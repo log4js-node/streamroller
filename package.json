@@ -1,0 +1,35 @@
+{
+  "name": "streamroller",
+  "version": "0.0.0",
+  "description": "file streams that roll over when size limits, or dates are reached",
+  "main": "lib/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nomiddlename/streamroller.git"
+  },
+  "keywords": [
+    "stream",
+    "rolling"
+  ],
+  "author": "Gareth Jones <gareth.jones@sensis.com.au>",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "ece35d7d86c87c04ff09e8604accae81cf36a0ce",
+  "devDependencies": {
+    "should": "~1.2.2",
+    "mocha": "~1.12.0",
+    "sandboxed-module": "~0.2.1"
+  },
+  "dependencies": {
+    "semver": "~2.1.0",
+    "debug": "~0.7.2",
+    "async": "~0.2.9",
+    "date-format": "0.0.0"
+  }
+}
