@@ -2,16 +2,8 @@
 var async = require('async')
 , should = require('should')
 , fs = require('fs')
-, semver = require('semver')
-, streams
-, RollingFileStream;
-
-if (semver.satisfies(process.version, '>=0.10.0')) {
-  streams = require('stream');
-} else {
-  streams = require('readable-stream');
-}
-RollingFileStream = require('../lib').RollingFileStream;
+, streams = require('readable-stream')
+, RollingFileStream = require('../lib').RollingFileStream;
 
 function remove(filename, cb) {
   fs.unlink(filename, function(err) { cb(); });
@@ -22,7 +14,7 @@ function create(filename, cb) {
 }
 
 describe('RollingFileStream', function() {
-  
+
   describe('arguments', function() {
     var stream;
 
@@ -55,9 +47,9 @@ describe('RollingFileStream', function() {
   describe('with stream arguments', function() {
     it('should pass them to the underlying stream', function() {
       var stream = new RollingFileStream(
-        __dirname + '/test-rolling-file-stream', 
-        1024, 
-        5, 
+        __dirname + '/test-rolling-file-stream',
+        1024,
+        5,
         { mode: parseInt('0666', 8) }
       );
       stream.theStream.mode.should.eql(parseInt('0666', 8));
@@ -92,7 +84,7 @@ describe('RollingFileStream', function() {
     before(function(done) {
       remove(__dirname + "/test-rolling-file-stream-write-less", function() {
         var stream = new RollingFileStream(
-          __dirname + "/test-rolling-file-stream-write-less", 
+          __dirname + "/test-rolling-file-stream-write-less",
           100
         );
         stream.write("cheese", "utf8", function() {
@@ -104,10 +96,10 @@ describe('RollingFileStream', function() {
     after(function(done) {
       remove(__dirname + "/test-rolling-file-stream-write-less", done);
     });
-    
+
     it('should write to the file', function(done) {
       fs.readFile(
-        __dirname + "/test-rolling-file-stream-write-less", "utf8", 
+        __dirname + "/test-rolling-file-stream-write-less", "utf8",
         function(err, contents) {
           contents.should.eql("cheese");
           done(err);
@@ -135,14 +127,14 @@ describe('RollingFileStream', function() {
         remove,
         function() {
           var stream = new RollingFileStream(
-            __dirname + "/test-rolling-file-stream-write-more", 
+            __dirname + "/test-rolling-file-stream-write-more",
             45
           );
           async.forEachSeries(
-            [0, 1, 2, 3, 4, 5, 6], 
+            [0, 1, 2, 3, 4, 5, 6],
             function(i, cb) {
               stream.write(i +".cheese\n", "utf8", cb);
-            }, 
+            },
             function() {
               stream.end(done);
             }
@@ -165,8 +157,8 @@ describe('RollingFileStream', function() {
     it('should write two files' , function(done) {
       fs.readdir(__dirname, function(err, files) {
         files.filter(
-          function(file) { 
-            return file.indexOf('test-rolling-file-stream-write-more') > -1; 
+          function(file) {
+            return file.indexOf('test-rolling-file-stream-write-more') > -1;
           }
         ).should.have.length(2);
         done(err);
@@ -175,7 +167,7 @@ describe('RollingFileStream', function() {
 
     it('should write the last two log messages to the first file', function(done) {
       fs.readFile(
-        __dirname + "/test-rolling-file-stream-write-more", "utf8", 
+        __dirname + "/test-rolling-file-stream-write-more", "utf8",
         function(err, contents) {
           contents.should.eql('5.cheese\n6.cheese\n');
           done(err);
@@ -184,7 +176,7 @@ describe('RollingFileStream', function() {
 
     it('should write the first five log messages to the second file', function(done) {
       fs.readFile(
-        __dirname + '/test-rolling-file-stream-write-more.1', "utf8", 
+        __dirname + '/test-rolling-file-stream-write-more.1', "utf8",
         function(err, contents) {
           contents.should.eql('0.cheese\n1.cheese\n2.cheese\n3.cheese\n4.cheese\n');
           done(err);
@@ -206,7 +198,7 @@ describe('RollingFileStream', function() {
         remove,
         function(err) {
           if (err) done(err);
-          
+
           async.forEach(
             [
               __dirname + '/test-rolling-stream-with-existing-files.11',
@@ -220,16 +212,16 @@ describe('RollingFileStream', function() {
               if (err) done(err);
 
               var stream = new RollingFileStream(
-                __dirname + "/test-rolling-stream-with-existing-files", 
+                __dirname + "/test-rolling-stream-with-existing-files",
                 45,
                 5
               );
-              
+
               async.forEachSeries(
-                [0, 1, 2, 3, 4, 5, 6], 
+                [0, 1, 2, 3, 4, 5, 6],
                 function(i, cb) {
                   stream.write(i +".cheese\n", "utf8", cb);
-                }, 
+                },
                 function() {
                   stream.end(done);
                 }

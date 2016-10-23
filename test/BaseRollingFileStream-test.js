@@ -1,56 +1,8 @@
 "use strict";
 var should = require('should')
-, fs = require('fs')
-, sandbox = require('sandboxed-module');
+, fs = require('fs');
 
-describe('../lib/BaseRollingFileStream', function() {
-  describe('when node version < 0.10.0', function() {
-    it('should use readable-stream to maintain compatibility', function() {
-    
-      var streamLib = sandbox.load(
-        '../lib/BaseRollingFileStream',
-        {
-          globals: {
-            process: {
-              version: '0.8.11'
-            }
-          },
-          requires: {
-            'readable-stream': {
-              Writable: function() {}
-            }
-          }
-        }
-      );
-
-      streamLib.required.should.have.property('readable-stream');
-      streamLib.required.should.not.have.property('stream');
-    });
-  });
-
-  describe('when node version > 0.10.0', function() {
-    it('should use the core stream module', function() {
-      var streamLib = sandbox.load(
-        '../lib/BaseRollingFileStream',
-        {
-          globals: {
-            process: {
-              version: '0.10.1'
-            }
-          },
-          requires: {
-            'stream': {
-              Writable: function() {}
-            }
-          }
-        }
-      );
-
-      streamLib.required.should.have.property('stream');
-      streamLib.required.should.not.have.property('readable-stream');
-    });
-  });
-
+describe('BaseRollingFileStream', function() {
   describe('when no filename is passed', function() {
     it('should throw an error', function() {
       var BaseRollingFileStream = require('../lib/BaseRollingFileStream');
