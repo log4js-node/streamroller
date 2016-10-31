@@ -2,6 +2,8 @@
 var async = require('async')
 , should = require('should')
 , fs = require('fs')
+, path = require('path')
+, zlib = require('zlib')
 , streams = require('readable-stream')
 , RollingFileStream = require('../lib').RollingFileStream;
 
@@ -61,10 +63,13 @@ describe('RollingFileStream', function() {
   });
 
   describe('without size', function() {
-    it('should throw an error', function() {
-      (function() {
-        new RollingFileStream(__dirname + "/test-rolling-file-stream");
-      }).should.throw();
+    it('should default to max int size', function() {
+      var stream = new RollingFileStream(__dirname + "/test-rolling-file-stream");
+      stream.size.should.eql(Number.MAX_SAFE_INTEGER);
+    });
+
+    after(function(done) {
+      remove(__dirname + "/test-rolling-file-stream", done);
     });
   });
 
@@ -183,6 +188,65 @@ describe('RollingFileStream', function() {
         }
       );
     });
+  });
+
+  describe('with options.compress = true', function() {
+    before(function(done) {
+      var stream = new RollingFileStream(
+        path.join(__dirname, 'compressed-backups.log'),
+        30, //30 bytes max size
+        2,  //two backup files to keep
+        { compress: true }
+      );
+      async.forEachSeries(
+        [
+          "This is the first log message.",
+          "This is the second log message.",
+          "This is the third log message.",
+          "This is the fourth log message."
+        ],
+        function(i, cb) {
+          stream.write(i + "\n", "utf8", cb);
+        },
+        function() {
+          stream.end(done);
+        }
+      );
+    });
+
+    it('should produce three files, with the backups compressed', function(done) {
+      fs.readdir(__dirname, function(err, files) {
+        var testFiles = files.filter(
+          function(f) { return f.indexOf('compressed-backups.log') > -1; }
+        ).sort();
+
+        testFiles.length.should.eql(3);
+        testFiles.should.eql([
+          'compressed-backups.log',
+          'compressed-backups.log.1.gz',
+          'compressed-backups.log.2.gz',
+        ]);
+
+        fs.readFile(path.join(__dirname, testFiles[0]), 'utf8', function(err, contents) {
+          contents.should.eql('This is the fourth log message.\n');
+
+          contents = zlib.gunzipSync(fs.readFileSync(path.join(__dirname, testFiles[1])));
+          contents.toString('utf8').should.eql('This is the third log message.\n');
+          contents = zlib.gunzipSync(fs.readFileSync(path.join(__dirname, testFiles[2])));
+          contents.toString('utf8').should.eql('This is the second log message.\n');
+          done();
+        });
+      });
+    });
+
+    after(function(done) {
+      async.forEach([
+        path.join(__dirname, 'compressed-backups.log'),
+        path.join(__dirname, 'compressed-backups.log.1.gz'),
+        path.join(__dirname, 'compressed-backups.log.2.gz'),
+      ], remove, done);
+    });
+
   });
 
   describe('when many files already exist', function() {

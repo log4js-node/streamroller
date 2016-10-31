@@ -1,6 +1,7 @@
 "use strict";
 var should = require('should')
 , fs = require('fs')
+, zlib = require('zlib')
 , streams = require('readable-stream')
 , DateRollingFileStream
 , testTime = new Date(2012, 8, 12, 10, 37, 11);
@@ -249,5 +250,55 @@ describe('DateRollingFileStream', function() {
         });
       });
     });
+  });
+
+  describe('with compress option', function() {
+    var stream;
+
+    before(function(done) {
+      testTime = new Date(2012, 8, 12, 0, 10, 12);
+      stream = new DateRollingFileStream(
+        __dirname + '/compressed.log',
+        '.yyyy-MM-dd',
+        { compress: true },
+        now
+      );
+      stream.write("First message\n", 'utf8', done);
+    });
+
+    describe('when the day changes', function() {
+      before(function(done) {
+        testTime = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write("Second message\n", 'utf8', done);
+      });
+
+      it('should be two files, one compressed', function(done) {
+        fs.readdir(__dirname, function(err, files) {
+          var logFiles = files.filter(
+            function(file) {
+              return file.indexOf('compressed.log') > -1;
+            }
+          );
+          logFiles.should.have.length(2);
+
+          zlib.gunzipSync(
+            fs.readFileSync(__dirname + '/compressed.log.2012-09-12.gz')
+          ).toString('utf8').should.eql('First message\n');
+
+          fs.readFileSync(__dirname + '/compressed.log','utf8').should.eql('Second message\n');
+          done(err);
+        });
+      });
+    });
+
+    after(function(done) {
+      remove(
+        __dirname + '/compressed.log',
+        function() {
+          remove(__dirname + '/compressed.log.2012-09-12.gz', done);
+        }
+      );
+    });
+
   });
 });
