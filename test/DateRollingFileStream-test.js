@@ -281,12 +281,14 @@ describe('DateRollingFileStream', function() {
           );
           logFiles.should.have.length(2);
 
-          zlib.gunzipSync(
-            fs.readFileSync(__dirname + '/compressed.log.2012-09-12.gz')
-          ).toString('utf8').should.eql('First message\n');
-
-          fs.readFileSync(__dirname + '/compressed.log','utf8').should.eql('Second message\n');
-          done(err);
+          zlib.gunzip(
+            fs.readFileSync(__dirname + '/compressed.log.2012-09-12.gz'),
+            function(err, contents) {
+              contents.toString('utf8').should.eql('First message\n');
+              fs.readFileSync(__dirname + '/compressed.log','utf8').should.eql('Second message\n');
+              done(err);
+            }
+          );
         });
       });
     });

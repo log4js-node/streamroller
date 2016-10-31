@@ -230,11 +230,17 @@ describe('RollingFileStream', function() {
         fs.readFile(path.join(__dirname, testFiles[0]), 'utf8', function(err, contents) {
           contents.should.eql('This is the fourth log message.\n');
 
-          contents = zlib.gunzipSync(fs.readFileSync(path.join(__dirname, testFiles[1])));
-          contents.toString('utf8').should.eql('This is the third log message.\n');
-          contents = zlib.gunzipSync(fs.readFileSync(path.join(__dirname, testFiles[2])));
-          contents.toString('utf8').should.eql('This is the second log message.\n');
-          done();
+          zlib.gunzip(fs.readFileSync(path.join(__dirname, testFiles[1])),
+            function(err, contents) {
+              contents.toString('utf8').should.eql('This is the third log message.\n');
+              zlib.gunzip(fs.readFileSync(path.join(__dirname, testFiles[2])),
+                function(err, contents) {
+                  contents.toString('utf8').should.eql('This is the second log message.\n');
+                  done(err);
+                }
+              );
+            }
+          );
         });
       });
     });
