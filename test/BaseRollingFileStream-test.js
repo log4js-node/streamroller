@@ -46,6 +46,9 @@ describe('BaseRollingFileStream', function() {
               'fs': {
                 createWriteStream: function(filename, options) {
                   underlyingStreamOptions = options;
+                  return {
+                    on: function() {}
+                  };
                 }
               }
             }
