@@ -60,4 +60,16 @@ describe('BaseRollingFileStream', function() {
         underlyingStreamOptions.should.eql({ encoding: 'utf904', mode: 420, flags: 'a'});
     });
   });
+
+  describe('when end is called', function() {
+    it('should close the underlying stream', function(done) {
+      var stream = new (require('../lib/BaseRollingFileStream'))('cheese.log');
+
+      stream.theStream.on('close', function() {
+        done();
+      });
+
+      stream.end();
+    });
+  });
 });
