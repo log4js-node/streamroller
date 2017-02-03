@@ -23,79 +23,103 @@ function now() {
 
 describe('DateRollingFileStream', function () {
   describe('arguments', function () {
-    var stream = new DateRollingFileStream(
-      __dirname + '/test-date-rolling-file-stream-1',
-      'yyyy-mm-dd.hh'
-    );
+    var stream;
+
+    before(function (done) {
+      stream = new DateRollingFileStream(
+        __dirname + '/test-date-rolling-file-stream-1',
+        'yyyy-mm-dd.hh'
+      );
+      done();
+    });
 
     after(function (done) {
       remove(__dirname + '/test-date-rolling-file-stream-1', done);
     });
 
-    it('should take a filename and a pattern and return a WritableStream', function () {
+    it('should take a filename and a pattern and return a WritableStream', function (done) {
       stream.filename.should.eql(__dirname + '/test-date-rolling-file-stream-1');
       stream.pattern.should.eql('yyyy-mm-dd.hh');
       stream.should.be.instanceOf(streams.Writable);
+      done();
     });
 
-    it('with default settings for the underlying stream', function () {
+    it('with default settings for the underlying stream', function (done) {
       stream.theStream.mode.should.eql(420);
       stream.theStream.flags.should.eql('a');
       //encoding is not available on the underlying stream
       //assert.equal(stream.encoding, 'utf8');
+      done();
     });
   });
 
   describe('default arguments', function () {
-    var stream = new DateRollingFileStream(__dirname + '/test-date-rolling-file-stream-2');
+    var stream;
+
+    before(function(done) {
+      stream = new DateRollingFileStream(__dirname + '/test-date-rolling-file-stream-2');
+      done();
+    });
 
     after(function (done) {
       remove(__dirname + '/test-date-rolling-file-stream-2', done);
     });
 
-    it('should have pattern of .yyyy-MM-dd', function () {
+    it('should have pattern of .yyyy-MM-dd', function (done) {
       stream.pattern.should.eql('.yyyy-MM-dd');
+      done();
     });
   });
 
   describe('with stream arguments', function () {
-    var stream = new DateRollingFileStream(
-      __dirname + '/test-date-rolling-file-stream-3',
-      'yyyy-MM-dd',
-      {mode: parseInt('0666', 8)}
-    );
+    var stream;
 
+    before(function(done) {
+      stream = new DateRollingFileStream(
+        __dirname + '/test-date-rolling-file-stream-3',
+        'yyyy-MM-dd',
+        {mode: parseInt('0666', 8)}
+      );
+      done();
+    });
 
     after(function (done) {
       remove(__dirname + '/test-date-rolling-file-stream-3', done);
     });
 
-    it('should pass them to the underlying stream', function () {
+    it('should pass them to the underlying stream', function (done) {
       stream.theStream.mode.should.eql(parseInt('0666', 8));
+      done();
     });
   });
 
   describe('with stream arguments but no pattern', function () {
-    var stream = new DateRollingFileStream(
-      __dirname + '/test-date-rolling-file-stream-4',
-      {mode: parseInt('0666', 8)}
-    );
+    var stream;
+
+    before(function (done) {
+      stream = new DateRollingFileStream(
+        __dirname + '/test-date-rolling-file-stream-4',
+        {mode: parseInt('0666', 8)}
+      );
+      done();
+    });
 
     after(function (done) {
       remove(__dirname + '/test-date-rolling-file-stream-4', done);
     });
 
-    it('should pass them to the underlying stream', function () {
+    it('should pass them to the underlying stream', function (done) {
       stream.theStream.mode.should.eql(parseInt('0666', 8));
+      done();
     });
 
-    it('should use default pattern', function () {
+    it('should use default pattern', function (done) {
       stream.pattern.should.eql('.yyyy-MM-dd');
+      done();
     });
   });
 
   describe('with a pattern of .yyyy-MM-dd', function () {
-
     var stream;
 
     before(function (done) {
@@ -139,12 +163,13 @@ describe('DateRollingFileStream', function () {
           });
         });
 
-        it('should be two', function () {
+        it('should be two', function (done) {
           files.filter(
             function (file) {
               return file.indexOf('test-date-rolling-file-stream-5') > -1;
             }
           ).should.have.length(2);
+          done();
         });
       });
 
@@ -311,58 +336,155 @@ describe('DateRollingFileStream', function () {
   describe('with daysToKeep option', function () {
     var stream;
     var daysToKeep = 4;
+    var numOriginalLogs = 10;
 
     before(function (done) {
-      var numLogs = 10;
-      var day = 1;
+      var day = 0;
+      var streams = [];
       async.whilst(
         function () {
-          return day < numLogs;
+          return day < numOriginalLogs;
         },
-        function (callback) {
-          // Should wind up with files for 2012-08-07 through 2012-08-12
+        function (nextCallback) {
           testTime = new Date(2012, 8, 20 - day, 0, 10, 12);
-          var logFilename = __dirname + '/daysToKeep.log' + format.asString('.yyyy-MM-dd', testTime);
-          day++;
-          fs.writeFile(logFilename,
-            util.format("Message on day %d\n", day),
-            { encoding: 'utf8'},
-            function (err) {
-              fs.utimes(logFilename, testTime, testTime, callback);
-            });
-        },
-        function (err, n) {
-          testTime = new Date(2012, 8, 20, 0, 10, 12);
-          stream = new DateRollingFileStream(
+          var currentStream = new DateRollingFileStream(
             __dirname + '/daysToKeep.log',
             '.yyyy-MM-dd',
             {
+              alwaysIncludePattern: true,
               daysToKeep: daysToKeep
             },
             now
           );
-          stream.write("First message\n", 'utf8', function (err) {
-            fs.utimes(stream.filename, testTime, testTime, done);
-          });
-        }
-      );
-    });
+          async.waterfall([
+              function (callback) {
+                currentStream.write(util.format("Message on day %d\n", day), 'utf8', callback);
+              },
+              function (callback) {
+                fs.utimes(currentStream.filename, testTime, testTime, callback);
+              }
+            ],
+            function (err) {
+              day++;
+              streams.push(currentStream);
+              nextCallback(err);
+            })
+        },
+        function (err, n) {
+          stream = streams[0];
+          done(err);
+        });
 
-    describe('when the day changes', function () {
-      before(function (done) {
-        testTime = new Date(2012, 8, 21, 0, 10, 12);
-        stream.write("Second message\n", 'utf8', done);
+      describe('when the day changes', function () {
+        before(function (done) {
+          testTime = new Date(2012, 8, 21, 0, 10, 12);
+          stream.write("Second message\n", 'utf8', done);
+        });
+
+        it('should be daysToKeep + 1 files left from numOriginalLogs', function (done) {
+          fs.readdir(__dirname, function (err, files) {
+            var logFiles = files.filter(
+              function (file) {
+                return file.indexOf('daysToKeep.log') > -1;
+              }
+            );
+            logFiles.should.have.length(daysToKeep + 1);
+            done(err);
+          });
+        });
       });
 
-      it('should be 4 files left from original 3', function (done) {
+      after(function (done) {
         fs.readdir(__dirname, function (err, files) {
           var logFiles = files.filter(
             function (file) {
               return file.indexOf('daysToKeep.log') > -1;
             }
           );
+          async.each(logFiles, function (logFile, nextCallback) {
+              remove(__dirname + "/" + logFile, nextCallback);
+            },
+            function (err) {
+              done(err);
+            })
+        });
+      });
+    });
+  });
+
+  describe('with daysToKeep and compress options', function () {
+    var stream;
+    var daysToKeep = 4;
+    var numOriginalLogs = 10;
+
+    before(function (done) {
+      var day = 0;
+      var streams = [];
+      async.whilst(
+        function () {
+          return day < numOriginalLogs;
+        },
+        function (nextCallback) {
+          testTime = new Date(2012, 8, 20 - day, 0, 10, 12);
+          var currentStream = new DateRollingFileStream(
+            __dirname + '/compressedDaysToKeep.log',
+            '.yyyy-MM-dd',
+            {
+              alwaysIncludePattern: true,
+              compress: true,
+              daysToKeep: daysToKeep
+            },
+            now
+          );
+          async.waterfall([
+              function (callback) {
+                currentStream.write(util.format("Message on day %d\n", day), 'utf8', callback);
+              },
+              function (callback) {
+                currentStream.compress(currentStream.filename, callback);
+              },
+              function (callback) {
+                fs.utimes(currentStream.filename + ".gz", testTime, testTime, callback);
+              }
+            ],
+            function (err) {
+              day++;
+              streams.push(currentStream);
+              nextCallback(err);
+            })
+        },
+        function (err, n) {
+
+          // Uncompress the most recent stream which will be the one we roll over
+          // for testing
+          stream = streams[0];
+          var compressedFilename = stream.filename + '.gz';
+          var gzip = zlib.createGzip();
+          var inp = fs.createReadStream(compressedFilename);
+          var out = fs.createWriteStream(stream.filename);
+          inp.pipe(gzip).pipe(out);
+
+          out.on('finish', function (err) {
+            fs.unlink(compressedFilename, done);
+          });
+        });
+    });
+
+    describe('when the day changes', function () {
+      before(function (done) {
+        testTime = new Date(2012, 8, 21, 0, 10, 12);
+        stream.write("New file message\n", 'utf8', done);
+      });
+
+      it('should be 4 files left from original 3', function (done) {
+        fs.readdir(__dirname, function (err, files) {
+          var logFiles = files.filter(
+            function (file) {
+              return file.indexOf('compressedDaysToKeep.log') > -1;
+            }
+          );
           logFiles.should.have.length(daysToKeep + 1);
-          done();
+          done(err);
         });
       });
     });
@@ -371,15 +493,15 @@ describe('DateRollingFileStream', function () {
       fs.readdir(__dirname, function (err, files) {
         var logFiles = files.filter(
           function (file) {
-            return file.indexOf('daysToKeep.log') > -1;
+            return file.indexOf('compressedDaysToKeep.log') > -1;
           }
         );
-        async.each(logFiles, function(logFile, nextCallback) {
-          remove(__dirname + "/" + logFile, nextCallback);
-        },
-        function (err) {
-          done();
-        })
+        async.each(logFiles, function (logFile, nextCallback) {
+            remove(__dirname + "/" + logFile, nextCallback);
+          },
+          function (err) {
+            done(err);
+          })
       });
     });
   });
