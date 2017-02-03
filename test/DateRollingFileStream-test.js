@@ -368,7 +368,7 @@ describe('DateRollingFileStream', function () {
               day++;
               streams.push(currentStream);
               nextCallback(err);
-            })
+            });
         },
         function (err, n) {
           stream = streams[0];
@@ -406,7 +406,7 @@ describe('DateRollingFileStream', function () {
             },
             function (err) {
               done(err);
-            })
+            });
         });
       });
     });
@@ -451,7 +451,7 @@ describe('DateRollingFileStream', function () {
               day++;
               streams.push(currentStream);
               nextCallback(err);
-            })
+            });
         },
         function (err, n) {
 
@@ -501,7 +501,7 @@ describe('DateRollingFileStream', function () {
           },
           function (err) {
             done(err);
-          })
+          });
       });
     });
   });
