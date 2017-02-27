@@ -327,4 +327,31 @@ describe('RollingFileStream', function() {
       });
     });
   });
+
+  describe('when the directory gets deleted', function() {
+    var stream;
+    before(function(done) {
+      stream = new RollingFileStream(path.join('subdir', 'test-rolling-file-stream'), 5, 5);
+      stream.write('initial', 'utf8', done);
+    });
+
+    after(function() {
+      fs.unlinkSync(path.join('subdir', 'test-rolling-file-stream'));
+      fs.rmdirSync('subdir');
+    });
+
+    it('handles directory deletion gracefully', function(done) {
+      stream.theStream.on('error', done);
+
+      remove(path.join('subdir', 'test-rolling-file-stream'), function() {
+        fs.rmdir('subdir', function() {
+          stream.write('rollover', 'utf8', function() {
+            fs.readFileSync(path.join('subdir', 'test-rolling-file-stream'), 'utf8')
+              .should.eql('rollover');
+            done();
+          });
+        });
+      });
+    });
+  });
 });

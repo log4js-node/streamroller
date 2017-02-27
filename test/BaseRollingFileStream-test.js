@@ -72,4 +72,22 @@ describe('BaseRollingFileStream', function() {
       stream.end();
     });
   });
+
+  describe('when the file is in a non-existent directory', function() {
+    var stream;
+    before(function() {
+      var BaseRollingFileStream = require('../lib/BaseRollingFileStream');
+      stream = new BaseRollingFileStream('subdir/test.log');
+    });
+
+    after(function() {
+      fs.unlinkSync('subdir/test.log');
+      fs.rmdir('subdir');
+    });
+
+    it('should create the directory', function() {
+      fs.existsSync('subdir/test.log').should.eql(true);
+      stream.end();
+    });
+  });
 });
