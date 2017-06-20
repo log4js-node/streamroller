@@ -64,7 +64,6 @@ describe('BaseRollingFileStream', function() {
   describe('when end is called', function() {
     it('should close the underlying stream', function(done) {
       var stream = new (require('../lib/BaseRollingFileStream'))('cheese.log');
-
       stream.theStream.on('close', function() {
         done();
       });
