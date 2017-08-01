@@ -51,7 +51,8 @@ describe('BaseRollingFileStream', function() {
                   };
                 }
               }
-            }
+            },
+            singleOnly: true
           }
         );
         var stream = new BaseRollingFileStream('cheese.log', { encoding: 'utf904'});

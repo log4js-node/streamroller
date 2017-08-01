@@ -318,11 +318,11 @@ describe('RollingFileStream', function() {
 
     it('should roll the files', function(done) {
       fs.readdir(__dirname, function(err, files) {
-        files.should.include('test-rolling-stream-with-existing-files');
-        files.should.include('test-rolling-stream-with-existing-files.1');
-        files.should.include('test-rolling-stream-with-existing-files.2');
-        files.should.include('test-rolling-stream-with-existing-files.11');
-        files.should.include('test-rolling-stream-with-existing-files.20');
+        files.should.containEql('test-rolling-stream-with-existing-files');
+        files.should.containEql('test-rolling-stream-with-existing-files.1');
+        files.should.containEql('test-rolling-stream-with-existing-files.2');
+        files.should.containEql('test-rolling-stream-with-existing-files.11');
+        files.should.containEql('test-rolling-stream-with-existing-files.20');
         done(err);
       });
     });
