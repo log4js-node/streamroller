@@ -213,7 +213,9 @@ describe('DateRollingFileStream', function () {
             {alwaysIncludePattern: true},
             now
           );
-          stream.write("First message\n", 'utf8', done);
+          setTimeout(() => {
+            stream.write("First message\n", 'utf8', done);            
+          }, 50);
         }
       );
     });
@@ -222,7 +224,7 @@ describe('DateRollingFileStream', function () {
       remove(__dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', done);
     });
 
-    it('should create a file with the pattern set', function (done) {
+    it.only('should create a file with the pattern set', function (done) {
       fs.readFile(
         __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', 'utf8',
         function (err, contents) {
