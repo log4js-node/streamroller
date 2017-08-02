@@ -213,8 +213,8 @@ describe('DateRollingFileStream', function () {
             {alwaysIncludePattern: true},
             now
           );
-          setTimeout(() => {
-            stream.write("First message\n", 'utf8', done);            
+          setTimeout(function() {
+            stream.write("First message\n", 'utf8', done);
           }, 50);
         }
       );
