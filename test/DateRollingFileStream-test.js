@@ -224,7 +224,7 @@ describe('DateRollingFileStream', function () {
       remove(__dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', done);
     });
 
-    it.only('should create a file with the pattern set', function (done) {
+    it('should create a file with the pattern set', function (done) {
       fs.readFile(
         __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', 'utf8',
         function (err, contents) {
