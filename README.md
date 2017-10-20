@@ -23,6 +23,7 @@ The streams behave the same as standard node.js streams, except that when certai
   * `mode` - defaults to 0644
   * `flags` - defaults to 'a'
   * `compress` - (boolean) defaults to `false` - compress the backup files using gzip (files will have `.gz` extension).
+  * `keepFileExt` - (boolean) defaults to `false` - keep the file original extension. e.g.: `filename.log -> filename.1.log`.
 
 This returns a `WritableStream`. When the current file being written to (given by `filename`) gets up to or larger than `maxSize`, then the current file will be renamed to `filename.1` and a new file will start being written to. Up to `numBackups` of old files are maintained, so if `numBackups` is 3 then there will be 4 files:
 <pre>
