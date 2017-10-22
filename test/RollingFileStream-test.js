@@ -255,6 +255,136 @@ describe('RollingFileStream', function() {
 
   });
 
+  describe('with options.keepFileExt = true', function() {
+    before(function(done) {
+      var stream = new RollingFileStream(
+        path.join(__dirname, 'extKept-backups.log'),
+        30, //30 bytes max size
+        2,  //two backup files to keep
+        { keepFileExt: true }
+      );
+      async.forEachSeries(
+        [
+          "This is the first log message.",
+          "This is the second log message.",
+          "This is the third log message.",
+          "This is the fourth log message."
+        ],
+        function(i, cb) {
+          stream.write(i + "\n", "utf8", cb);
+        },
+        function() {
+          stream.end(done);
+        }
+      );
+    });
+
+    it('should produce three files, with the file-extension kept', function(done) {
+      fs.readdir(__dirname, function(err, files) {
+        var testFiles = files.filter(
+          function(f) { return f.indexOf('extKept-backups') > -1; }
+        ).sort();
+
+        testFiles.length.should.eql(3);
+        testFiles.should.eql([
+          'extKept-backups.1.log',
+          'extKept-backups.2.log',
+          'extKept-backups.log',
+        ]);
+
+        fs.readFile(path.join(__dirname, testFiles[0]), 'utf8', function(err, contents) {
+          contents.should.eql('This is the third log message.\n');
+
+          fs.readFile(path.join(__dirname, testFiles[1]), 'utf8',
+            function(err, contents) {
+              contents.toString('utf8').should.eql('This is the second log message.\n');
+              fs.readFile(path.join(__dirname, testFiles[2]), 'utf8',
+                function(err, contents) {
+                  contents.toString('utf8').should.eql('This is the fourth log message.\n');
+                  done(err);
+                }
+              );
+            }
+          );
+        });
+      });
+    });
+
+    after(function(done) {
+      async.forEach([
+        path.join(__dirname, 'extKept-backups.log'),
+        path.join(__dirname, 'extKept-backups.1.log'),
+        path.join(__dirname, 'extKept-backups.2.log'),
+      ], remove, done);
+    });
+
+  });
+
+  describe('with options.compress = true and keepFileExt = true', function() {
+    before(function(done) {
+      var stream = new RollingFileStream(
+        path.join(__dirname, 'compressed-backups.log'),
+        30, //30 bytes max size
+        2,  //two backup files to keep
+        { compress: true, keepFileExt: true }
+      );
+      async.forEachSeries(
+        [
+          "This is the first log message.",
+          "This is the second log message.",
+          "This is the third log message.",
+          "This is the fourth log message."
+        ],
+        function(i, cb) {
+          stream.write(i + "\n", "utf8", cb);
+        },
+        function() {
+          stream.end(done);
+        }
+      );
+    });
+
+    it('should produce three files, with the backups compressed', function(done) {
+      fs.readdir(__dirname, function(err, files) {
+        var testFiles = files.filter(
+          function(f) { return f.indexOf('compressed-backups') > -1; }
+        ).sort();
+
+        testFiles.length.should.eql(3);
+        testFiles.should.eql([
+          'compressed-backups.1.log.gz',
+          'compressed-backups.2.log.gz',
+          'compressed-backups.log',
+        ]);
+
+        fs.readFile(path.join(__dirname, testFiles[2]), 'utf8', function(err, contents) {
+          contents.should.eql('This is the fourth log message.\n');
+
+          zlib.gunzip(fs.readFileSync(path.join(__dirname, testFiles[1])),
+            function(err, contents) {
+              contents.toString('utf8').should.eql('This is the second log message.\n');
+              zlib.gunzip(fs.readFileSync(path.join(__dirname, testFiles[0])),
+                function(err, contents) {
+                  contents.toString('utf8').should.eql('This is the third log message.\n');
+                  done(err);
+                }
+              );
+            }
+          );
+        });
+      });
+    });
+
+    after(function(done) {
+      async.forEach([
+        path.join(__dirname, 'compressed-backups.log'),
+        path.join(__dirname, 'compressed-backups.1.log.gz'),
+        path.join(__dirname, 'compressed-backups.2.log.gz'),
+      ], remove, done);
+    });
+
+  });
+
   describe('when many files already exist', function() {
     before(function(done) {
       async.forEach(
