@@ -335,6 +335,107 @@ describe('DateRollingFileStream', function () {
 
   });
 
+  describe('with keepFileExt option', function () {
+    var stream;
+
+    before(function (done) {
+      testTime = new Date(2012, 8, 12, 0, 10, 12);
+      stream = new DateRollingFileStream(
+        __dirname + '/keepFileExt.log',
+        '.yyyy-MM-dd',
+        {keepFileExt: true},
+        now
+      );
+      stream.write("First message\n", 'utf8', done);
+    });
+
+    describe('when the day changes', function () {
+      before(function (done) {
+        testTime = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write("Second message\n", 'utf8', done);
+      });
+
+      it('should be two files', function (done) {
+        fs.readdir(__dirname, function (err, files) {
+          var logFiles = files.filter(
+            function (file) {
+              return file.indexOf('keepFileExt') > -1;
+            }
+          );
+          logFiles.should.have.length(2);
+          fs.readFileSync(__dirname + '/keepFileExt.2012-09-12.log', 'utf8')
+            .should.eql('First message\n');
+          fs.readFileSync(__dirname + '/keepFileExt.log', 'utf8')
+            .should.eql('Second message\n');
+          done(err);
+        });
+      });
+    });
+
+    after(function (done) {
+      remove(
+        __dirname + '/keepFileExt.log',
+        function () {
+          remove(__dirname + '/keepFileExt.2012-09-12.log', done);
+        }
+      );
+    });
+
+  });
+
+  describe('with compress option and keepFileExt option', function () {
+    var stream;
+
+    before(function (done) {
+      testTime = new Date(2012, 8, 12, 0, 10, 12);
+      stream = new DateRollingFileStream(
+        __dirname + '/compressedAndKeepExt.log',
+        '.yyyy-MM-dd',
+        {compress: true, keepFileExt: true},
+        now
+      );
+      stream.write("First message\n", 'utf8', done);
+    });
+
+    describe('when the day changes', function () {
+      before(function (done) {
+        testTime = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write("Second message\n", 'utf8', done);
+      });
+
+      it('should be two files, one compressed', function (done) {
+        fs.readdir(__dirname, function (err, files) {
+          var logFiles = files.filter(
+            function (file) {
+              return file.indexOf('compressedAndKeepExt') > -1;
+            }
+          );
+          logFiles.should.have.length(2);
+
+          zlib.gunzip(
+            fs.readFileSync(__dirname + '/compressedAndKeepExt.2012-09-12.log.gz'),
+            function (err, contents) {
+              contents.toString('utf8').should.eql('First message\n');
+              fs.readFileSync(__dirname + '/compressedAndKeepExt.log', 'utf8')
+                .should.eql('Second message\n');
+              done(err);
+            }
+          );
+        });
+      });
+    });
+
+    after(function (done) {
+      remove(
+        __dirname + '/compressedAndKeepExt.log',
+        function () {
+          remove(__dirname + '/compressedAndKeepExt.log.2012-09-12.gz', done);
+        }
+      );
+    });
+
+  });
+
   describe('with daysToKeep option', function () {
     var stream;
     var daysToKeep = 4;
