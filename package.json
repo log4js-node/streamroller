@@ -23,15 +23,15 @@
   "readmeFilename": "README.md",
   "gitHead": "ece35d7d86c87c04ff09e8604accae81cf36a0ce",
   "devDependencies": {
-    "async": "^2.5.0",
+    "async": "^2.6.0",
     "should": "^11.2.1",
-    "mocha": "^3.5.0",
+    "mocha": "^4.0.1",
     "jshint": "^2.9.5",
     "sandboxed-module": "^2.0.3"
   },
   "dependencies": {
-    "date-format": "^1.1.0",
-    "debug": "^2.6.8",
+    "date-format": "^1.2.0",
+    "debug": "^3.1.0",
     "mkdirp": "^0.5.1",
     "readable-stream": "^2.3.0"
   },
