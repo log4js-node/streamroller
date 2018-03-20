@@ -1,24 +1,28 @@
-"use strict";
+'use strict';
 var should = require('should')
   , fs = require('fs')
   , zlib = require('zlib')
+  , proxyquire = require('proxyquire')
   , util = require('util')
   , async = require('async')
-  , format = require('date-format')
-  , streams = require('readable-stream')
-  , DateRollingFileStream
-  , testTime = new Date(2012, 8, 12, 10, 37, 11);
+  , streams = require('stream');
 
-DateRollingFileStream = require('../lib').DateRollingFileStream;
+var fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+var mockMoment = require('moment');
+mockMoment.now = function () {
+  return fakeNow;
+};
+var RollingFileWriteStream = proxyquire('../lib/RollingFileWriteStream', {
+  moment: mockMoment
+});
+var DateRollingFileStream = proxyquire('../lib/DateRollingFileStream', {
+  './RollingFileWriteStream': RollingFileWriteStream
+});
 
 function remove(filename, cb) {
   fs.unlink(filename, function () {
     cb();
   });
-}
-
-function now() {
-  return testTime.getTime();
 }
 
 describe('DateRollingFileStream', function () {
@@ -56,7 +60,7 @@ describe('DateRollingFileStream', function () {
   describe('default arguments', function () {
     var stream;
 
-    before(function(done) {
+    before(function (done) {
       stream = new DateRollingFileStream(__dirname + '/test-date-rolling-file-stream-2');
       done();
     });
@@ -74,7 +78,7 @@ describe('DateRollingFileStream', function () {
   describe('with stream arguments', function () {
     var stream;
 
-    before(function(done) {
+    before(function (done) {
       stream = new DateRollingFileStream(
         __dirname + '/test-date-rolling-file-stream-3',
         'yyyy-MM-dd',
@@ -125,10 +129,9 @@ describe('DateRollingFileStream', function () {
     before(function (done) {
       stream = new DateRollingFileStream(
         __dirname + '/test-date-rolling-file-stream-5', '.yyyy-MM-dd',
-        null,
-        now
+        null
       );
-      stream.write("First message\n", 'utf8', done);
+      stream.write('First message\n', 'utf8', done);
     });
 
     after(function (done) {
@@ -137,7 +140,7 @@ describe('DateRollingFileStream', function () {
 
     it('should create a file with the base name', function (done) {
       fs.readFile(__dirname + '/test-date-rolling-file-stream-5', 'utf8', function (err, contents) {
-        contents.should.eql("First message\n");
+        contents.should.eql('First message\n');
         done(err);
       });
     });
@@ -145,8 +148,8 @@ describe('DateRollingFileStream', function () {
     describe('when the day changes', function () {
 
       before(function (done) {
-        testTime = new Date(2012, 8, 13, 0, 10, 12);
-        stream.write("Second message\n", 'utf8', done);
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write('Second message\n', 'utf8', done);
       });
 
       after(function (done) {
@@ -178,7 +181,7 @@ describe('DateRollingFileStream', function () {
           fs.readFile(
             __dirname + '/test-date-rolling-file-stream-5', 'utf8',
             function (err, contents) {
-              contents.should.eql("Second message\n");
+              contents.should.eql('Second message\n');
               done(err);
             }
           );
@@ -190,7 +193,7 @@ describe('DateRollingFileStream', function () {
           fs.readFile(
             __dirname + '/test-date-rolling-file-stream-5.2012-09-12', 'utf8',
             function (err, contents) {
-              contents.should.eql("First message\n");
+              contents.should.eql('First message\n');
               done(err);
             }
           );
@@ -203,18 +206,17 @@ describe('DateRollingFileStream', function () {
     var stream;
 
     before(function (done) {
-      testTime = new Date(2012, 8, 12, 0, 10, 12);
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
       remove(
         __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12',
         function () {
           stream = new DateRollingFileStream(
             __dirname + '/test-date-rolling-file-stream-pattern',
             '.yyyy-MM-dd',
-            {alwaysIncludePattern: true},
-            now
+            {alwaysIncludePattern: true}
           );
-          setTimeout(function() {
-            stream.write("First message\n", 'utf8', done);
+          setTimeout(function () {
+            stream.write('First message\n', 'utf8', done);
           }, 50);
         }
       );
@@ -228,7 +230,7 @@ describe('DateRollingFileStream', function () {
       fs.readFile(
         __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', 'utf8',
         function (err, contents) {
-          contents.should.eql("First message\n");
+          contents.should.eql('First message\n');
           done(err);
         }
       );
@@ -236,8 +238,8 @@ describe('DateRollingFileStream', function () {
 
     describe('when the day changes', function () {
       before(function (done) {
-        testTime = new Date(2012, 8, 13, 0, 10, 12);
-        stream.write("Second message\n", 'utf8', done);
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write('Second message\n', 'utf8', done);
       });
 
       after(function (done) {
@@ -262,7 +264,7 @@ describe('DateRollingFileStream', function () {
           fs.readFile(
             __dirname + '/test-date-rolling-file-stream-pattern.2012-09-13', 'utf8',
             function (err, contents) {
-              contents.should.eql("Second message\n");
+              contents.should.eql('Second message\n');
               done(err);
             }
           );
@@ -274,7 +276,7 @@ describe('DateRollingFileStream', function () {
           fs.readFile(
             __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', 'utf8',
             function (err, contents) {
-              contents.should.eql("First message\n");
+              contents.should.eql('First message\n');
               done(err);
             }
           );
@@ -287,20 +289,19 @@ describe('DateRollingFileStream', function () {
     var stream;
 
     before(function (done) {
-      testTime = new Date(2012, 8, 12, 0, 10, 12);
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
       stream = new DateRollingFileStream(
         __dirname + '/compressed.log',
         '.yyyy-MM-dd',
-        {compress: true},
-        now
+        {compress: true}
       );
-      stream.write("First message\n", 'utf8', done);
+      stream.write('First message\n', 'utf8', done);
     });
 
     describe('when the day changes', function () {
       before(function (done) {
-        testTime = new Date(2012, 8, 13, 0, 10, 12);
-        stream.write("Second message\n", 'utf8', done);
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write('Second message\n', 'utf8', done);
       });
 
       it('should be two files, one compressed', function (done) {
@@ -339,20 +340,19 @@ describe('DateRollingFileStream', function () {
     var stream;
 
     before(function (done) {
-      testTime = new Date(2012, 8, 12, 0, 10, 12);
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
       stream = new DateRollingFileStream(
         __dirname + '/keepFileExt.log',
         '.yyyy-MM-dd',
-        {keepFileExt: true},
-        now
+        {keepFileExt: true}
       );
-      stream.write("First message\n", 'utf8', done);
+      stream.write('First message\n', 'utf8', done);
     });
 
     describe('when the day changes', function () {
       before(function (done) {
-        testTime = new Date(2012, 8, 13, 0, 10, 12);
-        stream.write("Second message\n", 'utf8', done);
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write('Second message\n', 'utf8', done);
       });
 
       it('should be two files', function (done) {
@@ -387,20 +387,19 @@ describe('DateRollingFileStream', function () {
     var stream;
 
     before(function (done) {
-      testTime = new Date(2012, 8, 12, 0, 10, 12);
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
       stream = new DateRollingFileStream(
         __dirname + '/compressedAndKeepExt.log',
         '.yyyy-MM-dd',
-        {compress: true, keepFileExt: true},
-        now
+        {compress: true, keepFileExt: true}
       );
-      stream.write("First message\n", 'utf8', done);
+      stream.write('First message\n', 'utf8', done);
     });
 
     describe('when the day changes', function () {
       before(function (done) {
-        testTime = new Date(2012, 8, 13, 0, 10, 12);
-        stream.write("Second message\n", 'utf8', done);
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write('Second message\n', 'utf8', done);
       });
 
       it('should be two files, one compressed', function (done) {
@@ -429,7 +428,7 @@ describe('DateRollingFileStream', function () {
       remove(
         __dirname + '/compressedAndKeepExt.log',
         function () {
-          remove(__dirname + '/compressedAndKeepExt.log.2012-09-12.gz', done);
+          remove(__dirname + '/compressedAndKeepExt.2012-09-12.log.gz', done);
         }
       );
     });
@@ -449,29 +448,28 @@ describe('DateRollingFileStream', function () {
           return day < numOriginalLogs;
         },
         function (nextCallback) {
-          testTime = new Date(2012, 8, 20 - day, 0, 10, 12);
+          fakeNow = new Date(2012, 8, 20 - day, 0, 10, 12);
           var currentStream = new DateRollingFileStream(
             __dirname + '/daysToKeep.log',
             '.yyyy-MM-dd',
             {
               alwaysIncludePattern: true,
               daysToKeep: daysToKeep
-            },
-            now
+            }
           );
           async.waterfall([
-              function (callback) {
-                currentStream.write(util.format("Message on day %d\n", day), 'utf8', callback);
-              },
-              function (callback) {
-                fs.utimes(currentStream.filename, testTime, testTime, callback);
-              }
-            ],
-            function (err) {
-              day++;
-              streams.push(currentStream);
-              nextCallback(err);
-            });
+            function (callback) {
+              currentStream.write(util.format('Message on day %d\n', day), 'utf8', callback);
+            },
+            function (callback) {
+              fs.utimes(currentStream.filename, fakeNow, fakeNow, callback);
+            }
+          ],
+          function (err) {
+            day++;
+            streams.push(currentStream);
+            nextCallback(err);
+          });
         },
         function (err, n) {
           stream = streams[0];
@@ -480,8 +478,8 @@ describe('DateRollingFileStream', function () {
 
       describe('when the day changes', function () {
         before(function (done) {
-          testTime = new Date(2012, 8, 21, 0, 10, 12);
-          stream.write("Second message\n", 'utf8', done);
+          fakeNow = new Date(2012, 8, 21, 0, 10, 12);
+          stream.write('Second message\n', 'utf8', done);
         });
 
         it('should be daysToKeep + 1 files left from numOriginalLogs', function (done) {
@@ -505,11 +503,11 @@ describe('DateRollingFileStream', function () {
             }
           );
           async.each(logFiles, function (logFile, nextCallback) {
-              remove(__dirname + "/" + logFile, nextCallback);
-            },
-            function (err) {
-              done(err);
-            });
+            remove(__dirname + '/' + logFile, nextCallback);
+          },
+          function (err) {
+            done(err);
+          });
         });
       });
     });
@@ -528,7 +526,7 @@ describe('DateRollingFileStream', function () {
           return day < numOriginalLogs;
         },
         function (nextCallback) {
-          testTime = new Date(2012, 8, 20 - day, 0, 10, 12);
+          fakeNow = new Date(2012, 8, 20 - day, 0, 10, 12);
           var currentStream = new DateRollingFileStream(
             __dirname + '/compressedDaysToKeep.log',
             '.yyyy-MM-dd',
@@ -536,25 +534,32 @@ describe('DateRollingFileStream', function () {
               alwaysIncludePattern: true,
               compress: true,
               daysToKeep: daysToKeep
-            },
-            now
+            }
           );
           async.waterfall([
-              function (callback) {
-                currentStream.write(util.format("Message on day %d\n", day), 'utf8', callback);
-              },
-              function (callback) {
-                currentStream.compress(currentStream.filename, callback);
-              },
-              function (callback) {
-                fs.utimes(currentStream.filename + ".gz", testTime, testTime, callback);
-              }
-            ],
-            function (err) {
-              day++;
-              streams.push(currentStream);
-              nextCallback(err);
-            });
+            function (callback) {
+              currentStream.write(util.format('Message on day %d\n', day), 'utf8', callback);
+            },
+            function (callback) {
+              var filename = currentStream.filename;
+              var gzip = zlib.createGzip();
+              var inp = fs.createReadStream(filename);
+              var out = fs.createWriteStream(filename+'.gz');
+              inp.pipe(gzip).pipe(out);
+
+              out.on('finish', function (err) {
+                fs.unlink(filename, callback);
+              });
+            },
+            function (callback) {
+              fs.utimes(currentStream.filename + '.gz', fakeNow, fakeNow, callback);
+            }
+          ],
+          function (err) {
+            day++;
+            streams.push(currentStream);
+            nextCallback(err);
+          });
         },
         function (err, n) {
 
@@ -575,8 +580,8 @@ describe('DateRollingFileStream', function () {
 
     describe('when the day changes', function () {
       before(function (done) {
-        testTime = new Date(2012, 8, 21, 0, 10, 12);
-        stream.write("New file message\n", 'utf8', done);
+        fakeNow = new Date(2012, 8, 21, 0, 10, 12);
+        stream.write('New file message\n', 'utf8', done);
       });
 
       it('should be 4 files left from original 3', function (done) {
@@ -600,11 +605,11 @@ describe('DateRollingFileStream', function () {
           }
         );
         async.each(logFiles, function (logFile, nextCallback) {
-            remove(__dirname + "/" + logFile, nextCallback);
-          },
-          function (err) {
-            done(err);
-          });
+          remove(__dirname + '/' + logFile, nextCallback);
+        },
+        function (err) {
+          done(err);
+        });
       });
     });
   });

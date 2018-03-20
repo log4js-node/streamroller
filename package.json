@@ -1,13 +1,14 @@
 {
   "name": "streamroller",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "file streams that roll over when size limits, or dates are reached",
   "main": "lib/index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "pretest": "jshint lib/ test/",
+    "codecheck": "eslint 'src/**/*.js'",
+    "pretest": "npm run codecheck",
     "test": "mocha"
   },
   "repository": {
@@ -23,19 +24,77 @@
   "readmeFilename": "README.md",
   "gitHead": "ece35d7d86c87c04ff09e8604accae81cf36a0ce",
   "devDependencies": {
+    "@commitlint/cli": "^6.1.3",
+    "@commitlint/config-conventional": "^6.1.3",
+    "proxyquire": "^2.0.1",
+    "husky": "^0.14.3",
     "async": "^2.6.0",
-    "should": "^11.2.1",
+    "eslint": "^4.18.2",
     "mocha": "^4.0.1",
-    "jshint": "^2.9.5",
-    "sandboxed-module": "^2.0.3"
+    "should": "^11.2.1"
   },
   "dependencies": {
-    "date-format": "^1.2.0",
     "debug": "^3.1.0",
-    "mkdirp": "^0.5.1",
-    "readable-stream": "^2.3.0"
+    "fs-extra": "^5.0.0",
+    "moment": "^2.21.0"
   },
   "engines": {
-    "node": ">=0.12.0"
+    "node": ">=6.0"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": false,
+      "node": true,
+      "es6": true,
+      "mocha": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 8
+    },
+    "rules": {
+      "no-undef": "error",
+      "prefer-const": "error",
+      "indent": [
+        "error",
+        2
+      ],
+      "max-len": [
+        "error",
+        {
+          "code": 120
+        }
+      ],
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "semi": [
+        "error",
+        "always",
+        {
+          "omitLastInOneLineBlock": true
+        }
+      ],
+      "arrow-parens": [
+        "error",
+        "as-needed"
+      ],
+      "object-curly-spacing": [
+        "error",
+        "never"
+      ],
+      "space-before-function-paren": [
+        "error",
+        {
+          "anonymous": "always",
+          "named": "never"
+        }
+      ]
+    }
   }
 }

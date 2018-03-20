@@ -1,146 +1,144 @@
-"use strict";
+'use strict';
 var async = require('async')
-, should = require('should')
-, fs = require('fs')
-, path = require('path')
-, zlib = require('zlib')
-, streams = require('readable-stream')
-, RollingFileStream = require('../lib').RollingFileStream;
+  , should = require('should')
+  , fs = require('fs')
+  , path = require('path')
+  , zlib = require('zlib')
+  , streams = require('stream')
+  , RollingFileStream = require('../lib').RollingFileStream;
 
 function remove(filename, cb) {
-  fs.unlink(filename, function(err) { cb(); });
+  fs.unlink(filename, function (err) { cb() });
 }
 
 function create(filename, cb) {
-  fs.writeFile(filename, "test file", cb);
+  fs.writeFile(filename, 'test file', cb);
 }
 
-describe('RollingFileStream', function() {
+describe('RollingFileStream', function () {
 
-  describe('arguments', function() {
+  describe('arguments', function () {
     var stream;
 
-    before(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", function() {
-        stream = new RollingFileStream(__dirname + "/test-rolling-file-stream", 1024, 5);
+    before(function (done) {
+      remove(__dirname + '/test-rolling-file-stream', function () {
+        stream = new RollingFileStream(__dirname + '/test-rolling-file-stream', 1024, 5);
         done();
       });
     });
 
-    after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", done);
+    after(function (done) {
+      remove(__dirname + '/test-rolling-file-stream', done);
     });
 
-    it('should take a filename, file size (bytes), no. backups, return Writable', function() {
+    it('should take a filename, file size (bytes), no. backups, return Writable', function () {
       stream.should.be.an.instanceOf(streams.Writable);
-      stream.filename.should.eql(__dirname + "/test-rolling-file-stream");
+      stream.filename.should.eql(__dirname + '/test-rolling-file-stream');
       stream.size.should.eql(1024);
       stream.backups.should.eql(5);
     });
 
-    it('should apply default settings to the underlying stream', function() {
+    it('should apply default settings to the underlying stream', function () {
       stream.theStream.mode.should.eql(420);
       stream.theStream.flags.should.eql('a');
-      //encoding isn't a property on the underlying stream
-      //assert.equal(stream.theStream.encoding, 'utf8');
     });
   });
 
-  describe('with stream arguments', function() {
-    it('should pass them to the underlying stream', function() {
+  describe('with stream arguments', function () {
+    it('should pass them to the underlying stream', function () {
       var stream = new RollingFileStream(
         __dirname + '/test-rolling-file-stream',
         1024,
         5,
-        { mode: parseInt('0666', 8) }
+        {mode: parseInt('0666', 8)}
       );
       stream.theStream.mode.should.eql(parseInt('0666', 8));
     });
 
-    after(function(done) {
+    after(function (done) {
       remove(__dirname + '/test-rolling-file-stream', done);
     });
   });
 
-  describe('without size', function() {
-    it('should default to max int size', function() {
-      var stream = new RollingFileStream(__dirname + "/test-rolling-file-stream");
+  describe('without size', function () {
+    it('should default to max int size', function () {
+      var stream = new RollingFileStream(__dirname + '/test-rolling-file-stream');
       stream.size.should.eql(Number.MAX_SAFE_INTEGER);
     });
 
-    after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", done);
+    after(function (done) {
+      remove(__dirname + '/test-rolling-file-stream', done);
     });
   });
 
-  describe('without number of backups', function() {
-    it('should default to 1 backup', function() {
-      var stream = new RollingFileStream(__dirname + "/test-rolling-file-stream", 1024);
+  describe('without number of backups', function () {
+    it('should default to 1 backup', function () {
+      var stream = new RollingFileStream(__dirname + '/test-rolling-file-stream', 1024);
       stream.backups.should.eql(1);
     });
 
-    after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", done);
+    after(function (done) {
+      remove(__dirname + '/test-rolling-file-stream', done);
     });
   });
 
-  describe('writing less than the file size', function() {
+  describe('writing less than the file size', function () {
 
-    before(function(done) {
-      remove(__dirname + "/test-rolling-file-stream-write-less", function() {
+    before(function (done) {
+      remove(__dirname + '/test-rolling-file-stream-write-less', function () {
         var stream = new RollingFileStream(
-          __dirname + "/test-rolling-file-stream-write-less",
+          __dirname + '/test-rolling-file-stream-write-less',
           100
         );
-        stream.write("cheese", "utf8", function() {
+        stream.write('cheese', 'utf8', function () {
           stream.end(done);
         });
       });
     });
 
-    after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream-write-less", done);
+    after(function (done) {
+      remove(__dirname + '/test-rolling-file-stream-write-less', done);
     });
 
-    it('should write to the file', function(done) {
+    it('should write to the file', function (done) {
       fs.readFile(
-        __dirname + "/test-rolling-file-stream-write-less", "utf8",
-        function(err, contents) {
-          contents.should.eql("cheese");
+        __dirname + '/test-rolling-file-stream-write-less', 'utf8',
+        function (err, contents) {
+          contents.should.eql('cheese');
           done(err);
         }
       );
     });
 
-    it('should write one file', function(done) {
-      fs.readdir(__dirname, function(err, files) {
+    it('should write one file', function (done) {
+      fs.readdir(__dirname, function (err, files) {
         files.filter(
-          function(file) { return file.indexOf('test-rolling-file-stream-write-less') > -1; }
+          function (file) { return file.indexOf('test-rolling-file-stream-write-less') > -1 }
         ).should.have.length(1);
         done(err);
       });
     });
   });
 
-  describe('writing more than the file size', function() {
-    before(function(done) {
+  describe('writing more than the file size', function () {
+    before(function (done) {
       async.forEach(
         [
-          __dirname + "/test-rolling-file-stream-write-more",
-          __dirname + "/test-rolling-file-stream-write-more.1"
+          __dirname + '/test-rolling-file-stream-write-more',
+          __dirname + '/test-rolling-file-stream-write-more.1'
         ],
         remove,
-        function() {
+        function () {
           var stream = new RollingFileStream(
-            __dirname + "/test-rolling-file-stream-write-more",
+            __dirname + '/test-rolling-file-stream-write-more',
             45
           );
           async.forEachSeries(
             [0, 1, 2, 3, 4, 5, 6],
-            function(i, cb) {
-              stream.write(i +".cheese\n", "utf8", cb);
+            function (i, cb) {
+              stream.write(i +'.cheese\n', 'utf8', cb);
             },
-            function() {
+            function () {
               stream.end(done);
             }
           );
@@ -148,21 +146,21 @@ describe('RollingFileStream', function() {
       );
     });
 
-    after(function(done) {
+    after(function (done) {
       async.forEach(
         [
-          __dirname + "/test-rolling-file-stream-write-more",
-          __dirname + "/test-rolling-file-stream-write-more.1"
+          __dirname + '/test-rolling-file-stream-write-more',
+          __dirname + '/test-rolling-file-stream-write-more.1'
         ],
         remove,
         done
       );
     });
 
-    it('should write two files' , function(done) {
-      fs.readdir(__dirname, function(err, files) {
+    it('should write two files' , function (done) {
+      fs.readdir(__dirname, function (err, files) {
         files.filter(
-          function(file) {
+          function (file) {
             return file.indexOf('test-rolling-file-stream-write-more') > -1;
           }
         ).should.have.length(2);
@@ -170,19 +168,19 @@ describe('RollingFileStream', function() {
       });
     });
 
-    it('should write the last two log messages to the first file', function(done) {
+    it('should write the last two log messages to the first file', function (done) {
       fs.readFile(
-        __dirname + "/test-rolling-file-stream-write-more", "utf8",
-        function(err, contents) {
+        __dirname + '/test-rolling-file-stream-write-more', 'utf8',
+        function (err, contents) {
           contents.should.eql('5.cheese\n6.cheese\n');
           done(err);
         });
     });
 
-    it('should write the first five log messages to the second file', function(done) {
+    it('should write the first five log messages to the second file', function (done) {
       fs.readFile(
-        __dirname + '/test-rolling-file-stream-write-more.1', "utf8",
-        function(err, contents) {
+        __dirname + '/test-rolling-file-stream-write-more.1', 'utf8',
+        function (err, contents) {
           contents.should.eql('0.cheese\n1.cheese\n2.cheese\n3.cheese\n4.cheese\n');
           done(err);
         }
@@ -190,34 +188,34 @@ describe('RollingFileStream', function() {
     });
   });
 
-  describe('with options.compress = true', function() {
-    before(function(done) {
+  describe('with options.compress = true', function () {
+    before(function (done) {
       var stream = new RollingFileStream(
         path.join(__dirname, 'compressed-backups.log'),
         30, //30 bytes max size
         2,  //two backup files to keep
-        { compress: true }
+        {compress: true}
       );
       async.forEachSeries(
         [
-          "This is the first log message.",
-          "This is the second log message.",
-          "This is the third log message.",
-          "This is the fourth log message."
+          'This is the first log message.',
+          'This is the second log message.',
+          'This is the third log message.',
+          'This is the fourth log message.'
         ],
-        function(i, cb) {
-          stream.write(i + "\n", "utf8", cb);
+        function (i, cb) {
+          stream.write(i + '\n', 'utf8', cb);
         },
-        function() {
+        function () {
           stream.end(done);
         }
       );
     });
 
-    it('should produce three files, with the backups compressed', function(done) {
-      fs.readdir(__dirname, function(err, files) {
+    it('should produce three files, with the backups compressed', function (done) {
+      fs.readdir(__dirname, function (err, files) {
         var testFiles = files.filter(
-          function(f) { return f.indexOf('compressed-backups.log') > -1; }
+          function (f) { return f.indexOf('compressed-backups.log') > -1 }
         ).sort();
 
         testFiles.length.should.eql(3);
@@ -227,14 +225,14 @@ describe('RollingFileStream', function() {
           'compressed-backups.log.2.gz',
         ]);
 
-        fs.readFile(path.join(__dirname, testFiles[0]), 'utf8', function(err, contents) {
+        fs.readFile(path.join(__dirname, testFiles[0]), 'utf8', function (err, contents) {
           contents.should.eql('This is the fourth log message.\n');
 
           zlib.gunzip(fs.readFileSync(path.join(__dirname, testFiles[1])),
-            function(err, contents) {
+            function (err, contents) {
               contents.toString('utf8').should.eql('This is the third log message.\n');
               zlib.gunzip(fs.readFileSync(path.join(__dirname, testFiles[2])),
-                function(err, contents) {
+                function (err, contents) {
                   contents.toString('utf8').should.eql('This is the second log message.\n');
                   done(err);
                 }
@@ -245,7 +243,7 @@ describe('RollingFileStream', function() {
       });
     });
 
-    after(function(done) {
+    after(function (done) {
       async.forEach([
         path.join(__dirname, 'compressed-backups.log'),
         path.join(__dirname, 'compressed-backups.log.1.gz'),
@@ -255,34 +253,34 @@ describe('RollingFileStream', function() {
 
   });
 
-  describe('with options.keepFileExt = true', function() {
-    before(function(done) {
+  describe('with options.keepFileExt = true', function () {
+    before(function (done) {
       var stream = new RollingFileStream(
         path.join(__dirname, 'extKept-backups.log'),
         30, //30 bytes max size
         2,  //two backup files to keep
-        { keepFileExt: true }
+        {keepFileExt: true}
       );
       async.forEachSeries(
         [
-          "This is the first log message.",
-          "This is the second log message.",
-          "This is the third log message.",
-          "This is the fourth log message."
+          'This is the first log message.',
+          'This is the second log message.',
+          'This is the third log message.',
+          'This is the fourth log message.'
         ],
-        function(i, cb) {
-          stream.write(i + "\n", "utf8", cb);
+        function (i, cb) {
+          stream.write(i + '\n', 'utf8', cb);
         },
-        function() {
+        function () {
           stream.end(done);
         }
       );
     });
 
-    it('should produce three files, with the file-extension kept', function(done) {
-      fs.readdir(__dirname, function(err, files) {
+    it('should produce three files, with the file-extension kept', function (done) {
+      fs.readdir(__dirname, function (err, files) {
         var testFiles = files.filter(
-          function(f) { return f.indexOf('extKept-backups') > -1; }
+          function (f) { return f.indexOf('extKept-backups') > -1 }
         ).sort();
 
         testFiles.length.should.eql(3);
@@ -292,14 +290,14 @@ describe('RollingFileStream', function() {
           'extKept-backups.log',
         ]);
 
-        fs.readFile(path.join(__dirname, testFiles[0]), 'utf8', function(err, contents) {
+        fs.readFile(path.join(__dirname, testFiles[0]), 'utf8', function (err, contents) {
           contents.should.eql('This is the third log message.\n');
 
           fs.readFile(path.join(__dirname, testFiles[1]), 'utf8',
-            function(err, contents) {
+            function (err, contents) {
               contents.toString('utf8').should.eql('This is the second log message.\n');
               fs.readFile(path.join(__dirname, testFiles[2]), 'utf8',
-                function(err, contents) {
+                function (err, contents) {
                   contents.toString('utf8').should.eql('This is the fourth log message.\n');
                   done(err);
                 }
@@ -310,7 +308,7 @@ describe('RollingFileStream', function() {
       });
     });
 
-    after(function(done) {
+    after(function (done) {
       async.forEach([
         path.join(__dirname, 'extKept-backups.log'),
         path.join(__dirname, 'extKept-backups.1.log'),
@@ -320,34 +318,34 @@ describe('RollingFileStream', function() {
 
   });
 
-  describe('with options.compress = true and keepFileExt = true', function() {
-    before(function(done) {
+  describe('with options.compress = true and keepFileExt = true', function () {
+    before(function (done) {
       var stream = new RollingFileStream(
         path.join(__dirname, 'compressed-backups.log'),
         30, //30 bytes max size
         2,  //two backup files to keep
-        { compress: true, keepFileExt: true }
+        {compress: true, keepFileExt: true}
       );
       async.forEachSeries(
         [
-          "This is the first log message.",
-          "This is the second log message.",
-          "This is the third log message.",
-          "This is the fourth log message."
+          'This is the first log message.',
+          'This is the second log message.',
+          'This is the third log message.',
+          'This is the fourth log message.'
         ],
-        function(i, cb) {
-          stream.write(i + "\n", "utf8", cb);
+        function (i, cb) {
+          stream.write(i + '\n', 'utf8', cb);
         },
-        function() {
+        function () {
           stream.end(done);
         }
       );
     });
 
-    it('should produce three files, with the backups compressed', function(done) {
-      fs.readdir(__dirname, function(err, files) {
+    it('should produce three files, with the backups compressed', function (done) {
+      fs.readdir(__dirname, function (err, files) {
         var testFiles = files.filter(
-          function(f) { return f.indexOf('compressed-backups') > -1; }
+          function (f) { return f.indexOf('compressed-backups') > -1 }
         ).sort();
 
         testFiles.length.should.eql(3);
@@ -357,14 +355,14 @@ describe('RollingFileStream', function() {
           'compressed-backups.log',
         ]);
 
-        fs.readFile(path.join(__dirname, testFiles[2]), 'utf8', function(err, contents) {
+        fs.readFile(path.join(__dirname, testFiles[2]), 'utf8', function (err, contents) {
           contents.should.eql('This is the fourth log message.\n');
 
           zlib.gunzip(fs.readFileSync(path.join(__dirname, testFiles[1])),
-            function(err, contents) {
+            function (err, contents) {
               contents.toString('utf8').should.eql('This is the second log message.\n');
               zlib.gunzip(fs.readFileSync(path.join(__dirname, testFiles[0])),
-                function(err, contents) {
+                function (err, contents) {
                   contents.toString('utf8').should.eql('This is the third log message.\n');
                   done(err);
                 }
@@ -375,7 +373,7 @@ describe('RollingFileStream', function() {
       });
     });
 
-    after(function(done) {
+    after(function (done) {
       async.forEach([
         path.join(__dirname, 'compressed-backups.log'),
         path.join(__dirname, 'compressed-backups.1.log.gz'),
@@ -385,8 +383,8 @@ describe('RollingFileStream', function() {
 
   });
 
-  describe('when many files already exist', function() {
-    before(function(done) {
+  describe('when many files already exist', function () {
+    before(function (done) {
       async.forEach(
         [
           __dirname + '/test-rolling-stream-with-existing-files.11',
@@ -396,7 +394,7 @@ describe('RollingFileStream', function() {
           __dirname + '/test-rolling-stream-with-existing-files.1'
         ],
         remove,
-        function(err) {
+        function (err) {
           if (err) done(err);
 
           async.forEach(
@@ -408,21 +406,21 @@ describe('RollingFileStream', function() {
               __dirname + '/test-rolling-stream-with-existing-files.1'
             ],
             create,
-            function(err) {
+            function (err) {
               if (err) done(err);
 
               var stream = new RollingFileStream(
-                __dirname + "/test-rolling-stream-with-existing-files",
-                45,
+                __dirname + '/test-rolling-stream-with-existing-files',
+                18,
                 5
               );
 
               async.forEachSeries(
                 [0, 1, 2, 3, 4, 5, 6],
-                function(i, cb) {
-                  stream.write(i +".cheese\n", "utf8", cb);
+                function (i, cb) {
+                  stream.write(i +'.cheese\n', 'utf8', cb);
                 },
-                function() {
+                function () {
                   stream.end(done);
                 }
               );
@@ -432,22 +430,25 @@ describe('RollingFileStream', function() {
       );
     });
 
-    after(function(done) {
+    after(function (done) {
       async.forEach([
+        __dirname + '/test-rolling-stream-with-existing-files.-1',
         __dirname + '/test-rolling-stream-with-existing-files',
+        __dirname + '/test-rolling-stream-with-existing-files.1.1',
         __dirname + '/test-rolling-stream-with-existing-files.0',
         __dirname + '/test-rolling-stream-with-existing-files.1',
         __dirname + '/test-rolling-stream-with-existing-files.2',
         __dirname + '/test-rolling-stream-with-existing-files.3',
         __dirname + '/test-rolling-stream-with-existing-files.4',
         __dirname + '/test-rolling-stream-with-existing-files.5',
+        __dirname + '/test-rolling-stream-with-existing-files.6',
         __dirname + '/test-rolling-stream-with-existing-files.11',
         __dirname + '/test-rolling-stream-with-existing-files.20'
       ], remove, done);
     });
 
-    it('should roll the files', function(done) {
-      fs.readdir(__dirname, function(err, files) {
+    it('should roll the files', function (done) {
+      fs.readdir(__dirname, function (err, files) {
         files.should.containEql('test-rolling-stream-with-existing-files');
         files.should.containEql('test-rolling-stream-with-existing-files.1');
         files.should.containEql('test-rolling-stream-with-existing-files.2');
@@ -458,24 +459,24 @@ describe('RollingFileStream', function() {
     });
   });
 
-  describe('when the directory gets deleted', function() {
+  describe('when the directory gets deleted', function () {
     var stream;
-    before(function(done) {
+    before(function (done) {
       stream = new RollingFileStream(path.join('subdir', 'test-rolling-file-stream'), 5, 5);
       stream.write('initial', 'utf8', done);
     });
 
-    after(function() {
+    after(function () {
       fs.unlinkSync(path.join('subdir', 'test-rolling-file-stream'));
       fs.rmdirSync('subdir');
     });
 
-    it('handles directory deletion gracefully', function(done) {
+    it('handles directory deletion gracefully', function (done) {
       stream.theStream.on('error', done);
 
-      remove(path.join('subdir', 'test-rolling-file-stream'), function() {
-        fs.rmdir('subdir', function() {
-          stream.write('rollover', 'utf8', function() {
+      remove(path.join('subdir', 'test-rolling-file-stream'), function () {
+        fs.rmdir('subdir', function () {
+          stream.write('rollover', 'utf8', function () {
             fs.readFileSync(path.join('subdir', 'test-rolling-file-stream'), 'utf8')
               .should.eql('rollover');
             done();
