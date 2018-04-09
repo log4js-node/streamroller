@@ -25,12 +25,13 @@ class RollingFileWriteStream extends Writable {
    * @param {number} options.daysToKeep - The max days of files to keep. This will be ignored if interval days is 0.
    * @param {number} options.maxSize - The maxSize one file can reach. Unit is Byte.
    *                                   This should be more than 1024. The default is Number.MAX_SAFE_INTEGER.
-   * @param {string} options.datePattern - The date string pattern in the file name.
-   *                                       Refer to moment.js for valid strings. The default is 'YYYY-MM-DD'.
    * @param {string} options.mode - The mode of the files. The default is '0644'. Refer to stream.writable for more.
    * @param {string} options.flags - The default is 'a'. Refer to stream.flags for more.
    * @param {boolean} options.compress - Whether to compress backup files.
    * @param {boolean} options.keepFileExt - Whether to keep the file extension.
+   * @param {string} options.datePattern - The date string pattern in the file name.
+   *                                       Refer to moment.js for valid strings. The default is 'YYYY-MM-DD'.
+   *                                       This is used to adapt the previous version and will be removed soon
    * @param {boolean} options.alwaysIncludePattern - Whether to add date to the name of the first file.
    *                                                 This is used to adapt the previous version and will be removed soon
    */
@@ -93,28 +94,30 @@ class RollingFileWriteStream extends Writable {
       && _.find(existingFileDetails, f => f.fileName === newFileName)) {
       const hotFileState = fs.statSync(path.format({
         dir: this.fileObject.dir,
-        name: newFileName
+        base: newFileName
       }));
       const hotFileDate = moment(hotFileState.birthtimeMs);
       if(hotFileDate.isBefore(now, 'day')) {
+        debug('deleting the existing hot file');
         fs.unlinkSync(path.format(this.fileObject));
       }
-      const oldestFileDetail = existingFileDetails[existingFileDetails.length - 1];
+      const oldestFileDetail = existingFileDetails[0];
       this.state = {
         currentDate: hotFileDate,
         currentIndex: oldestFileDetail.index,
         currentSize: hotFileState.size
       };
-      debug(`using the existing hot file. name=${newFileName}, state=${this.state}`);
+      debug(`using the existing hot file. name=${newFileName}, state=${JSON.stringify(this.state)}`);
+      this._renewWriteStream(newFileName, true);
     } else {
       this.state = {
         currentDate: now,
         currentIndex: 0,
         currentSize: 0
       };
-      debug(`create new file with no hot file. name=${newFileName}, state=${this.state}`);
+      debug(`create new file with no hot file. name=${newFileName}, state=${JSON.stringify(this.state)}`);
+      this._renewWriteStream(newFileName);
     }
-    this._renewWriteStream(newFileName);
     this.currentFileStream.write('', 'utf8', () => this._clean(existingFileDetails)); // to ensure file
     return;
   }
@@ -176,22 +179,35 @@ class RollingFileWriteStream extends Writable {
     }
   }
 
-  _final(callback) {
+  end(callback) {
+    super.end();
     if (this.currentFileStream) {
       debug(`ending the stream. filename=${this.currentFileStream.path}`);
       this.currentFileStream.end(callback);
+    } else {
+      callback();
     }
-    callback();
   }
 
-  _destory(err, callback) {
+  _final(callback) {
     if (this.currentFileStream) {
-      this.currentFileStream.destroy(err, callback);
+      debug(`finalizing the stream. filename=${this.currentFileStream.path}`);
+      this.currentFileStream.end(callback);
+    } else {
+      callback();
     }
-    callback();
   }
 
-  // SortedBy asc by date and index
+  _destroy(err, callback) {
+    if (this.currentFileStream) {
+      debug(`destroying the stream. filename=${this.currentFileStream.path}`);
+      this.currentFileStream.destroy(err, callback);
+    } else {
+      callback();
+    }
+  }
+
+  // Sorted from the oldest to the latest
   _getExistingFiles(rawDir) {
     const dir = rawDir || this.fileObject.dir;
     const existingFileDetails = _.compact(
@@ -206,7 +222,10 @@ class RollingFileWriteStream extends Writable {
         return _.assign({fileName: n}, parseResult);
       })
     );
-    return _.sortBy(existingFileDetails, n => (n.date ? n.date.valueOf() : 0) + n.index);
+    return _.sortBy(
+      existingFileDetails,
+      n => (n.date ? n.date.valueOf() : moment().valueOf()) - n.index
+    );
   }
 
   // need file name instead of file abs path.
@@ -228,7 +247,7 @@ class RollingFileWriteStream extends Writable {
       }
       metaStr = fileName.slice(prefix.length, suffix ? -1 * suffix.length : undefined);
     } else {
-      const prefix = path.format(_.pick(this.fileObject, ['name', 'ext']));
+      const prefix = this.fileObject.base;
       if (!fileName.startsWith(prefix)) {
         return;
       }
@@ -241,14 +260,6 @@ class RollingFileWriteStream extends Writable {
       };
     }
     if (this._dateRollingEnabled()) {
-      let date = moment(metaStr, this.options.datePattern);
-      if (date.isValid()) {
-        return {
-          index: 0,
-          date,
-          isCompressed
-        };
-      }
       const items = _.split(metaStr, FILENAME_SEP);
       if (items.length >= 2) {
         const indexStr = items[items.length - 1];
@@ -262,7 +273,15 @@ class RollingFileWriteStream extends Writable {
           };
         }
       }
-      return;
+      let date = moment(metaStr, this.options.datePattern);
+      if (date.isValid()) {
+        return {
+          index: 0,
+          date,
+          isCompressed
+        };
+      }
+
     } else {
       if (metaStr.match(/^\d+$/)) {
         return {
@@ -270,7 +289,6 @@ class RollingFileWriteStream extends Writable {
           isCompressed
         };
       }
-      return;
     }
   }
 
@@ -281,14 +299,11 @@ class RollingFileWriteStream extends Writable {
     const dateOpt = date || _.get(this, 'state.currentDate') || moment();
     const dateStr = dateOpt.clone().startOf('day').format(this.options.datePattern);
     const indexOpt = index || _.get(this, 'state.currentIndex');
-    const oriFileName = path.format(_.pick(this.fileObject, ['name', 'ext']));
+    const oriFileName = this.fileObject.base;
     if (isHotFile) {
       if (this.options.alwaysIncludePattern && this._dateRollingEnabled()) {
         return this.options.keepFileExt
-          ? path.format({
-            name: _.join([this.fileObject.name, dateStr], FILENAME_SEP),
-            ext: this.fileObject.ext
-          })
+          ? _.join([this.fileObject.name, dateStr], FILENAME_SEP) + this.fileObject.ext
           : _.join([oriFileName, dateStr], FILENAME_SEP);
       }
       return oriFileName;
@@ -304,10 +319,7 @@ class RollingFileWriteStream extends Writable {
     if (this.options.keepFileExt) {
       fileNameExtraItems = _.concat([this.fileObject.name], fileNameExtraItems);
       const baseFileName = _.join(fileNameExtraItems, FILENAME_SEP);
-      fileName = path.format({
-        name: baseFileName,
-        ext: this.fileObject.ext
-      });
+      fileName = baseFileName + this.fileObject.ext;
     } else {
       fileNameExtraItems = _.concat([oriFileName], fileNameExtraItems);
       fileName = _.join(fileNameExtraItems, FILENAME_SEP);
@@ -324,29 +336,29 @@ class RollingFileWriteStream extends Writable {
 
   _roll({isNextPeriod}) {
     const currentFilePath = this.currentFileStream.path;
-    let error;
-    this.currentFileStream.end(e => error = e);
-    if (error) {
-      throw error;
-    }
+    this.currentFileStream.end('', this.options.encoding, e => {
+      if (e !== undefined) {
+        console.error('Closing file failed.');
+        throw e;
+      }
+    });
 
     let targetFilePath;
-
     for (let i = _.min([this.state.currentIndex, this.options.numToKeep - 1]); i >= 0; i--) {
       const sourceFilePath = i === 0
         ? currentFilePath
         : path.format({
           dir: this.fileObject.dir,
-          name: this._formatFileName({date: this.state.currentDate, index: i})
+          base: this._formatFileName({date: this.state.currentDate, index: i})
         });
       const targetFilePath = this.options.adaptOldDateRolling && i == 0 && isNextPeriod
         ? path.format({
           dir: this.fileObject.dir,
-          name: this._formatFileName({date: this.state.currentDate})
+          base: this._formatFileName({date: this.state.currentDate})
         })
         : path.format({
           dir: this.fileObject.dir,
-          name: this._formatFileName({date: this.state.currentDate, index: i + 1})
+          base: this._formatFileName({date: this.state.currentDate, index: i + 1})
         });
       this._moveFile(sourceFilePath, targetFilePath, this.options.compress && i === 0);
     }
@@ -364,16 +376,14 @@ class RollingFileWriteStream extends Writable {
     this.currentFileStream.write('', 'utf8', () => this._clean()); // to touch file
   }
 
-  _renewWriteStream(fileName) {
+  _renewWriteStream(fileName, exists = false) {
     fs.ensureDirSync(this.fileObject.dir);
-    const filePath = path.format({dir: this.fileObject.dir, name: fileName});
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    const filePath = path.format({dir: this.fileObject.dir, base: fileName});
+    const ops = _.pick(this.options, ['flags', 'encoding', 'mode']);
+    if (exists) {
+      ops.flags = 'a';
     }
-    this.currentFileStream = fs.createWriteStream(
-      filePath,
-      _.pick(this.options, ['flags', 'encoding', 'mode'])
-    );
+    this.currentFileStream = fs.createWriteStream(filePath, ops);
   }
 
   _moveFile(sourceFilePath, targetFilePath, needCompress) {
@@ -426,8 +436,8 @@ class RollingFileWriteStream extends Writable {
       const currentFile = this._formatFileName({isHotFile: true});
       const fileNamesToRemove = _.slice(
         existingFileDetails.map(f => f.fileName),
-        1,
-        existingFileDetails.length - this.options.numToKeep,
+        0,
+        existingFileDetails.length - this.options.numToKeep - 1,
       );
       this._deleteFiles(fileNamesToRemove);
       if (this.state.currentIndex > this.options.numToKeep - 1) {
@@ -440,7 +450,7 @@ class RollingFileWriteStream extends Writable {
     if (fileNames) {
       fileNames.forEach(n => {
         try {
-          const filePath = path.format({dir: this.fileObject.dir, name: n});
+          const filePath = path.format({dir: this.fileObject.dir, base: n});
           debug(`deleting file. path=${filePath}`);
           fs.unlinkSync(filePath);
         } catch (e) {

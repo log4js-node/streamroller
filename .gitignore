@@ -7,6 +7,9 @@ lib-cov
 *.pid
 *.gz
 .DS_Store
+.nyc_output
+coverage
+lib
 
 pids
 logs

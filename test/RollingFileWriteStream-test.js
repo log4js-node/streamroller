@@ -71,14 +71,13 @@ describe('RollingFileWriteStream', () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {intervalDays: 3, maxSize: 5});
       const flows = Array.from(Array(38).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
     });
 
     after(done => {
-      s.end();
       fs.removeSync(fileObj.dir);
       done();
     });
@@ -90,51 +89,51 @@ describe('RollingFileWriteStream', () => {
         fileObj.base + '.2012-09-12.1',
         fileObj.base + '.2012-09-12.2',
         fileObj.base + '.2012-09-12.3',
+        fileObj.base + '.2012-09-12.4',
         fileObj.base + '.2012-09-15.1',
         fileObj.base + '.2012-09-15.2',
         fileObj.base + '.2012-09-15.3',
         fileObj.base + '.2012-09-15.4',
         fileObj.base + '.2012-09-15.5',
         fileObj.base + '.2012-09-18.1',
-        fileObj.base + '.2012-09-18.2',
-        fileObj.base + '.2012-09-18.3',
+        fileObj.base + '.2012-09-18.2'
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
-      fs.readFileSync(path.format(fileObj)).toString().should.equal('37');
+      fs.readFileSync(path.format(fileObj)).toString().should.equal('3637');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-12.1',
-      }))).toString().should.equal('101112');
+      }))).toString().should.equal('1314');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-12.2',
-      }))).toString().should.equal('56789');
+      }))).toString().should.equal('101112');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-12.3',
+      }))).toString().should.equal('56789');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-12.4',
       }))).toString().should.equal('01234');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.1',
-      }))).toString().should.equal('252627');
+      }))).toString().should.equal('272829');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.2',
-      }))).toString().should.equal('222324');
+      }))).toString().should.equal('242526');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.3',
-      }))).toString().should.equal('192021');
+      }))).toString().should.equal('212223');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.4',
-      }))).toString().should.equal('161718');
+      }))).toString().should.equal('181920');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.5',
-      }))).toString().should.equal('131415');
+      }))).toString().should.equal('151617');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-18.1',
-      }))).toString().should.equal('343536');
+      }))).toString().should.equal('333435');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-18.2',
-      }))).toString().should.equal('313233');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.3',
-      }))).toString().should.equal('282930');
+      }))).toString().should.equal('303132');
     });
   });
 
@@ -150,7 +149,7 @@ describe('RollingFileWriteStream', () => {
         numToKeep: 3
       });
       const flows = Array.from(Array(38).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -166,22 +165,22 @@ describe('RollingFileWriteStream', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
         fileObj.base,
+        fileObj.base + '.2012-09-15.1',
         fileObj.base + '.2012-09-18.1',
-        fileObj.base + '.2012-09-18.2',
-        fileObj.base + '.2012-09-18.3'
+        fileObj.base + '.2012-09-18.2'
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
-      fs.readFileSync(path.format(fileObj)).toString().should.equal('37');
+      fs.readFileSync(path.format(fileObj)).toString().should.equal('3637');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-15.1'
+      }))).toString().should.equal('272829');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-18.1'
-      }))).toString().should.equal('343536');
+      }))).toString().should.equal('333435');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-18.2'
-      }))).toString().should.equal('313233');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.3'
-      }))).toString().should.equal('282930');
+      }))).toString().should.equal('303132');
     });
   });
 
@@ -197,7 +196,7 @@ describe('RollingFileWriteStream', () => {
         daysToKeep: 3
       });
       const flows = Array.from(Array(38).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -219,36 +218,32 @@ describe('RollingFileWriteStream', () => {
         fileObj.base + '.2012-09-15.4',
         fileObj.base + '.2012-09-15.5',
         fileObj.base + '.2012-09-18.1',
-        fileObj.base + '.2012-09-18.2',
-        fileObj.base + '.2012-09-18.3'
+        fileObj.base + '.2012-09-18.2'
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
-      fs.readFileSync(path.format(fileObj)).toString().should.equal('37');
+      fs.readFileSync(path.format(fileObj)).toString().should.equal('3637');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.1',
-      }))).toString().should.equal('252627');
+      }))).toString().should.equal('272829');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.2',
-      }))).toString().should.equal('222324');
+      }))).toString().should.equal('242526');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.3',
-      }))).toString().should.equal('192021');
+      }))).toString().should.equal('212223');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.4',
-      }))).toString().should.equal('161718');
+      }))).toString().should.equal('181920');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.5',
-      }))).toString().should.equal('131415');
+      }))).toString().should.equal('151617');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.1'
-      }))).toString().should.equal('343536');
+        base: fileObj.base + '.2012-09-18.1',
+      }))).toString().should.equal('333435');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.2'
-      }))).toString().should.equal('313233');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.3'
-      }))).toString().should.equal('282930');
+        base: fileObj.base + '.2012-09-18.2',
+      }))).toString().should.equal('303132');
     });
   });
 
@@ -264,7 +259,7 @@ describe('RollingFileWriteStream', () => {
         datePattern: 'DD-MM-YYYY'
       });
       const flows = Array.from(Array(8).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -303,7 +298,7 @@ describe('RollingFileWriteStream', () => {
         compress: true
       });
       const flows = Array.from(Array(8).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -344,7 +339,7 @@ describe('RollingFileWriteStream', () => {
         keepFileExt: true
       });
       const flows = Array.from(Array(8).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -386,7 +381,7 @@ describe('RollingFileWriteStream', () => {
         compress: true
       });
       const flows = Array.from(Array(8).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -428,7 +423,7 @@ describe('RollingFileWriteStream', () => {
         alwaysIncludePattern: true
       });
       const flows = Array.from(Array(8).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -471,7 +466,7 @@ describe('RollingFileWriteStream', () => {
         alwaysIncludePattern: true
       });
       const flows = Array.from(Array(38).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + i / 5, 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -490,53 +485,108 @@ describe('RollingFileWriteStream', () => {
         fileObj.name + '.2012-09-12.1.log.gz',
         fileObj.name + '.2012-09-12.2.log.gz',
         fileObj.name + '.2012-09-12.3.log.gz',
+        fileObj.name + '.2012-09-12.4.log.gz',
         fileObj.name + '.2012-09-15.1.log.gz',
         fileObj.name + '.2012-09-15.2.log.gz',
         fileObj.name + '.2012-09-15.3.log.gz',
         fileObj.name + '.2012-09-15.4.log.gz',
         fileObj.name + '.2012-09-15.5.log.gz',
         fileObj.name + '.2012-09-18.1.log.gz',
-        fileObj.name + '.2012-09-18.2.log.gz',
-        fileObj.name + '.2012-09-18.3.log.gz',
+        fileObj.name + '.2012-09-18.2.log.gz'
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-18.log',
-      }))).toString().should.equal('37');
+      }))).toString().should.equal('3637');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-12.1.log.gz',
-      })))).toString().should.equal('101112');
+      })))).toString().should.equal('1314');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-12.2.log.gz',
-      })))).toString().should.equal('56789');
+      })))).toString().should.equal('101112');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-12.3.log.gz',
+      })))).toString().should.equal('56789');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-12.4.log.gz',
       })))).toString().should.equal('01234');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-15.1.log.gz',
-      })))).toString().should.equal('252627');
+      })))).toString().should.equal('272829');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-15.2.log.gz',
-      })))).toString().should.equal('222324');
+      })))).toString().should.equal('242526');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-15.3.log.gz',
-      })))).toString().should.equal('192021');
+      })))).toString().should.equal('212223');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-15.4.log.gz',
-      })))).toString().should.equal('161718');
+      })))).toString().should.equal('181920');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-15.5.log.gz',
-      })))).toString().should.equal('131415');
+      })))).toString().should.equal('151617');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-18.1.log.gz',
-      })))).toString().should.equal('343536');
+      })))).toString().should.equal('333435');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-18.2.log.gz',
-      })))).toString().should.equal('313233');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-18.3.log.gz',
-      })))).toString().should.equal('282930');
+      })))).toString().should.equal('303132');
     });
   });
+
+  describe('when old files exit', () => {
+    const fileObj = generateTestFile();
+    let s;
+
+    before(done => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      fs.ensureFileSync(fileObj.path);
+      fs.writeFileSync(fileObj.path, 'exist');
+      s = new RollingFileWriteStream(fileObj.path);
+      s.write('now', 'utf8', done);
+    });
+
+    after(done => {
+      s.end();
+      fs.removeSync(fileObj.dir);
+      done();
+    });
+
+    it('should use write in the old file if not reach the maxSize limit', () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [fileObj.base];
+      files.length.should.equal(expectedFileList.length);
+      files.should.containDeep(expectedFileList);
+
+      fs.readFileSync(path.format(fileObj)).toString().should.equal('existnow');
+    });
+  });
+
+  describe('when dir does not exists', () => {
+    const fileObj = generateTestFile();
+    let s;
+
+    before(done => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      s = new RollingFileWriteStream(fileObj.path);
+      s.write('test', 'utf8', done);
+    });
+
+    after(done => {
+      s.end();
+      fs.removeSync(fileObj.dir);
+      done();
+    });
+
+    it('should use write in the old file if not reach the maxSize limit', () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [fileObj.base];
+      files.length.should.equal(expectedFileList.length);
+      files.should.containDeep(expectedFileList);
+
+      fs.readFileSync(path.format(fileObj)).toString().should.equal('test');
+    });
+  });
+
 });

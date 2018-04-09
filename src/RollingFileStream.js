@@ -31,4 +31,5 @@ class RollingFileStream extends RollingFileWriteStream {
     this.end(callback);
   }
 }
+
 module.exports = RollingFileStream;
