@@ -15,10 +15,10 @@ class RollingFileStream extends RollingFileWriteStream {
     if (!backups) {
       backups = 1;
     }
-    options.numToKeep = backups + 1;
+    options.numToKeep = backups;
     super(filename, options);
     this.filename = this.currentFileStream.path;
-    this.backups = this.options.numToKeep - 1;
+    this.backups = this.options.numToKeep;
     this.size = this.options.maxSize;
     this.theStream = this.currentFileStream;
   }
@@ -31,4 +31,5 @@ class RollingFileStream extends RollingFileWriteStream {
     this.end(callback);
   }
 }
+
 module.exports = RollingFileStream;

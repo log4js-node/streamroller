@@ -1,8 +1,11 @@
+/**
+ * This file will be removed.
+ */
 'use strict';
 var should = require('should')
   , fs = require('fs')
   , zlib = require('zlib')
-  , proxyquire = require('proxyquire')
+  , proxyquire = require('proxyquire').noPreserveCache()
   , util = require('util')
   , async = require('async')
   , streams = require('stream');
@@ -49,10 +52,8 @@ describe('DateRollingFileStream', function () {
     });
 
     it('with default settings for the underlying stream', function (done) {
-      stream.theStream.mode.should.eql(420);
-      stream.theStream.flags.should.eql('a');
-      //encoding is not available on the underlying stream
-      //assert.equal(stream.encoding, 'utf8');
+      stream.currentFileStream.mode.should.eql(420);
+      stream.currentFileStream.flags.should.eql('a');
       done();
     });
   });

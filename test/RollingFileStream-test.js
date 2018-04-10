@@ -1,3 +1,6 @@
+/**
+ * This file will be removed.
+ */
 'use strict';
 var async = require('async')
   , should = require('should')
