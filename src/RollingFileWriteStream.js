@@ -265,23 +265,25 @@ class RollingFileWriteStream extends Writable {
         const indexStr = items[items.length - 1];
         if (indexStr !== undefined && indexStr.match(/^\d+$/)) {
           const dateStr = metaStr.slice(0, -1 * (indexStr.length + 1));
-          date = moment(metaStr, this.options.datePattern);
+          const date = moment(dateStr, this.options.datePattern);
+          if (date.isValid()) {
+            return {
+              index: parseInt(indexStr, 10),
+              date,
+              isCompressed
+            };
+          }
+        }
+      } else {
+        const date = moment(metaStr, this.options.datePattern);
+        if (date.isValid()) {
           return {
-            index: parseInt(indexStr, 10),
+            index: 0,
             date,
             isCompressed
           };
         }
       }
-      let date = moment(metaStr, this.options.datePattern);
-      if (date.isValid()) {
-        return {
-          index: 0,
-          date,
-          isCompressed
-        };
-      }
-
     } else {
       if (metaStr.match(/^\d+$/)) {
         return {
@@ -290,6 +292,7 @@ class RollingFileWriteStream extends Writable {
         };
       }
     }
+    return;
   }
 
   // moment.date
