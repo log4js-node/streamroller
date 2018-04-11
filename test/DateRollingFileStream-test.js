@@ -2,8 +2,7 @@
  * This file will be removed.
  */
 'use strict';
-var should = require('should')
-  , fs = require('fs')
+var fs = require('fs')
   , zlib = require('zlib')
   , proxyquire = require('proxyquire').noPreserveCache()
   , util = require('util')
@@ -472,7 +471,7 @@ describe('DateRollingFileStream', function () {
             nextCallback(err);
           });
         },
-        function (err, n) {
+        function (err) {
           stream = streams[0];
           done(err);
         });
@@ -548,7 +547,7 @@ describe('DateRollingFileStream', function () {
               var out = fs.createWriteStream(filename+'.gz');
               inp.pipe(gzip).pipe(out);
 
-              out.on('finish', function (err) {
+              out.on('finish', function () {
                 fs.unlink(filename, callback);
               });
             },
@@ -562,7 +561,7 @@ describe('DateRollingFileStream', function () {
             nextCallback(err);
           });
         },
-        function (err, n) {
+        function () {
 
           // Uncompress the most recent stream which will be the one we roll over
           // for testing
@@ -573,7 +572,7 @@ describe('DateRollingFileStream', function () {
           var out = fs.createWriteStream(stream.filename);
           inp.pipe(gzip).pipe(out);
 
-          out.on('finish', function (err) {
+          out.on('finish', function () {
             fs.unlink(compressedFilename, done);
           });
         });

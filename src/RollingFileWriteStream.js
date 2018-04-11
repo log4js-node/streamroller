@@ -265,23 +265,25 @@ class RollingFileWriteStream extends Writable {
         const indexStr = items[items.length - 1];
         if (indexStr !== undefined && indexStr.match(/^\d+$/)) {
           const dateStr = metaStr.slice(0, -1 * (indexStr.length + 1));
-          date = moment(metaStr, this.options.datePattern);
+          const date = moment(dateStr, this.options.datePattern);
+          if (date.isValid()) {
+            return {
+              index: parseInt(indexStr, 10),
+              date,
+              isCompressed
+            };
+          }
+        }
+      } else {
+        const date = moment(metaStr, this.options.datePattern);
+        if (date.isValid()) {
           return {
-            index: parseInt(indexStr, 10),
+            index: 0,
             date,
             isCompressed
           };
         }
       }
-      let date = moment(metaStr, this.options.datePattern);
-      if (date.isValid()) {
-        return {
-          index: 0,
-          date,
-          isCompressed
-        };
-      }
-
     } else {
       if (metaStr.match(/^\d+$/)) {
         return {
@@ -290,6 +292,7 @@ class RollingFileWriteStream extends Writable {
         };
       }
     }
+    return;
   }
 
   // moment.date
@@ -338,12 +341,11 @@ class RollingFileWriteStream extends Writable {
     const currentFilePath = this.currentFileStream.path;
     this.currentFileStream.end('', this.options.encoding, e => {
       if (e !== undefined) {
-        console.error('Closing file failed.');
+        console.log('Closing file failed.');
         throw e;
       }
     });
 
-    let targetFilePath;
     for (let i = _.min([this.state.currentIndex, this.options.numToKeep - 1]); i >= 0; i--) {
       const sourceFilePath = i === 0
         ? currentFilePath
@@ -433,7 +435,6 @@ class RollingFileWriteStream extends Writable {
       existingFileDetails = _.slice(existingFileDetails, outOfDateFileDetails.length);
     }
     if (this.options.numToKeep && existingFileDetails.length > this.options.numToKeep) {
-      const currentFile = this._formatFileName({isHotFile: true});
       const fileNamesToRemove = _.slice(
         existingFileDetails.map(f => f.fileName),
         0,

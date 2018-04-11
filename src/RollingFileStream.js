@@ -1,5 +1,3 @@
-const _ = require('lodash');
-const debug = require('debug')('streamroller:RollingFileStream');
 const RollingFileWriteStream = require('./RollingFileWriteStream');
 
 // just to adapt the previous version
