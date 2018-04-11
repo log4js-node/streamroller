@@ -67,45 +67,9 @@
     "parserOptions": {
       "ecmaVersion": 8
     },
+    "extends": "eslint:recommended",
     "rules": {
-      "no-undef": "error",
-      "prefer-const": "error",
-      "indent": [
-        "error",
-        2
-      ],
-      "max-len": [
-        "error",
-        {
-          "code": 120
-        }
-      ],
-      "quotes": [
-        "error",
-        "single"
-      ],
-      "semi": [
-        "error",
-        "always",
-        {
-          "omitLastInOneLineBlock": true
-        }
-      ],
-      "arrow-parens": [
-        "error",
-        "as-needed"
-      ],
-      "object-curly-spacing": [
-        "error",
-        "never"
-      ],
-      "space-before-function-paren": [
-        "error",
-        {
-          "anonymous": "always",
-          "named": "never"
-        }
-      ]
+      "no-console": "off"
     }
   }
 }

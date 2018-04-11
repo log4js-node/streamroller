@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const should = require('should');
 const path = require('path');
 const zlib = require('zlib');
 const async = require('async');
@@ -16,7 +15,7 @@ const RollingFileWriteStream = proxyquire('../lib/RollingFileWriteStream', {
 
 function generateTestFile(fileName) {
   const dirName = path.join(__dirname, 'tmp_' + Math.floor(Math.random() * new Date()));
-  fileName = fileName || 'ignore.log';
+  fileName = fileName || (Math.floor(Math.random() * Math.floor(2)) ? 'withExtension.log' : 'noExtension');
   const fileNameObj = path.parse(fileName);
   return {
     dir: dirName,

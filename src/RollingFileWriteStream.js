@@ -341,12 +341,11 @@ class RollingFileWriteStream extends Writable {
     const currentFilePath = this.currentFileStream.path;
     this.currentFileStream.end('', this.options.encoding, e => {
       if (e !== undefined) {
-        console.error('Closing file failed.');
+        console.log('Closing file failed.');
         throw e;
       }
     });
 
-    let targetFilePath;
     for (let i = _.min([this.state.currentIndex, this.options.numToKeep - 1]); i >= 0; i--) {
       const sourceFilePath = i === 0
         ? currentFilePath
@@ -436,7 +435,6 @@ class RollingFileWriteStream extends Writable {
       existingFileDetails = _.slice(existingFileDetails, outOfDateFileDetails.length);
     }
     if (this.options.numToKeep && existingFileDetails.length > this.options.numToKeep) {
-      const currentFile = this._formatFileName({isHotFile: true});
       const fileNamesToRemove = _.slice(
         existingFileDetails.map(f => f.fileName),
         0,
