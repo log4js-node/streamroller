@@ -82,6 +82,7 @@ class RollingFileWriteStream extends Writable {
     if (options.daysToKeep && options.daysToKeep < 1) {
       throw new Error(`options.daysToKeep (${options.daysToKeep}) should be > 0`);
     }
+    debug(`creating stream with option=${JSON.stringify(options)}`);
     return options;
   }
 
@@ -97,10 +98,6 @@ class RollingFileWriteStream extends Writable {
         base: newFileName
       }));
       const hotFileDate = moment(hotFileState.birthtimeMs);
-      if(hotFileDate.isBefore(now, 'day')) {
-        debug('deleting the existing hot file');
-        fs.unlinkSync(path.format(this.fileObject));
-      }
       const oldestFileDetail = existingFileDetails[0];
       this.state = {
         currentDate: hotFileDate,

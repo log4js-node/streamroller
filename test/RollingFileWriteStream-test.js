@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const path = require('path');
+require('should');
 const zlib = require('zlib');
 const async = require('async');
 const stream = require('stream');
@@ -12,6 +13,14 @@ mockMoment.now = () => fakeNow;
 const RollingFileWriteStream = proxyquire('../lib/RollingFileWriteStream', {
   moment: mockMoment
 });
+let fakedFsDate = fakeNow;
+const mockFs = require('fs-extra');
+const oldStatSync = mockFs.statSync
+mockFs.statSync = fd => {
+  const result = oldStatSync(fd);
+  result.birthtimeMs = fakedFsDate.valueOf();
+  return result;
+}
 
 function generateTestFile(fileName) {
   const dirName = path.join(__dirname, 'tmp_' + Math.floor(Math.random() * new Date()));
@@ -26,7 +35,17 @@ function generateTestFile(fileName) {
   };
 }
 
+function resetTime() {
+  fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+  fakedFsDate = fakeNow;
+}
+
 describe('RollingFileWriteStream', () => {
+
+  beforeEach(done => {
+    resetTime();
+    done();
+  });
 
   describe('with default arguments', () => {
     const fileObj = generateTestFile();
@@ -133,6 +152,82 @@ describe('RollingFileWriteStream', () => {
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-18.2',
       }))).toString().should.equal('303132');
+    });
+  });
+
+  describe('with default arguments and recreated in the same day', () => {
+    const fileObj = generateTestFile();
+    let s;
+
+    before(done => {
+      const flows = Array.from(Array(3).keys()).map(() => cb => {
+        s = new RollingFileWriteStream(fileObj.path);
+        s.write('abc', 'utf8', cb);
+        s.end();
+      })
+      async.waterfall(flows, () => done());
+    });
+
+    after(done => {
+      fs.removeSync(fileObj.dir);
+      done();
+    });
+
+    it('should have only 1 file', () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [fileObj.base];
+      files.length.should.equal(expectedFileList.length);
+      files.should.containDeep(expectedFileList);
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base,
+      }))).toString().should.equal('abcabcabc');
+    });
+
+  });
+
+  describe('with default arguments and recreated in different days', () => {
+    const fileObj = generateTestFile();
+    let s;
+
+    before(done => {
+      const flows = Array.from(Array(4).keys()).map(i => cb => {
+        const day = 12 + i;
+        fakeNow = new Date(2012, 8, day, 10, 37 + i, 11);
+        s = new RollingFileWriteStream(fileObj.path);
+        s.write(day.toString(), 'utf8', cb);
+        s.end();
+        fakedFsDate = fakeNow;
+      })
+      async.waterfall(flows, () => done());
+    });
+
+    after(done => {
+      fs.removeSync(fileObj.dir);
+      done();
+    });
+
+    it('should have 2 files', () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [
+        fileObj.base,
+        fileObj.base + '.2012-09-12.1',
+        fileObj.base + '.2012-09-13.1',
+        fileObj.base + '.2012-09-14.1'
+      ];
+      files.length.should.equal(expectedFileList.length);
+      files.should.containDeep(expectedFileList);
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base,
+      }))).toString().should.equal('15');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-12.1',
+      }))).toString().should.equal('12');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-13.1',
+      }))).toString().should.equal('13');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-14.1',
+      }))).toString().should.equal('14');
     });
   });
 
@@ -661,5 +756,4 @@ describe('RollingFileWriteStream', () => {
       fs.readFileSync(path.format(fileObj)).toString().should.equal('test');
     });
   });
-
 });

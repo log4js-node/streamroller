@@ -4,6 +4,7 @@
 'use strict';
 var fs = require('fs')
   , zlib = require('zlib')
+  , should = require('should')
   , proxyquire = require('proxyquire').noPreserveCache()
   , util = require('util')
   , async = require('async')
