@@ -138,44 +138,6 @@ class RollingFileWriteStream extends Writable {
     }
   }
 
-  _writev(chunks, callback) {
-    try {
-      if (this._dateRollingEnabled() && (this.state.currentDate || moment()).clone()
-        .add(this.options.intervalDays - 1, 'days')
-        .isBefore(moment(), 'day')
-      ) {
-        this._roll({isNextPeriod: true});
-      }
-      const chunksForOldFile = [];
-      for (let i = 0; i < chunks.length; i++) {
-        const c = chunks[i];
-        if (this.state.currentSize + c.chunk.length < this.options.maxSize) {
-          this.state.currentSize += c.chunk.length;
-          chunksForOldFile.push(c);
-        }
-      }
-      let error;
-      debug(`writing chunks. file=${this.currentFileStream.path} `
-         + `state=${JSON.stringify(this.state)} chunks=${chunksForOldFile}`);
-      this.currentFileStream.writev(chunksForOldFile, e => error = e);
-      if (error) {
-        return callback(error);
-      }
-      const chunksForNewFile = _.slice(chunks, chunksForOldFile.length);
-      if (chunksForNewFile.length > 0) {
-        this._roll({isNextPeriod: false});
-        this.state.currentSize = _.sumBy(chunksForNewFile, c => c.chunk.length);
-        debug(`writing chunks. file=${this.currentFileStream.path} `
-          + `state=${JSON.stringify(this.state)} chunks=${chunksForNewFile}`);
-        this.currentFileStream.writev(chunksForNewFile, callback);
-      } else {
-        callback();
-      }
-    } catch (e) {
-      return callback(e);
-    }
-  }
-
   end(callback) {
     super.end();
     if (this.currentFileStream) {
