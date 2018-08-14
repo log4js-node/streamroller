@@ -1,5 +1,5 @@
 {
-  "plugins": ["lodash", "transform-object-rest-spread"],
+  "plugins": ["lodash"],
   "presets": [
     ["env", {"targets": {"node": "4"}}]
   ]
