@@ -756,4 +756,27 @@ describe('RollingFileWriteStream', () => {
       fs.readFileSync(path.format(fileObj)).toString().should.equal('test');
     });
   });
+
+  describe('when given just a base filename with no dir', () => {
+    let s;
+    before(done => {
+      s = new RollingFileWriteStream('test.log');
+      s.write('this should not cause any problems', 'utf8', done);
+    });
+
+    after(done => {
+      s.end();
+      fs.removeSync('test.log');
+      done();
+    });
+
+    it('should use process.cwd() as the dir', () => {
+      const files = fs.readdirSync(process.cwd());
+      files.should.containDeep(['test.log']);
+
+      fs.readFileSync(
+        path.join(process.cwd(), 'test.log')
+      ).toString().should.equal('this should not cause any problems');
+    });
+  });
 });
