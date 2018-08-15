@@ -42,6 +42,9 @@ class RollingFileWriteStream extends Writable {
       throw new Error('fileName is required.');
     }
     this.fileObject = path.parse(filePath);
+    if (this.fileObject.dir === '') {
+      this.fileObject = path.parse(path.join(process.cwd(), filePath));
+    }
     this.options = this._parseOption(options);
     this._initState();
   }
