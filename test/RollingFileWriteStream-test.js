@@ -10,7 +10,7 @@ const proxyquire = require('proxyquire').noPreserveCache();
 let fakeNow = new Date(2012, 8, 12, 10, 37, 11);
 const mockMoment = require('moment');
 mockMoment.now = () => fakeNow;
-const RollingFileWriteStream = proxyquire('../lib/RollingFileWriteStream', {
+const RollingFileWriteStream = proxyquire('../', {
   moment: mockMoment
 });
 let fakedFsDate = fakeNow;

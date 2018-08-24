@@ -15,10 +15,10 @@ var mockMoment = require('moment');
 mockMoment.now = function () {
   return fakeNow;
 };
-var RollingFileWriteStream = proxyquire('../lib/RollingFileWriteStream', {
+var RollingFileWriteStream = proxyquire('../', {
   moment: mockMoment
 });
-var DateRollingFileStream = proxyquire('../lib/DateRollingFileStream', {
+var DateRollingFileStream = proxyquire('../', {
   './RollingFileWriteStream': RollingFileWriteStream
 });
 

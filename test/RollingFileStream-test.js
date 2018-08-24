@@ -8,7 +8,7 @@ var async = require('async')
   , path = require('path')
   , zlib = require('zlib')
   , streams = require('stream')
-  , RollingFileStream = require('../lib').RollingFileStream;
+  , RollingFileStream = require('../').RollingFileStream;
 
 function remove(filename, cb) {
   fs.unlink(filename, function (err) { cb() });
