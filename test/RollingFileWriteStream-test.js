@@ -8,10 +8,9 @@ const fs = require('fs-extra');
 const proxyquire = require('proxyquire').noPreserveCache();
 
 let fakeNow = new Date(2012, 8, 12, 10, 37, 11);
-const mockMoment = require('moment');
-mockMoment.now = () => fakeNow;
+const mockNow = () => fakeNow;
 const RollingFileWriteStream = proxyquire('../lib/RollingFileWriteStream', {
-  moment: mockMoment
+  './now': mockNow
 });
 let fakedFsDate = fakeNow;
 const mockFs = require('fs-extra');
@@ -70,9 +69,7 @@ describe('RollingFileWriteStream', () => {
     });
 
     it('should apply default options', () => {
-      s.options.intervalDays.should.eql(1);
       s.options.maxSize.should.eql(Number.MAX_SAFE_INTEGER);
-      s.options.datePattern.should.eql('YYYY-MM-DD');
       s.options.encoding.should.eql('utf8');
       s.options.mode.should.eql(420);
       s.options.flags.should.eql('a');
@@ -81,13 +78,13 @@ describe('RollingFileWriteStream', () => {
     });
   });
 
-  describe('with 5 maxSize and 3 interval days', () => {
+  describe('with 5 maxSize, rotating daily', () => {
     const fileObj = generateTestFile('noExtension');
     let s;
 
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
-      s = new RollingFileWriteStream(fileObj.path, {intervalDays: 3, maxSize: 5});
+      s = new RollingFileWriteStream(fileObj.path, { pattern: 'yyyy-MM-dd', maxSize: 5 });
       const flows = Array.from(Array(38).keys()).map(i => cb => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
@@ -100,58 +97,62 @@ describe('RollingFileWriteStream', () => {
       done();
     });
 
-    it('should rotate after 3 days, using filename with no extension', () => {
+    it('should rotate using filename with no extension', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
-        fileObj.base,
-        fileObj.base + '.2012-09-12.1',
-        fileObj.base + '.2012-09-12.2',
-        fileObj.base + '.2012-09-12.3',
-        fileObj.base + '.2012-09-12.4',
-        fileObj.base + '.2012-09-15.1',
-        fileObj.base + '.2012-09-15.2',
-        fileObj.base + '.2012-09-15.3',
-        fileObj.base + '.2012-09-15.4',
-        fileObj.base + '.2012-09-15.5',
-        fileObj.base + '.2012-09-18.1',
-        fileObj.base + '.2012-09-18.2'
+        fileObj.base, //353637
+        fileObj.base + '.2012-09-12.1', // 01234
+        fileObj.base + '.2012-09-13.1', // 56789
+        fileObj.base + '.2012-09-14.2', // 101112
+        fileObj.base + '.2012-09-14.1', // 1314
+        fileObj.base + '.2012-09-15.2', // 151617
+        fileObj.base + '.2012-09-15.1', // 1819
+        fileObj.base + '.2012-09-16.2', // 202122
+        fileObj.base + '.2012-09-16.1', // 2324
+        fileObj.base + '.2012-09-17.2', // 252627
+        fileObj.base + '.2012-09-17.1', // 2829
+        fileObj.base + '.2012-09-18.2', // 303132
+        fileObj.base + '.2012-09-18.1'  // 3334
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
-      fs.readFileSync(path.format(fileObj)).toString().should.equal('3637');
+      fs.readFileSync(path.format(fileObj)).toString().should.equal('353637');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-12.1',
-      }))).toString().should.equal('1314');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-12.2',
-      }))).toString().should.equal('101112');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-12.3',
-      }))).toString().should.equal('56789');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-12.4',
       }))).toString().should.equal('01234');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.1',
-      }))).toString().should.equal('272829');
+        base: fileObj.base + '.2012-09-13.1',
+      }))).toString().should.equal('56789');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-14.2',
+      }))).toString().should.equal('101112');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-14.1',
+      }))).toString().should.equal('1314');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.2',
-      }))).toString().should.equal('242526');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.3',
-      }))).toString().should.equal('212223');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.4',
-      }))).toString().should.equal('181920');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.5',
       }))).toString().should.equal('151617');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.1',
-      }))).toString().should.equal('333435');
+        base: fileObj.base + '.2012-09-15.1',
+      }))).toString().should.equal('1819');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-16.2',
+      }))).toString().should.equal('202122');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-16.1',
+      }))).toString().should.equal('2324');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-17.2',
+      }))).toString().should.equal('252627');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-17.1',
+      }))).toString().should.equal('2829');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-18.2',
       }))).toString().should.equal('303132');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-18.1',
+      }))).toString().should.equal('3334');
     });
   });
 
@@ -193,7 +194,7 @@ describe('RollingFileWriteStream', () => {
       const flows = Array.from(Array(4).keys()).map(i => cb => {
         const day = 12 + i;
         fakeNow = new Date(2012, 8, day, 10, 37 + i, 11);
-        s = new RollingFileWriteStream(fileObj.path);
+        s = new RollingFileWriteStream(fileObj.path, { pattern: 'yyyy-MM-dd' });
         s.write(day.toString(), 'utf8', cb);
         s.end();
         fakedFsDate = fakeNow;
@@ -206,13 +207,13 @@ describe('RollingFileWriteStream', () => {
       done();
     });
 
-    it('should have 2 files', () => {
+    it('should have 4 files', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
         fileObj.base,
-        fileObj.base + '.2012-09-12.1',
-        fileObj.base + '.2012-09-13.1',
-        fileObj.base + '.2012-09-14.1'
+        fileObj.base + '.2012-09-12',
+        fileObj.base + '.2012-09-13',
+        fileObj.base + '.2012-09-14'
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
@@ -220,26 +221,26 @@ describe('RollingFileWriteStream', () => {
         base: fileObj.base,
       }))).toString().should.equal('15');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-12.1',
+        base: fileObj.base + '.2012-09-12',
       }))).toString().should.equal('12');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-13.1',
+        base: fileObj.base + '.2012-09-13',
       }))).toString().should.equal('13');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-14.1',
+        base: fileObj.base + '.2012-09-14',
       }))).toString().should.equal('14');
     });
   });
 
-  describe('with 5 maxSize and 3 interval days, using filename with extension', () => {
+  describe('with 5 maxSize, using filename with extension', () => {
     const fileObj = generateTestFile("withExtension.log");
     let s;
 
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
-      s = new RollingFileWriteStream(fileObj.path, {intervalDays: 3, maxSize: 5});
+      s = new RollingFileWriteStream(fileObj.path, { pattern: 'yyyy-MM-dd', maxSize: 5 });
       const flows = Array.from(Array(38).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 10, 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -250,69 +251,72 @@ describe('RollingFileWriteStream', () => {
       done();
     });
 
-    it('should rotate after 3 days', () => {
+    it('should rotate files within the day, and when the day changes', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
-        fileObj.base,
-        fileObj.base + '.2012-09-12.1',
-        fileObj.base + '.2012-09-12.2',
-        fileObj.base + '.2012-09-12.3',
-        fileObj.base + '.2012-09-12.4',
-        fileObj.base + '.2012-09-15.1',
-        fileObj.base + '.2012-09-15.2',
-        fileObj.base + '.2012-09-15.3',
-        fileObj.base + '.2012-09-15.4',
-        fileObj.base + '.2012-09-15.5',
-        fileObj.base + '.2012-09-18.1',
-        fileObj.base + '.2012-09-18.2'
+        fileObj.base, //3637
+        fileObj.base + '.2012-09-12.2', //01234
+        fileObj.base + '.2012-09-12.1', //56789
+        fileObj.base + '.2012-09-13.4', //101112
+        fileObj.base + '.2012-09-13.3', //131415
+        fileObj.base + '.2012-09-13.2', //161718
+        fileObj.base + '.2012-09-13.1', //19
+        fileObj.base + '.2012-09-14.4', //202122
+        fileObj.base + '.2012-09-14.3', //232425
+        fileObj.base + '.2012-09-14.2', //262728
+        fileObj.base + '.2012-09-14.1', //29
+        fileObj.base + '.2012-09-15.2', //303132
+        fileObj.base + '.2012-09-15.1', //333435
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
       fs.readFileSync(path.format(fileObj)).toString().should.equal('3637');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-12.1',
-      }))).toString().should.equal('1314');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-12.2',
-      }))).toString().should.equal('101112');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-12.3',
-      }))).toString().should.equal('56789');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-12.4',
       }))).toString().should.equal('01234');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.1',
-      }))).toString().should.equal('272829');
+        base: fileObj.base + '.2012-09-12.1',
+      }))).toString().should.equal('56789');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-13.4',
+      }))).toString().should.equal('101112');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-13.3',
+      }))).toString().should.equal('131415');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-13.2',
+      }))).toString().should.equal('161718');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-13.1',
+      }))).toString().should.equal('19');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-14.4',
+      }))).toString().should.equal('202122');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-14.3',
+      }))).toString().should.equal('232425');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-14.2',
+      }))).toString().should.equal('262728');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-14.1',
+      }))).toString().should.equal('29');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.2',
-      }))).toString().should.equal('242526');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.3',
-      }))).toString().should.equal('212223');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.4',
-      }))).toString().should.equal('181920');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.5',
-      }))).toString().should.equal('151617');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.1',
-      }))).toString().should.equal('333435');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.2',
       }))).toString().should.equal('303132');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-15.1',
+      }))).toString().should.equal('333435');
     });
   });
 
-  describe('with 5 maxSize, 3 interval days and 3 files limit', () => {
+  describe('with 5 maxSize and 3 files limit', () => {
     const fileObj = generateTestFile();
     let s;
 
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
-        intervalDays: 3,
         maxSize: 5,
         numToKeep: 3
       });
@@ -329,42 +333,42 @@ describe('RollingFileWriteStream', () => {
       done();
     });
 
-    it('should rotate after 3 days with at most 3 backup files not including the hot one', () => {
+    it('should rotate with at most 3 backup files not including the hot one', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
         fileObj.base,
-        fileObj.base + '.2012-09-15.1',
-        fileObj.base + '.2012-09-18.1',
-        fileObj.base + '.2012-09-18.2'
+        fileObj.base + '.1',
+        fileObj.base + '.2',
+        fileObj.base + '.3'
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
-      fs.readFileSync(path.format(fileObj)).toString().should.equal('3637');
+      fs.readFileSync(path.format(fileObj)).toString().should.equal('37');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.1'
-      }))).toString().should.equal('272829');
+        base: fileObj.base + '.1'
+      }))).toString().should.equal('343536');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.1'
-      }))).toString().should.equal('333435');
+        base: fileObj.base + '.2'
+      }))).toString().should.equal('313233');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.2'
-      }))).toString().should.equal('303132');
+        base: fileObj.base + '.3'
+      }))).toString().should.equal('282930');
     });
   });
 
-  describe('with 5 maxSize, 3 interval days and 4 days limit', () => {
+  describe('with 5 maxSize and 3 files limit, rotating daily', () => {
     const fileObj = generateTestFile();
     let s;
 
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
-        intervalDays: 3,
         maxSize: 5,
-        daysToKeep: 3
+        pattern: 'yyyy-MM-dd',
+        numToKeep: 3
       });
       const flows = Array.from(Array(38).keys()).map(i => cb => {
-        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5), 10, 37, 11);
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 10), 10, 37, 11);
         s.write(i.toString(), 'utf8', cb);
       });
       async.waterfall(flows, () => done());
@@ -376,55 +380,38 @@ describe('RollingFileWriteStream', () => {
       done();
     });
 
-    it('should rotate after 3 days with at most 3 backup files not including the hot one', () => {
+    it('should rotate with at most 3 backup files not including the hot one', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
-        fileObj.base,
-        fileObj.base + '.2012-09-15.1',
-        fileObj.base + '.2012-09-15.2',
-        fileObj.base + '.2012-09-15.3',
-        fileObj.base + '.2012-09-15.4',
-        fileObj.base + '.2012-09-15.5',
-        fileObj.base + '.2012-09-18.1',
-        fileObj.base + '.2012-09-18.2'
+        fileObj.base, //3637
+        fileObj.base + '.2012-09-14.1', //29
+        fileObj.base + '.2012-09-15.2', //303132
+        fileObj.base + '.2012-09-15.1', //333435
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
       fs.readFileSync(path.format(fileObj)).toString().should.equal('3637');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.base + '.2012-09-15.1',
-      }))).toString().should.equal('272829');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.2',
-      }))).toString().should.equal('242526');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.3',
-      }))).toString().should.equal('212223');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.4',
-      }))).toString().should.equal('181920');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-15.5',
-      }))).toString().should.equal('151617');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.1',
       }))).toString().should.equal('333435');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-18.2',
+        base: fileObj.base + '.2012-09-15.2',
       }))).toString().should.equal('303132');
+      fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.base + '.2012-09-14.1',
+      }))).toString().should.equal('29');
     });
   });
 
-  describe('with date pattern DD-MM-YYYY', () => {
+  describe('with date pattern dd-MM-yyyy', () => {
     const fileObj = generateTestFile();
     let s;
 
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
-        intervalDays: 3,
         maxSize: 5,
-        datePattern: 'DD-MM-YYYY'
+        pattern: 'dd-MM-yyyy'
       });
       const flows = Array.from(Array(8).keys()).map(i => cb => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
@@ -439,7 +426,7 @@ describe('RollingFileWriteStream', () => {
       done();
     });
 
-    it('should rotate with date pattern DD-MM-YYYY in the file name', () => {
+    it('should rotate with date pattern dd-MM-yyyy in the file name', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
         fileObj.base,
@@ -461,8 +448,8 @@ describe('RollingFileWriteStream', () => {
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
-        intervalDays: 3,
         maxSize: 5,
+        pattern: 'yyyy-MM-dd',
         compress: true
       });
       const flows = Array.from(Array(8).keys()).map(i => cb => {
@@ -502,7 +489,7 @@ describe('RollingFileWriteStream', () => {
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
-        intervalDays: 3,
+        pattern: 'yyyy-MM-dd',
         maxSize: 5,
         keepFileExt: true
       });
@@ -543,8 +530,8 @@ describe('RollingFileWriteStream', () => {
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
-        intervalDays: 3,
         maxSize: 5,
+        pattern: 'yyyy-MM-dd',
         keepFileExt: true,
         compress: true
       });
@@ -585,8 +572,8 @@ describe('RollingFileWriteStream', () => {
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
-        intervalDays: 3,
         maxSize: 5,
+        pattern: 'yyyy-MM-dd',
         keepFileExt: true,
         alwaysIncludePattern: true
       });
@@ -606,13 +593,13 @@ describe('RollingFileWriteStream', () => {
     it('should rotate with the same extension and keep date in the filename', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
-        fileObj.name + '.2012-09-12.log',
-        fileObj.name + '.2012-09-12.1.log'
+        fileObj.name + '.2012-09-12.1.log',
+        fileObj.name + '.2012-09-13.log'
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-12.log'
+        base: fileObj.name + '.2012-09-13.log'
       }))).toString().should.equal('567');
       fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-12.1.log'
@@ -620,18 +607,18 @@ describe('RollingFileWriteStream', () => {
     });
   });
 
-  describe('with 5 maxSize, 3 interval days, compress, keepFileExt and alwaysIncludePattern', () => {
+  describe('with 5 maxSize, compress, keepFileExt and alwaysIncludePattern', () => {
     const fileObj = generateTestFile('keepFileExt.log');
     let s;
 
     before(done => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
-        intervalDays: 3,
         maxSize: 5,
         compress: true,
         keepFileExt: true,
-        alwaysIncludePattern: true
+        alwaysIncludePattern: true,
+        pattern: 'yyyy-MM-dd'
       });
       const flows = Array.from(Array(38).keys()).map(i => cb => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
@@ -646,64 +633,68 @@ describe('RollingFileWriteStream', () => {
       done();
     });
 
-    it('should rotate after 3 days', () => {
+    it('should rotate every day', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [
-        fileObj.name + '.2012-09-18.log',
-        fileObj.name + '.2012-09-12.1.log.gz',
-        fileObj.name + '.2012-09-12.2.log.gz',
-        fileObj.name + '.2012-09-12.3.log.gz',
-        fileObj.name + '.2012-09-12.4.log.gz',
-        fileObj.name + '.2012-09-15.1.log.gz',
-        fileObj.name + '.2012-09-15.2.log.gz',
-        fileObj.name + '.2012-09-15.3.log.gz',
-        fileObj.name + '.2012-09-15.4.log.gz',
-        fileObj.name + '.2012-09-15.5.log.gz',
-        fileObj.name + '.2012-09-18.1.log.gz',
-        fileObj.name + '.2012-09-18.2.log.gz'
+        fileObj.name + '.2012-09-12.1.log.gz', //01234
+        fileObj.name + '.2012-09-13.1.log.gz', //56789
+        fileObj.name + '.2012-09-14.2.log.gz', //101112
+        fileObj.name + '.2012-09-14.1.log.gz', //1314
+        fileObj.name + '.2012-09-15.2.log.gz', //151617
+        fileObj.name + '.2012-09-15.1.log.gz', //1819
+        fileObj.name + '.2012-09-16.2.log.gz', //202122
+        fileObj.name + '.2012-09-16.1.log.gz', //2324
+        fileObj.name + '.2012-09-17.2.log.gz', //252627
+        fileObj.name + '.2012-09-17.1.log.gz', //2829
+        fileObj.name + '.2012-09-18.2.log.gz', //303132
+        fileObj.name + '.2012-09-18.1.log.gz', //3334
+        fileObj.name + '.2012-09-19.log' //353637
       ];
       files.length.should.equal(expectedFileList.length);
       files.should.containDeep(expectedFileList);
       fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-18.log',
-      }))).toString().should.equal('3637');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-12.1.log.gz',
-      })))).toString().should.equal('1314');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-12.2.log.gz',
-      })))).toString().should.equal('101112');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-12.3.log.gz',
-      })))).toString().should.equal('56789');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-12.4.log.gz',
-      })))).toString().should.equal('01234');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-15.1.log.gz',
-      })))).toString().should.equal('272829');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-15.2.log.gz',
-      })))).toString().should.equal('242526');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-15.3.log.gz',
-      })))).toString().should.equal('212223');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-15.4.log.gz',
-      })))).toString().should.equal('181920');
-      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.name + '.2012-09-15.5.log.gz',
-      })))).toString().should.equal('151617');
+        base: fileObj.name + '.2012-09-19.log',
+      }))).toString().should.equal('353637');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-18.1.log.gz',
-      })))).toString().should.equal('333435');
+      })))).toString().should.equal('3334');
       zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
         base: fileObj.name + '.2012-09-18.2.log.gz',
       })))).toString().should.equal('303132');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-17.1.log.gz',
+      })))).toString().should.equal('2829');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-17.2.log.gz',
+      })))).toString().should.equal('252627');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-16.1.log.gz',
+      })))).toString().should.equal('2324');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-16.2.log.gz',
+      })))).toString().should.equal('202122');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-15.1.log.gz',
+      })))).toString().should.equal('1819');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-15.2.log.gz',
+      })))).toString().should.equal('151617');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-14.1.log.gz',
+      })))).toString().should.equal('1314');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-14.2.log.gz',
+      })))).toString().should.equal('101112');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-13.1.log.gz',
+      })))).toString().should.equal('56789');
+      zlib.gunzipSync(fs.readFileSync(path.format(_.assign({}, fileObj, {
+        base: fileObj.name + '.2012-09-12.1.log.gz',
+      })))).toString().should.equal('01234');
     });
   });
 
-  describe('when old files exit', () => {
+  describe('when old files exist', () => {
     const fileObj = generateTestFile();
     let s;
 
@@ -731,11 +722,12 @@ describe('RollingFileWriteStream', () => {
     });
   });
 
-  describe('when dir does not exists', () => {
+  describe('when dir does not exist', () => {
     const fileObj = generateTestFile();
     let s;
 
     before(done => {
+      fs.removeSync(fileObj.dir);
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path);
       s.write('test', 'utf8', done);
@@ -747,7 +739,7 @@ describe('RollingFileWriteStream', () => {
       done();
     });
 
-    it('should use write in the old file if not reach the maxSize limit', () => {
+    it('should create the dir', () => {
       const files = fs.readdirSync(fileObj.dir);
       const expectedFileList = [fileObj.base];
       files.length.should.equal(expectedFileList.length);
