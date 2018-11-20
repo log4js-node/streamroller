@@ -46,6 +46,28 @@ describe('RollingFileWriteStream', () => {
     done();
   });
 
+  describe('with no arguments', () => {
+    it('should throw an error', () => {
+      (() => new RollingFileWriteStream()).should.throw('fileName is required.');
+    });
+  });
+
+  describe('with invalid options', () => {
+    after(done => {
+      fs.remove('filename', done);
+    });
+    
+    it('should complain about a negative maxSize', () => {
+      (() => { new RollingFileWriteStream('filename', { maxSize: -3 }) }).should.throw('options.maxSize (-3) should be > 0');
+      (() => { new RollingFileWriteStream('filename', { maxSize: 0 }) }).should.throw('options.maxSize (0) should be > 0');
+    });
+
+    it('should complain about a negative numToKeep', () => {
+      (() => { new RollingFileWriteStream('filename', { numToKeep: -3 }) }).should.throw('options.numToKeep (-3) should be > 0');
+      (() => { new RollingFileWriteStream('filename', { numToKeep: 0 }) }).should.throw('options.numToKeep (0) should be > 0');
+    });
+  });
+
   describe('with default arguments', () => {
     const fileObj = generateTestFile();
     let s;

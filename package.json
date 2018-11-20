@@ -12,7 +12,8 @@
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "pretest": "npm run codecheck",
     "clean": "rm -rf node_modules/",
-    "test": "nyc --check-coverage --lines 75 mocha"
+    "test": "nyc --check-coverage --lines 100 --branches 100 --functions 100 mocha",
+    "html-report": "nyc report --reporter=html"
   },
   "repository": {
     "type": "git",
