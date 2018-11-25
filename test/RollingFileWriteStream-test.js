@@ -1,6 +1,7 @@
+require('should');
+
 const _ = require('lodash');
 const path = require('path');
-require('should');
 const zlib = require('zlib');
 const async = require('async');
 const stream = require('stream');
@@ -41,9 +42,15 @@ function resetTime() {
 
 describe('RollingFileWriteStream', () => {
 
-  beforeEach(done => {
+  beforeEach(() => {
     resetTime();
-    done();
+  });
+
+  after(() => {
+    fs
+      .readdirSync(__dirname)
+      .filter(f => f.startsWith('tmp_'))
+      .forEach(f => fs.removeSync(path.join(__dirname, f)));
   });
 
   describe('with no arguments', () => {
@@ -56,7 +63,7 @@ describe('RollingFileWriteStream', () => {
     after(done => {
       fs.remove('filename', done);
     });
-    
+
     it('should complain about a negative maxSize', () => {
       (() => { new RollingFileWriteStream('filename', { maxSize: -3 }) }).should.throw('options.maxSize (-3) should be > 0');
       (() => { new RollingFileWriteStream('filename', { maxSize: 0 }) }).should.throw('options.maxSize (0) should be > 0');
@@ -72,15 +79,13 @@ describe('RollingFileWriteStream', () => {
     const fileObj = generateTestFile();
     let s;
 
-    before(done => {
+    before(() => {
       s = new RollingFileWriteStream(fileObj.path);
-      done();
     });
 
-    after(done => {
+    after(() => {
       s.end();
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should take a filename and options, return Writable', () => {
@@ -191,9 +196,8 @@ describe('RollingFileWriteStream', () => {
       async.waterfall(flows, () => done());
     });
 
-    after(done => {
+    after(() => {
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should have only 1 file', () => {
@@ -224,9 +228,8 @@ describe('RollingFileWriteStream', () => {
       async.waterfall(flows, () => done());
     });
 
-    after(done => {
+    after(() => {
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should have 4 files', () => {
@@ -349,10 +352,9 @@ describe('RollingFileWriteStream', () => {
       async.waterfall(flows, () => done());
     });
 
-    after(done => {
+    after(() => {
       s.end();
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should rotate with at most 3 backup files not including the hot one', () => {
@@ -396,10 +398,9 @@ describe('RollingFileWriteStream', () => {
       async.waterfall(flows, () => done());
     });
 
-    after(done => {
+    after(() => {
       s.end();
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should rotate with at most 3 backup files not including the hot one', () => {
@@ -442,10 +443,9 @@ describe('RollingFileWriteStream', () => {
       async.waterfall(flows, () => done());
     });
 
-    after(done => {
+    after(() => {
       s.end();
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should rotate with date pattern dd-MM-yyyy in the file name', () => {
@@ -481,10 +481,9 @@ describe('RollingFileWriteStream', () => {
       async.waterfall(flows, () => done());
     });
 
-    after(done => {
+    after(() => {
       s.end();
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should rotate with gunzip', () => {
@@ -728,10 +727,9 @@ describe('RollingFileWriteStream', () => {
       s.write('now', 'utf8', done);
     });
 
-    after(done => {
+    after(() => {
       s.end();
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should use write in the old file if not reach the maxSize limit', () => {
@@ -755,10 +753,9 @@ describe('RollingFileWriteStream', () => {
       s.write('test', 'utf8', done);
     });
 
-    after(done => {
+    after(() => {
       s.end();
       fs.removeSync(fileObj.dir);
-      done();
     });
 
     it('should create the dir', () => {
@@ -778,10 +775,9 @@ describe('RollingFileWriteStream', () => {
       s.write('this should not cause any problems', 'utf8', done);
     });
 
-    after(done => {
+    after(() => {
       s.end();
       fs.removeSync('test.log');
-      done();
     });
 
     it('should use process.cwd() as the dir', () => {
