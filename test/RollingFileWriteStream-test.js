@@ -90,7 +90,7 @@ describe('RollingFileWriteStream', () => {
 
     it('should take a filename and options, return Writable', () => {
       s.should.be.an.instanceOf(stream.Writable);
-      s.path().should.eql(fileObj.path);
+      s.currentFileStream.path.should.eql(fileObj.path);
       s.currentFileStream.mode.should.eql(420);
       s.currentFileStream.flags.should.eql('a');
     });
@@ -789,4 +789,52 @@ describe('RollingFileWriteStream', () => {
       ).toString().should.equal('this should not cause any problems');
     });
   });
+
+  describe('destroy', () => {
+    let s;
+    before(done => {
+      s = new RollingFileWriteStream('test-destroy.log');
+      s.write('this should not cause any problems', 'utf8', done);
+    });
+
+    after(() => {
+      s.end();
+      fs.removeSync('test-destroy.log');
+    });
+
+    it('should destroy the underlying stream', (done) => {
+      s.destroy();
+      s.on('error', (e) => {
+        e.code.should.equal('ERR_STREAM_DESTROYED');
+        done();
+      });
+      s.write('nope');
+    });
+  });
+
+  describe('events', () => {
+    let s;
+    before(done => {
+      s = new RollingFileWriteStream('test-events.log');
+      s.write('this should not cause any problems', 'utf8', done);
+    });
+
+    after(() => {
+      s.end();
+      fs.removeSync('test-events.log');
+    });
+
+    it('should emit the drain event of the underlying stream', (done) => {
+      s.on('drain', done);
+      s.currentFileStream.emit('drain');
+    });
+
+    it('should emit the error event of the underlying stream', (done) => {
+      s.on('error', (e) => { e.message.should.equal('oh no'); done(); });
+      s.currentFileStream.emit('error', new Error('oh no'));
+    });
+
+    it('should emit error events when something goes wrong');
+  });
+
 });
