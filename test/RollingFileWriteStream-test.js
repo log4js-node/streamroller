@@ -17,7 +17,7 @@ const mockFs = require('fs-extra');
 const oldStatSync = mockFs.statSync
 mockFs.statSync = fd => {
   const result = oldStatSync(fd);
-  result.birthtimeMs = fakedFsDate.valueOf();
+  result.birthtime = fakedFsDate.valueOf();
   return result;
 }
 
