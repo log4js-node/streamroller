@@ -443,9 +443,10 @@ describe('RollingFileWriteStream', () => {
       async.waterfall(flows, () => done());
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after((done) => {
+      s.end(() => {
+        fs.remove(fileObj.dir, done);
+      });
     });
 
     it('should rotate with date pattern dd-MM-yyyy in the file name', () => {
