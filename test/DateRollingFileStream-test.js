@@ -503,12 +503,9 @@ describe('DateRollingFileStream', function () {
               return file.indexOf('daysToKeep.log') > -1;
             }
           );
-          async.each(logFiles, function (logFile, nextCallback) {
+          async.each(logFiles, (logFile, nextCallback) => {
             remove(__dirname + '/' + logFile, nextCallback);
-          },
-          function (err) {
-            done(err);
-          });
+          }, done);
         });
       });
     });
@@ -561,21 +558,11 @@ describe('DateRollingFileStream', function () {
             nextCallback(err);
           });
         },
-        function () {
-
-          // Uncompress the most recent stream which will be the one we roll over
-          // for testing
+        () => {
           stream = streams[0];
-          var compressedFilename = stream.filename + '.gz';
-          var gzip = zlib.createGzip();
-          var inp = fs.createReadStream(compressedFilename);
-          var out = fs.createWriteStream(stream.filename);
-          inp.pipe(gzip).pipe(out);
-
-          out.on('finish', function () {
-            fs.unlink(compressedFilename, done);
-          });
-        });
+          done();
+        }
+      );
     });
 
     describe('when the day changes', function () {

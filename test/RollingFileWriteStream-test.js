@@ -212,51 +212,6 @@ describe('RollingFileWriteStream', () => {
 
   });
 
-  describe('with default arguments and recreated in different days', () => {
-    const fileObj = generateTestFile();
-    let s;
-
-    before(done => {
-      const flows = Array.from(Array(4).keys()).map(i => cb => {
-        const day = 12 + i;
-        fakeNow = new Date(2012, 8, day, 10, 37 + i, 11);
-        s = new RollingFileWriteStream(fileObj.path, { pattern: 'yyyy-MM-dd' });
-        s.write(day.toString(), 'utf8', cb);
-        s.end();
-        fakedFsDate = fakeNow;
-      })
-      async.waterfall(flows, () => done());
-    });
-
-    after(() => {
-      fs.removeSync(fileObj.dir);
-    });
-
-    it('should have 4 files', () => {
-      const files = fs.readdirSync(fileObj.dir);
-      const expectedFileList = [
-        fileObj.base,
-        fileObj.base + '.2012-09-12',
-        fileObj.base + '.2012-09-13',
-        fileObj.base + '.2012-09-14'
-      ];
-      files.length.should.equal(expectedFileList.length);
-      files.should.containDeep(expectedFileList);
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base,
-      }))).toString().should.equal('15');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-12',
-      }))).toString().should.equal('12');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-13',
-      }))).toString().should.equal('13');
-      fs.readFileSync(path.format(_.assign({}, fileObj, {
-        base: fileObj.base + '.2012-09-14',
-      }))).toString().should.equal('14');
-    });
-  });
-
   describe('with 5 maxSize, using filename with extension', () => {
     const fileObj = generateTestFile("withExtension.log");
     let s;
@@ -813,6 +768,23 @@ describe('RollingFileWriteStream', () => {
     });
   });
 
+  describe('with no callback to write', () => {
+    let s;
+    before(done => {
+      s = new RollingFileWriteStream('no-callback.log');
+      s.write('this is all very nice', 'utf8', done);
+    });
+
+    after(done => {
+      fs.remove('no-callback.log', done);
+    });
+
+    it('should not complain', done => {
+        s.write('I am not bothered if this succeeds or not');
+        s.end(done);
+    });
+  });
+
   describe('events', () => {
     let s;
     before(done => {
@@ -825,17 +797,11 @@ describe('RollingFileWriteStream', () => {
       fs.removeSync('test-events.log');
     });
 
-    it('should emit the drain event of the underlying stream', (done) => {
-      s.on('drain', done);
-      s.currentFileStream.emit('drain');
-    });
-
     it('should emit the error event of the underlying stream', (done) => {
       s.on('error', (e) => { e.message.should.equal('oh no'); done(); });
       s.currentFileStream.emit('error', new Error('oh no'));
     });
 
-    it('should emit error events when something goes wrong');
   });
 
 });
