@@ -55,7 +55,7 @@ describe('RollingFileWriteStream', () => {
 
   describe('with no arguments', () => {
     it('should throw an error', () => {
-      (() => new RollingFileWriteStream()).should.throw('fileName is required.');
+      (() => new RollingFileWriteStream()).should.throw('Path must be a string. Received undefined');
     });
   });
 
