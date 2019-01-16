@@ -746,28 +746,6 @@ describe('RollingFileWriteStream', () => {
     });
   });
 
-  describe('destroy', () => {
-    let s;
-    before(done => {
-      s = new RollingFileWriteStream('test-destroy.log');
-      s.write('this should not cause any problems', 'utf8', done);
-    });
-
-    after(() => {
-      s.end();
-      fs.removeSync('test-destroy.log');
-    });
-
-    it('should destroy the underlying stream', (done) => {
-      s.destroy();
-      s.on('error', (e) => {
-        e.code.should.equal('ERR_STREAM_DESTROYED');
-        done();
-      });
-      s.write('nope');
-    });
-  });
-
   describe('with no callback to write', () => {
     let s;
     before(done => {
