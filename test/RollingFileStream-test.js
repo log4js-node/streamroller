@@ -1,9 +1,8 @@
-/**
- * This file will be removed.
- */
 'use strict';
+
+require('should');
+
 var async = require('async')
-  , should = require('should')
   , fs = require('fs')
   , path = require('path')
   , zlib = require('zlib')
@@ -11,7 +10,7 @@ var async = require('async')
   , RollingFileStream = require('../lib').RollingFileStream;
 
 function remove(filename, cb) {
-  fs.unlink(filename, function (err) { cb() });
+  fs.unlink(filename, function () { cb() });
 }
 
 function create(filename, cb) {

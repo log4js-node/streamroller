@@ -2,23 +2,22 @@
  * This file will be removed.
  */
 'use strict';
-var fs = require('fs')
+
+require('should');
+
+const fs = require('fs')
   , zlib = require('zlib')
-  , should = require('should')
   , proxyquire = require('proxyquire').noPreserveCache()
   , util = require('util')
   , async = require('async')
   , streams = require('stream');
 
-var fakeNow = new Date(2012, 8, 12, 10, 37, 11);
-var mockMoment = require('moment');
-mockMoment.now = function () {
-  return fakeNow;
-};
-var RollingFileWriteStream = proxyquire('../lib/RollingFileWriteStream', {
-  moment: mockMoment
+let fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+const mockNow = () => fakeNow;
+const RollingFileWriteStream = proxyquire('../lib/RollingFileWriteStream', {
+  './now': mockNow
 });
-var DateRollingFileStream = proxyquire('../lib/DateRollingFileStream', {
+const DateRollingFileStream = proxyquire('../lib/DateRollingFileStream', {
   './RollingFileWriteStream': RollingFileWriteStream
 });
 
@@ -35,7 +34,7 @@ describe('DateRollingFileStream', function () {
     before(function (done) {
       stream = new DateRollingFileStream(
         __dirname + '/test-date-rolling-file-stream-1',
-        'yyyy-mm-dd.hh'
+        'yyyy-MM-dd.hh'
       );
       done();
     });
@@ -46,7 +45,7 @@ describe('DateRollingFileStream', function () {
 
     it('should take a filename and a pattern and return a WritableStream', function (done) {
       stream.filename.should.eql(__dirname + '/test-date-rolling-file-stream-1');
-      stream.pattern.should.eql('yyyy-mm-dd.hh');
+      stream.options.pattern.should.eql('yyyy-MM-dd.hh');
       stream.should.be.instanceOf(streams.Writable);
       done();
     });
@@ -71,7 +70,7 @@ describe('DateRollingFileStream', function () {
     });
 
     it('should have pattern of .yyyy-MM-dd', function (done) {
-      stream.pattern.should.eql('.yyyy-MM-dd');
+      stream.options.pattern.should.eql('yyyy-MM-dd');
       done();
     });
   });
@@ -119,7 +118,7 @@ describe('DateRollingFileStream', function () {
     });
 
     it('should use default pattern', function (done) {
-      stream.pattern.should.eql('.yyyy-MM-dd');
+      stream.options.pattern.should.eql('yyyy-MM-dd');
       done();
     });
   });
@@ -207,13 +206,13 @@ describe('DateRollingFileStream', function () {
     var stream;
 
     before(function (done) {
-      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
+      fakeNow = new Date(2012, 8, 12, 11, 10, 12);
       remove(
-        __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12',
+        __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12-11.log',
         function () {
           stream = new DateRollingFileStream(
             __dirname + '/test-date-rolling-file-stream-pattern',
-            '.yyyy-MM-dd',
+            '.yyyy-MM-dd-hh.log',
             {alwaysIncludePattern: true}
           );
           setTimeout(function () {
@@ -224,12 +223,12 @@ describe('DateRollingFileStream', function () {
     });
 
     after(function (done) {
-      remove(__dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', done);
+      remove(__dirname + '/test-date-rolling-file-stream-pattern.2012-09-12-11.log', done);
     });
 
     it('should create a file with the pattern set', function (done) {
       fs.readFile(
-        __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', 'utf8',
+        __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12-11.log', 'utf8',
         function (err, contents) {
           contents.should.eql('First message\n');
           done(err);
@@ -239,12 +238,12 @@ describe('DateRollingFileStream', function () {
 
     describe('when the day changes', function () {
       before(function (done) {
-        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        fakeNow = new Date(2012, 8, 12, 12, 10, 12);
         stream.write('Second message\n', 'utf8', done);
       });
 
       after(function (done) {
-        remove(__dirname + '/test-date-rolling-file-stream-pattern.2012-09-13', done);
+        remove(__dirname + '/test-date-rolling-file-stream-pattern.2012-09-12-12.log', done);
       });
 
       describe('the number of files', function () {
@@ -263,7 +262,7 @@ describe('DateRollingFileStream', function () {
       describe('the file with the later date', function () {
         it('should contain the second message', function (done) {
           fs.readFile(
-            __dirname + '/test-date-rolling-file-stream-pattern.2012-09-13', 'utf8',
+            __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12-12.log', 'utf8',
             function (err, contents) {
               contents.should.eql('Second message\n');
               done(err);
@@ -275,7 +274,7 @@ describe('DateRollingFileStream', function () {
       describe('the file with the date', function () {
         it('should contain the first message', function (done) {
           fs.readFile(
-            __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12', 'utf8',
+            __dirname + '/test-date-rolling-file-stream-pattern.2012-09-12-11.log', 'utf8',
             function (err, contents) {
               contents.should.eql('First message\n');
               done(err);
@@ -476,6 +475,7 @@ describe('DateRollingFileStream', function () {
           stream = streams[0];
           done(err);
         });
+      });
 
       describe('when the day changes', function () {
         before(function (done) {
@@ -503,16 +503,12 @@ describe('DateRollingFileStream', function () {
               return file.indexOf('daysToKeep.log') > -1;
             }
           );
-          async.each(logFiles, function (logFile, nextCallback) {
+          async.each(logFiles, (logFile, nextCallback) => {
             remove(__dirname + '/' + logFile, nextCallback);
-          },
-          function (err) {
-            done(err);
-          });
+          }, done);
         });
       });
     });
-  });
 
   describe('with daysToKeep and compress options', function () {
     var stream;
@@ -562,21 +558,11 @@ describe('DateRollingFileStream', function () {
             nextCallback(err);
           });
         },
-        function () {
-
-          // Uncompress the most recent stream which will be the one we roll over
-          // for testing
+        () => {
           stream = streams[0];
-          var compressedFilename = stream.filename + '.gz';
-          var gzip = zlib.createGzip();
-          var inp = fs.createReadStream(compressedFilename);
-          var out = fs.createWriteStream(stream.filename);
-          inp.pipe(gzip).pipe(out);
-
-          out.on('finish', function () {
-            fs.unlink(compressedFilename, done);
-          });
-        });
+          done();
+        }
+      );
     });
 
     describe('when the day changes', function () {
