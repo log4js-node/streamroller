@@ -1,6 +1,6 @@
 {
   "name": "streamroller",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "file streams that roll over when size limits, or dates are reached",
   "main": "lib/index.js",
   "directories": {
