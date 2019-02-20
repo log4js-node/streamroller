@@ -285,6 +285,56 @@ describe('DateRollingFileStream', function () {
     });
   });
 
+  describe('with a pattern that evaluates to digits', function() {
+    let stream;
+    before(done => {
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
+      stream = new DateRollingFileStream(
+        __dirname + '/digits.log',
+        '.yyyyMMdd'
+      );
+      stream.write('First message\n', 'utf8', done);
+    });
+
+    describe('when the day changes', function () {
+      before(function (done) {
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write('Second message\n', 'utf8', done);
+      });
+
+      it('should be two files (it should not get confused by indexes)', function (done) {
+        fs.readdir(__dirname, function (err, files) {
+          var logFiles = files.filter(
+            function (file) {
+              return file.indexOf('digits.log') > -1;
+            }
+          );
+          logFiles.should.have.length(2);
+
+          fs.readFile(__dirname + '/digits.log.20120912', 'utf8',
+            (err, contents) => {
+              contents.should.eql('First message\n');
+              fs.readFile(__dirname + '/digits.log', 'utf8', (e, c) => {
+                c.should.eql('Second message\n');
+                done(err || e);
+              });
+            }
+          );
+        });
+      });
+    });
+
+    after(function (done) {
+      remove(
+        __dirname + '/digits.log',
+        function () {
+          remove(__dirname + '/digits.log.20120912', done);
+        }
+      );
+    });
+
+  });
+
   describe('with compress option', function () {
     var stream;
 
