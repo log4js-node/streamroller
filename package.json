@@ -34,15 +34,15 @@
     "husky": "^0.14.3",
     "mocha": "^4.0.1",
     "nyc": "^11.9.0",
-    "proxyquire": "^2.0.1",
+    "proxyquire": "^2.1.0",
     "should": "^11.2.1"
   },
   "dependencies": {
-    "async": "^2.6.1",
+    "async": "^2.6.2",
     "date-format": "^2.0.0",
-    "debug": "^3.1.0",
-    "fs-extra": "^7.0.0",
-    "lodash": "^4.17.10"
+    "debug": "^3.2.6",
+    "fs-extra": "^7.0.1",
+    "lodash": "^4.17.11"
   },
   "engines": {
     "node": ">=6.0"
