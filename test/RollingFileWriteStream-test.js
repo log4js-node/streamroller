@@ -18,7 +18,7 @@ const mockFs = require('fs-extra');
 const oldStatSync = mockFs.statSync
 mockFs.statSync = fd => {
   const result = oldStatSync(fd);
-  result.birthtime = fakedFsDate.valueOf();
+  result.birthtime = fakedFsDate;
   return result;
 }
 
@@ -726,6 +726,36 @@ describe('RollingFileWriteStream', () => {
 
       fs.readFileSync(path.format(fileObj)).toString().should.equal('three\n');
       fs.readFileSync(path.join(fileObj.dir, fileObj.base + '.1')).toString().should.equal('This is exactly 30 bytes long\none\ntwo\n');
+
+    });
+  });
+
+  describe('when old files exist with contents and rolling by date', () => {
+    const fileObj = generateTestFile();
+    let s;
+
+    before(done => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      fs.ensureFileSync(fileObj.path);
+      fs.writeFileSync(fileObj.path, 'This was created Sept 12, 2012.\n');
+      fakeNow = new Date(2012, 8, 13, 10, 53, 12);
+      s = new RollingFileWriteStream(fileObj.path, { pattern: 'yyyy-MM-dd' });
+      s.write('It is now Sept 13, 2012.\n', 'utf8', done); // this should be in a new file.
+    });
+
+    after(() => {
+      s.end();
+      fs.removeSync(fileObj.dir);
+    });
+
+    it('should respect the existing file date', () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [fileObj.base, fileObj.base + '.2012-09-12'];
+      files.length.should.equal(expectedFileList.length);
+      files.should.containDeep(expectedFileList);
+
+      fs.readFileSync(path.format(fileObj)).toString().should.equal('It is now Sept 13, 2012.\n');
+      fs.readFileSync(path.join(fileObj.dir, fileObj.base + '.2012-09-12')).toString().should.equal('This was created Sept 12, 2012.\n');
 
     });
   });
