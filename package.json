@@ -9,7 +9,6 @@
   "scripts": {
     "codecheck": "eslint 'lib/*.js'",
     "prepublishOnly": "npm test",
-    "commitmsg": "commitlint -e $GIT_PARAMS",
     "pretest": "npm run codecheck",
     "clean": "rm -rf node_modules/",
     "test": "nyc --check-coverage --lines 100 --branches 100 --functions 100 mocha",
@@ -65,6 +64,11 @@
     "extends": "eslint:recommended",
     "rules": {
       "no-console": "off"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -e $HUSKY_GIT_PARAMS"
     }
   }
 }
