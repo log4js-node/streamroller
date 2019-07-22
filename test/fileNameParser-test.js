@@ -15,8 +15,16 @@ describe("fileNameParser", () => {
       should(parser("thefile.log.biscuits")).not.be.ok();
     });
     it("should take a filename and return the index", () => {
-      parser("thefile.log.2").should.eql({ index: 2, isCompressed: false });
-      parser("thefile.log.2.gz").should.eql({ index: 2, isCompressed: true });
+      parser("thefile.log.2").should.eql({
+        filename: "thefile.log.2",
+        index: 2,
+        isCompressed: false
+      });
+      parser("thefile.log.2.gz").should.eql({
+        filename: "thefile.log.2.gz",
+        index: 2,
+        isCompressed: true
+      });
     });
   });
 
@@ -37,24 +45,28 @@ describe("fileNameParser", () => {
     });
     it("should take a filename and return the date", () => {
       parser("thefile.log.2019-07-17").should.eql({
+        filename: "thefile.log.2019-07-17",
         index: 0,
         date: "2019-07-17",
         timestamp: 1563321600000,
         isCompressed: false
       });
       parser("thefile.log.gz").should.eql({
+        filename: "thefile.log.gz",
         index: 0,
         isCompressed: true
       });
     });
     it("should take a filename and return both date and index", () => {
       parser("thefile.log.2019-07-17.2").should.eql({
+        filename: "thefile.log.2019-07-17.2",
         index: 2,
         date: "2019-07-17",
         timestamp: 1563321600000,
         isCompressed: false
       });
       parser("thefile.log.2019-07-17.2.gz").should.eql({
+        filename: "thefile.log.2019-07-17.2.gz",
         index: 2,
         date: "2019-07-17",
         timestamp: 1563321600000,
@@ -76,8 +88,16 @@ describe("fileNameParser", () => {
     it("should take a filename and return the index", () => {
       should(parser("thefile.log.2")).not.be.ok();
       should(parser("thefile.log.2.gz")).not.be.ok();
-      parser("thefile.2.log").should.eql({ index: 2, isCompressed: false });
-      parser("thefile.2.log.gz").should.eql({ index: 2, isCompressed: true });
+      parser("thefile.2.log").should.eql({
+        filename: "thefile.2.log",
+        index: 2,
+        isCompressed: false
+      });
+      parser("thefile.2.log.gz").should.eql({
+        filename: "thefile.2.log.gz",
+        index: 2,
+        isCompressed: true
+      });
     });
   });
 });
