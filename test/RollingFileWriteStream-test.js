@@ -1,6 +1,5 @@
 require("should");
 
-const _ = require("lodash");
 const path = require("path");
 const zlib = require("zlib");
 const async = require("async");
@@ -162,7 +161,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("353637");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-12.1"
           })
         )
@@ -171,7 +170,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("01234");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-13.1"
           })
         )
@@ -180,7 +179,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("56789");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-14.2"
           })
         )
@@ -189,7 +188,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("101112");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-14.1"
           })
         )
@@ -198,7 +197,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("1314");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-15.2"
           })
         )
@@ -207,7 +206,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("151617");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-15.1"
           })
         )
@@ -216,7 +215,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("1819");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-16.2"
           })
         )
@@ -225,7 +224,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("202122");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-16.1"
           })
         )
@@ -234,7 +233,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("2324");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-17.2"
           })
         )
@@ -243,7 +242,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("252627");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-17.1"
           })
         )
@@ -252,7 +251,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("2829");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-18.2"
           })
         )
@@ -261,7 +260,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("303132");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-18.1"
           })
         )
@@ -295,7 +294,7 @@ describe("RollingFileWriteStream", () => {
       files.length.should.equal(expectedFileList.length);
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base
           })
         )
@@ -351,7 +350,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("3637");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-12.2"
           })
         )
@@ -360,7 +359,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("01234");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-12.1"
           })
         )
@@ -369,7 +368,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("56789");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-13.4"
           })
         )
@@ -378,7 +377,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("101112");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-13.3"
           })
         )
@@ -387,7 +386,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("131415");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-13.2"
           })
         )
@@ -396,7 +395,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("161718");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-13.1"
           })
         )
@@ -405,7 +404,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("19");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-14.4"
           })
         )
@@ -414,7 +413,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("202122");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-14.3"
           })
         )
@@ -423,7 +422,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("232425");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-14.2"
           })
         )
@@ -432,7 +431,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("262728");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-14.1"
           })
         )
@@ -441,7 +440,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("29");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-15.2"
           })
         )
@@ -450,7 +449,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("303132");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-15.1"
           })
         )
@@ -497,7 +496,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("37");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".1"
           })
         )
@@ -506,7 +505,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("343536");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2"
           })
         )
@@ -515,7 +514,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("313233");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".3"
           })
         )
@@ -563,7 +562,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("3637");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-15.1"
           })
         )
@@ -572,7 +571,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("333435");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-15.2"
           })
         )
@@ -581,7 +580,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("303132");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-14.1"
           })
         )
@@ -624,7 +623,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("567");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".12-09-2012.1"
           })
         )
@@ -671,7 +670,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("567");
       const content = fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.base + ".2012-09-12.1.gz"
           })
         )
@@ -769,7 +768,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("567");
       const content = fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.name + ".2012-09-12.1.log.gz"
           })
         )
@@ -816,7 +815,7 @@ describe("RollingFileWriteStream", () => {
       files.length.should.equal(expectedFileList.length);
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.name + ".2012-09-13.log"
           })
         )
@@ -825,7 +824,7 @@ describe("RollingFileWriteStream", () => {
         .should.equal("567");
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.name + ".2012-09-12.1.log"
           })
         )
@@ -882,7 +881,7 @@ describe("RollingFileWriteStream", () => {
       files.length.should.equal(expectedFileList.length);
       fs.readFileSync(
         path.format(
-          _.assign({}, fileObj, {
+          Object.assign({}, fileObj, {
             base: fileObj.name + ".2012-09-19.log"
           })
         )
@@ -893,7 +892,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-18.1.log.gz"
               })
             )
@@ -905,7 +904,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-18.2.log.gz"
               })
             )
@@ -917,7 +916,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-17.1.log.gz"
               })
             )
@@ -929,7 +928,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-17.2.log.gz"
               })
             )
@@ -941,7 +940,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-16.1.log.gz"
               })
             )
@@ -953,7 +952,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-16.2.log.gz"
               })
             )
@@ -965,7 +964,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-15.1.log.gz"
               })
             )
@@ -977,7 +976,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-15.2.log.gz"
               })
             )
@@ -989,7 +988,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-14.1.log.gz"
               })
             )
@@ -1001,7 +1000,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-14.2.log.gz"
               })
             )
@@ -1013,7 +1012,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-13.1.log.gz"
               })
             )
@@ -1025,7 +1024,7 @@ describe("RollingFileWriteStream", () => {
         .gunzipSync(
           fs.readFileSync(
             path.format(
-              _.assign({}, fileObj, {
+              Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-12.1.log.gz"
               })
             )
