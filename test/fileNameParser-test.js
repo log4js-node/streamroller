@@ -48,7 +48,7 @@ describe("fileNameParser", () => {
         filename: "thefile.log.2019-07-17",
         index: 0,
         date: "2019-07-17",
-        timestamp: 1563321600000,
+        timestamp: new Date(2019, 6, 17).getTime(),
         isCompressed: false
       });
       parser("thefile.log.gz").should.eql({
@@ -62,14 +62,14 @@ describe("fileNameParser", () => {
         filename: "thefile.log.2019-07-17.2",
         index: 2,
         date: "2019-07-17",
-        timestamp: 1563321600000,
+        timestamp: new Date(2019, 6, 17).getTime(),
         isCompressed: false
       });
       parser("thefile.log.2019-07-17.2.gz").should.eql({
         filename: "thefile.log.2019-07-17.2.gz",
         index: 2,
         date: "2019-07-17",
-        timestamp: 1563321600000,
+        timestamp: new Date(2019, 6, 17).getTime(),
         isCompressed: true
       });
     });
