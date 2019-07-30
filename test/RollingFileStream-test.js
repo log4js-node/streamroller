@@ -24,9 +24,9 @@ describe("RollingFileStream", function() {
     var stream;
 
     before(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", function() {
+      remove(path.join(__dirname, "test-rolling-file-stream"), function() {
         stream = new RollingFileStream(
-          __dirname + "/test-rolling-file-stream",
+          path.join(__dirname, "test-rolling-file-stream"),
           1024,
           5
         );
@@ -35,12 +35,14 @@ describe("RollingFileStream", function() {
     });
 
     after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", done);
+      remove(path.join(__dirname, "test-rolling-file-stream"), done);
     });
 
     it("should take a filename, file size (bytes), no. backups, return Writable", function() {
       stream.should.be.an.instanceOf(streams.Writable);
-      stream.filename.should.eql(__dirname + "/test-rolling-file-stream");
+      stream.filename.should.eql(
+        path.join(__dirname, "test-rolling-file-stream")
+      );
       stream.size.should.eql(1024);
       stream.backups.should.eql(5);
     });
@@ -54,7 +56,7 @@ describe("RollingFileStream", function() {
   describe("with stream arguments", function() {
     it("should pass them to the underlying stream", function() {
       var stream = new RollingFileStream(
-        __dirname + "/test-rolling-file-stream",
+        path.join(__dirname, "test-rolling-file-stream"),
         1024,
         5,
         { mode: parseInt("0666", 8) }
@@ -63,57 +65,60 @@ describe("RollingFileStream", function() {
     });
 
     after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", done);
+      remove(path.join(__dirname, "test-rolling-file-stream"), done);
     });
   });
 
   describe("without size", function() {
     it("should default to max int size", function() {
       var stream = new RollingFileStream(
-        __dirname + "/test-rolling-file-stream"
+        path.join(__dirname, "test-rolling-file-stream")
       );
       stream.size.should.eql(Number.MAX_SAFE_INTEGER);
     });
 
     after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", done);
+      remove(path.join(__dirname, "test-rolling-file-stream"), done);
     });
   });
 
   describe("without number of backups", function() {
     it("should default to 1 backup", function() {
       var stream = new RollingFileStream(
-        __dirname + "/test-rolling-file-stream",
+        path.join(__dirname, "test-rolling-file-stream"),
         1024
       );
       stream.backups.should.eql(1);
     });
 
     after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream", done);
+      remove(path.join(__dirname, "test-rolling-file-stream"), done);
     });
   });
 
   describe("writing less than the file size", function() {
     before(function(done) {
-      remove(__dirname + "/test-rolling-file-stream-write-less", function() {
-        var stream = new RollingFileStream(
-          __dirname + "/test-rolling-file-stream-write-less",
-          100
-        );
-        stream.write("cheese", "utf8", function() {
-          stream.end(done);
-        });
-      });
+      remove(
+        path.join(__dirname, "test-rolling-file-stream-write-less"),
+        function() {
+          var stream = new RollingFileStream(
+            path.join(__dirname, "test-rolling-file-stream-write-less"),
+            100
+          );
+          stream.write("cheese", "utf8", function() {
+            stream.end(done);
+          });
+        }
+      );
     });
 
     after(function(done) {
-      remove(__dirname + "/test-rolling-file-stream-write-less", done);
+      remove(path.join(__dirname, "test-rolling-file-stream-write-less"), done);
     });
 
     it("should write to the file", function(done) {
       fs.readFile(
-        __dirname + "/test-rolling-file-stream-write-less",
+        path.join(__dirname, "test-rolling-file-stream-write-less"),
         "utf8",
         function(err, contents) {
           contents.should.eql("cheese");
@@ -138,13 +143,13 @@ describe("RollingFileStream", function() {
     before(function(done) {
       async.forEach(
         [
-          __dirname + "/test-rolling-file-stream-write-more",
-          __dirname + "/test-rolling-file-stream-write-more.1"
+          path.join(__dirname, "test-rolling-file-stream-write-more"),
+          path.join(__dirname, "/test-rolling-file-stream-write-more.1")
         ],
         remove,
         function() {
           var stream = new RollingFileStream(
-            __dirname + "/test-rolling-file-stream-write-more",
+            path.join(__dirname, "test-rolling-file-stream-write-more"),
             45
           );
           async.forEachSeries(
@@ -163,8 +168,8 @@ describe("RollingFileStream", function() {
     after(function(done) {
       async.forEach(
         [
-          __dirname + "/test-rolling-file-stream-write-more",
-          __dirname + "/test-rolling-file-stream-write-more.1"
+          path.join(__dirname, "test-rolling-file-stream-write-more"),
+          path.join(__dirname, "test-rolling-file-stream-write-more.1")
         ],
         remove,
         done
@@ -184,7 +189,7 @@ describe("RollingFileStream", function() {
 
     it("should write the last two log messages to the first file", function(done) {
       fs.readFile(
-        __dirname + "/test-rolling-file-stream-write-more",
+        path.join(__dirname, "test-rolling-file-stream-write-more"),
         "utf8",
         function(err, contents) {
           contents.should.eql("5.cheese\n6.cheese\n");
@@ -195,7 +200,7 @@ describe("RollingFileStream", function() {
 
     it("should write the first five log messages to the second file", function(done) {
       fs.readFile(
-        __dirname + "/test-rolling-file-stream-write-more.1",
+        path.join(__dirname, "test-rolling-file-stream-write-more.1"),
         "utf8",
         function(err, contents) {
           contents.should.eql(
@@ -448,11 +453,11 @@ describe("RollingFileStream", function() {
     before(function(done) {
       async.forEach(
         [
-          __dirname + "/test-rolling-stream-with-existing-files.11",
-          __dirname + "/test-rolling-stream-with-existing-files.20",
-          __dirname + "/test-rolling-stream-with-existing-files.-1",
-          __dirname + "/test-rolling-stream-with-existing-files.1.1",
-          __dirname + "/test-rolling-stream-with-existing-files.1"
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.11"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.20"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.-1"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.1.1"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.1")
         ],
         remove,
         function(err) {
@@ -460,18 +465,33 @@ describe("RollingFileStream", function() {
 
           async.forEach(
             [
-              __dirname + "/test-rolling-stream-with-existing-files.11",
-              __dirname + "/test-rolling-stream-with-existing-files.20",
-              __dirname + "/test-rolling-stream-with-existing-files.-1",
-              __dirname + "/test-rolling-stream-with-existing-files.1.1",
-              __dirname + "/test-rolling-stream-with-existing-files.1"
+              path.join(
+                __dirname,
+                "/test-rolling-stream-with-existing-files.11"
+              ),
+              path.join(
+                __dirname,
+                "/test-rolling-stream-with-existing-files.20"
+              ),
+              path.join(
+                __dirname,
+                "/test-rolling-stream-with-existing-files.-1"
+              ),
+              path.join(
+                __dirname,
+                "/test-rolling-stream-with-existing-files.1.1"
+              ),
+              path.join(__dirname, "/test-rolling-stream-with-existing-files.1")
             ],
             create,
             function(err) {
               if (err) done(err);
 
               var stream = new RollingFileStream(
-                __dirname + "/test-rolling-stream-with-existing-files",
+                path.join(
+                  __dirname,
+                  "/test-rolling-stream-with-existing-files"
+                ),
                 18,
                 5
               );
@@ -494,18 +514,18 @@ describe("RollingFileStream", function() {
     after(function(done) {
       async.forEach(
         [
-          __dirname + "/test-rolling-stream-with-existing-files.-1",
-          __dirname + "/test-rolling-stream-with-existing-files",
-          __dirname + "/test-rolling-stream-with-existing-files.1.1",
-          __dirname + "/test-rolling-stream-with-existing-files.0",
-          __dirname + "/test-rolling-stream-with-existing-files.1",
-          __dirname + "/test-rolling-stream-with-existing-files.2",
-          __dirname + "/test-rolling-stream-with-existing-files.3",
-          __dirname + "/test-rolling-stream-with-existing-files.4",
-          __dirname + "/test-rolling-stream-with-existing-files.5",
-          __dirname + "/test-rolling-stream-with-existing-files.6",
-          __dirname + "/test-rolling-stream-with-existing-files.11",
-          __dirname + "/test-rolling-stream-with-existing-files.20"
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.-1"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.1.1"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.0"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.1"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.2"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.3"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.4"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.5"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.6"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.11"),
+          path.join(__dirname, "/test-rolling-stream-with-existing-files.20")
         ],
         remove,
         done
