@@ -1098,6 +1098,43 @@ describe("RollingFileWriteStream", () => {
     });
   });
 
+  describe("when old files exist with contents and the flag is a+", () => {
+    const fileObj = generateTestFile();
+    let s;
+
+    before(done => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      fs.ensureFileSync(fileObj.path);
+      fs.writeFileSync(fileObj.path, "This is exactly 30 bytes long\n");
+      s = new RollingFileWriteStream(fileObj.path, {
+        maxSize: 35,
+        flags: "a+"
+      });
+      s.write("one\n", "utf8"); //34
+      s.write("two\n", "utf8"); //38 - file should be rotated next time
+      s.write("three\n", "utf8", done); // this should be in a new file.
+    });
+
+    after(() => {
+      s.end();
+      fs.removeSync(fileObj.dir);
+    });
+
+    it("should respect the existing file size", () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [fileObj.base, fileObj.base + ".1"];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+
+      fs.readFileSync(path.format(fileObj))
+        .toString()
+        .should.equal("three\n");
+      fs.readFileSync(path.join(fileObj.dir, fileObj.base + ".1"))
+        .toString()
+        .should.equal("This is exactly 30 bytes long\none\ntwo\n");
+    });
+  });
+
   describe("when old files exist with indices", () => {
     const fileObj = generateTestFile();
     let s;
