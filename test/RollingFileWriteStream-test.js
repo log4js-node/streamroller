@@ -2,7 +2,6 @@ require("should");
 
 const path = require("path");
 const zlib = require("zlib");
-const async = require("async");
 const stream = require("stream");
 const fs = require("fs-extra");
 const proxyquire = require("proxyquire").noPreserveCache();
@@ -119,17 +118,21 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile("noExtension");
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         pattern: "yyyy-MM-dd",
         maxSize: 5
       });
-      const flows = Array.from(Array(38).keys()).map(i => cb => {
+      const flows = Array.from(Array(38).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(done => {
@@ -274,13 +277,16 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile();
     let s;
 
-    before(done => {
-      const flows = Array.from(Array(3).keys()).map(() => cb => {
+    before(async () => {
+      const flows = Array.from(Array(3).keys()).map(() => () => {
         s = new RollingFileWriteStream(fileObj.path);
-        s.write("abc", "utf8", cb);
-        s.end();
+        return new Promise(resolve => {
+          s.end("abc", "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(() => {
@@ -308,17 +314,21 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile("withExtension.log");
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         pattern: "yyyy-MM-dd",
         maxSize: 5
       });
-      const flows = Array.from(Array(38).keys()).map(i => cb => {
+      const flows = Array.from(Array(38).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 10, 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(done => {
@@ -463,17 +473,21 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile();
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
         numToKeep: 3
       });
-      const flows = Array.from(Array(38).keys()).map(i => cb => {
+      const flows = Array.from(Array(38).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(() => {
@@ -528,18 +542,22 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile();
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
         pattern: "yyyy-MM-dd",
         numToKeep: 3
       });
-      const flows = Array.from(Array(38).keys()).map(i => cb => {
+      const flows = Array.from(Array(38).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(() => {
@@ -594,17 +612,21 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile();
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
         pattern: "dd-MM-yyyy"
       });
-      const flows = Array.from(Array(8).keys()).map(i => cb => {
+      const flows = Array.from(Array(8).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(done => {
@@ -637,18 +659,22 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile();
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
         pattern: "yyyy-MM-dd",
         compress: true
       });
-      const flows = Array.from(Array(8).keys()).map(i => cb => {
+      const flows = Array.from(Array(8).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(() => {
@@ -686,18 +712,22 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile("keepFileExt.log");
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         pattern: "yyyy-MM-dd",
         maxSize: 5,
         keepFileExt: true
       });
-      const flows = Array.from(Array(8).keys()).map(i => cb => {
+      const flows = Array.from(Array(8).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(done => {
@@ -733,7 +763,7 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile("keepFileExt.log");
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
@@ -741,11 +771,15 @@ describe("RollingFileWriteStream", () => {
         keepFileExt: true,
         compress: true
       });
-      const flows = Array.from(Array(8).keys()).map(i => cb => {
+      const flows = Array.from(Array(8).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(done => {
@@ -784,7 +818,7 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile("keepFileExt.log");
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
@@ -792,11 +826,15 @@ describe("RollingFileWriteStream", () => {
         keepFileExt: true,
         alwaysIncludePattern: true
       });
-      const flows = Array.from(Array(8).keys()).map(i => cb => {
+      const flows = Array.from(Array(8).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(done => {
@@ -838,7 +876,7 @@ describe("RollingFileWriteStream", () => {
     const fileObj = generateTestFile("keepFileExt.log");
     let s;
 
-    before(done => {
+    before(async () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
@@ -847,11 +885,15 @@ describe("RollingFileWriteStream", () => {
         alwaysIncludePattern: true,
         pattern: "yyyy-MM-dd"
       });
-      const flows = Array.from(Array(38).keys()).map(i => cb => {
+      const flows = Array.from(Array(38).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
-        s.write(i.toString(), "utf8", cb);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
       });
-      async.waterfall(flows, () => done());
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
     });
 
     after(done => {
