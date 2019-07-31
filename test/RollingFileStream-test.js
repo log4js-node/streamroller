@@ -2,40 +2,54 @@
 
 require("should");
 
-var async = require("async"),
-  fs = require("fs"),
+const fs = require("fs-extra"),
   path = require("path"),
+  util = require("util"),
   zlib = require("zlib"),
   streams = require("stream"),
   RollingFileStream = require("../lib").RollingFileStream;
 
-function remove(filename, cb) {
-  fs.unlink(filename, function() {
-    cb();
-  });
-}
+const gunzip = util.promisify(zlib.gunzip);
+const fullPath = f => path.join(__dirname, f);
+const remove = filename => fs.unlink(fullPath(filename)).catch(() => {});
+const create = filename => fs.writeFile(fullPath(filename), "test file");
 
-function create(filename, cb) {
-  fs.writeFile(filename, "test file", cb);
-}
+const write = (stream, data) => {
+  return new Promise((resolve, reject) => {
+    stream.write(data, "utf8", e => {
+      if (e) {
+        reject(e);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+const writeInSequence = async (stream, messages) => {
+  for (let i = 0; i < messages.length; i += 1) {
+    await write(stream, messages[i] + "\n");
+  }
+  return new Promise(resolve => {
+    stream.end(resolve);
+  });
+};
 
 describe("RollingFileStream", function() {
   describe("arguments", function() {
-    var stream;
+    let stream;
 
-    before(function(done) {
-      remove(path.join(__dirname, "test-rolling-file-stream"), function() {
-        stream = new RollingFileStream(
-          path.join(__dirname, "test-rolling-file-stream"),
-          1024,
-          5
-        );
-        done();
-      });
+    before(async function() {
+      await remove("test-rolling-file-stream");
+      stream = new RollingFileStream(
+        path.join(__dirname, "test-rolling-file-stream"),
+        1024,
+        5
+      );
     });
 
-    after(function(done) {
-      remove(path.join(__dirname, "test-rolling-file-stream"), done);
+    after(async function() {
+      await remove("test-rolling-file-stream");
     });
 
     it("should take a filename, file size (bytes), no. backups, return Writable", function() {
@@ -64,8 +78,8 @@ describe("RollingFileStream", function() {
       stream.theStream.mode.should.eql(parseInt("0666", 8));
     });
 
-    after(function(done) {
-      remove(path.join(__dirname, "test-rolling-file-stream"), done);
+    after(async function() {
+      await remove("test-rolling-file-stream");
     });
   });
 
@@ -77,8 +91,8 @@ describe("RollingFileStream", function() {
       stream.size.should.eql(Number.MAX_SAFE_INTEGER);
     });
 
-    after(function(done) {
-      remove(path.join(__dirname, "test-rolling-file-stream"), done);
+    after(async function() {
+      await remove("test-rolling-file-stream");
     });
   });
 
@@ -91,456 +105,301 @@ describe("RollingFileStream", function() {
       stream.backups.should.eql(1);
     });
 
-    after(function(done) {
-      remove(path.join(__dirname, "test-rolling-file-stream"), done);
+    after(async function() {
+      await remove("test-rolling-file-stream");
     });
   });
 
   describe("writing less than the file size", function() {
-    before(function(done) {
-      remove(
+    before(async function() {
+      await remove("test-rolling-file-stream-write-less");
+      const stream = new RollingFileStream(
         path.join(__dirname, "test-rolling-file-stream-write-less"),
-        function() {
-          var stream = new RollingFileStream(
-            path.join(__dirname, "test-rolling-file-stream-write-less"),
-            100
-          );
-          stream.write("cheese", "utf8", function() {
-            stream.end(done);
-          });
-        }
+        100
       );
+      await writeInSequence(stream, ["cheese"]);
     });
 
-    after(function(done) {
-      remove(path.join(__dirname, "test-rolling-file-stream-write-less"), done);
+    after(async function() {
+      await remove("test-rolling-file-stream-write-less");
     });
 
-    it("should write to the file", function(done) {
-      fs.readFile(
+    it("should write to the file", async function() {
+      const contents = await fs.readFile(
         path.join(__dirname, "test-rolling-file-stream-write-less"),
-        "utf8",
-        function(err, contents) {
-          contents.should.eql("cheese");
-          done(err);
-        }
+        "utf8"
       );
+      contents.should.eql("cheese\n");
     });
 
-    it("should write one file", function(done) {
-      fs.readdir(__dirname, function(err, files) {
-        files
-          .filter(function(file) {
-            return file.indexOf("test-rolling-file-stream-write-less") > -1;
-          })
-          .should.have.length(1);
-        done(err);
-      });
+    it("should write one file", async function() {
+      const files = await fs.readdir(__dirname);
+      files
+        .filter(
+          file => file.indexOf("test-rolling-file-stream-write-less") > -1
+        )
+        .should.have.length(1);
     });
   });
 
   describe("writing more than the file size", function() {
-    before(function(done) {
-      async.forEach(
-        [
-          path.join(__dirname, "test-rolling-file-stream-write-more"),
-          path.join(__dirname, "/test-rolling-file-stream-write-more.1")
-        ],
-        remove,
-        function() {
-          var stream = new RollingFileStream(
-            path.join(__dirname, "test-rolling-file-stream-write-more"),
-            45
-          );
-          async.forEachSeries(
-            [0, 1, 2, 3, 4, 5, 6],
-            function(i, cb) {
-              stream.write(i + ".cheese\n", "utf8", cb);
-            },
-            function() {
-              stream.end(done);
-            }
-          );
-        }
-      );
-    });
-
-    after(function(done) {
-      async.forEach(
-        [
-          path.join(__dirname, "test-rolling-file-stream-write-more"),
-          path.join(__dirname, "test-rolling-file-stream-write-more.1")
-        ],
-        remove,
-        done
-      );
-    });
-
-    it("should write two files", function(done) {
-      fs.readdir(__dirname, function(err, files) {
-        files
-          .filter(function(file) {
-            return file.indexOf("test-rolling-file-stream-write-more") > -1;
-          })
-          .should.have.length(2);
-        done(err);
-      });
-    });
-
-    it("should write the last two log messages to the first file", function(done) {
-      fs.readFile(
+    before(async function() {
+      await remove("test-rolling-file-stream-write-more");
+      await remove("test-rolling-file-stream-write-more.1");
+      const stream = new RollingFileStream(
         path.join(__dirname, "test-rolling-file-stream-write-more"),
-        "utf8",
-        function(err, contents) {
-          contents.should.eql("5.cheese\n6.cheese\n");
-          done(err);
-        }
+        45
+      );
+      await writeInSequence(
+        stream,
+        [0, 1, 2, 3, 4, 5, 6].map(i => i + ".cheese")
       );
     });
 
-    it("should write the first five log messages to the second file", function(done) {
-      fs.readFile(
-        path.join(__dirname, "test-rolling-file-stream-write-more.1"),
-        "utf8",
-        function(err, contents) {
-          contents.should.eql(
-            "0.cheese\n1.cheese\n2.cheese\n3.cheese\n4.cheese\n"
-          );
-          done(err);
-        }
+    after(async function() {
+      await remove("test-rolling-file-stream-write-more");
+      await remove("test-rolling-file-stream-write-more.1");
+    });
+
+    it("should write two files", async function() {
+      const files = await fs.readdir(__dirname);
+      files
+        .filter(
+          file => file.indexOf("test-rolling-file-stream-write-more") > -1
+        )
+        .should.have.length(2);
+    });
+
+    it("should write the last two log messages to the first file", async function() {
+      const contents = await fs.readFile(
+        path.join(__dirname, "test-rolling-file-stream-write-more"),
+        "utf8"
       );
+      contents.should.eql("5.cheese\n6.cheese\n");
+    });
+
+    it("should write the first five log messages to the second file", async function() {
+      const contents = await fs.readFile(
+        path.join(__dirname, "test-rolling-file-stream-write-more.1"),
+        "utf8"
+      );
+      contents.should.eql("0.cheese\n1.cheese\n2.cheese\n3.cheese\n4.cheese\n");
     });
   });
 
   describe("with options.compress = true", function() {
-    before(function(done) {
-      var stream = new RollingFileStream(
+    before(async function() {
+      const stream = new RollingFileStream(
         path.join(__dirname, "compressed-backups.log"),
         30, //30 bytes max size
         2, //two backup files to keep
         { compress: true }
       );
-      async.forEachSeries(
-        [
-          "This is the first log message.",
-          "This is the second log message.",
-          "This is the third log message.",
-          "This is the fourth log message."
-        ],
-        function(i, cb) {
-          stream.write(i + "\n", "utf8", cb);
-        },
-        function() {
-          stream.end(done);
-        }
-      );
+      const messages = [
+        "This is the first log message.",
+        "This is the second log message.",
+        "This is the third log message.",
+        "This is the fourth log message."
+      ];
+      await writeInSequence(stream, messages);
     });
 
-    it("should produce three files, with the backups compressed", function(done) {
-      fs.readdir(__dirname, function(err, files) {
-        var testFiles = files
-          .filter(function(f) {
-            return f.indexOf("compressed-backups.log") > -1;
-          })
-          .sort();
+    it("should produce three files, with the backups compressed", async function() {
+      const files = await fs.readdir(__dirname);
+      const testFiles = files
+        .filter(f => f.indexOf("compressed-backups.log") > -1)
+        .sort();
 
-        testFiles.length.should.eql(3);
-        testFiles.should.eql([
-          "compressed-backups.log",
-          "compressed-backups.log.1.gz",
-          "compressed-backups.log.2.gz"
-        ]);
+      testFiles.length.should.eql(3);
+      testFiles.should.eql([
+        "compressed-backups.log",
+        "compressed-backups.log.1.gz",
+        "compressed-backups.log.2.gz"
+      ]);
 
-        fs.readFile(path.join(__dirname, testFiles[0]), "utf8", function(
-          err,
-          contents
-        ) {
-          contents.should.eql("This is the fourth log message.\n");
+      let contents = await fs.readFile(
+        path.join(__dirname, testFiles[0]),
+        "utf8"
+      );
+      contents.should.eql("This is the fourth log message.\n");
 
-          zlib.gunzip(
-            fs.readFileSync(path.join(__dirname, testFiles[1])),
-            function(err, contents) {
-              contents
-                .toString("utf8")
-                .should.eql("This is the third log message.\n");
-              zlib.gunzip(
-                fs.readFileSync(path.join(__dirname, testFiles[2])),
-                function(err, contents) {
-                  contents
-                    .toString("utf8")
-                    .should.eql("This is the second log message.\n");
-                  done(err);
-                }
-              );
-            }
-          );
-        });
-      });
+      let gzipped = await fs.readFile(path.join(__dirname, testFiles[1]));
+      contents = await gunzip(gzipped);
+      contents.toString("utf8").should.eql("This is the third log message.\n");
+
+      gzipped = await fs.readFile(path.join(__dirname, testFiles[2]));
+      contents = await gunzip(gzipped);
+      contents.toString("utf8").should.eql("This is the second log message.\n");
     });
 
-    after(function(done) {
-      async.forEach(
-        [
-          path.join(__dirname, "compressed-backups.log"),
-          path.join(__dirname, "compressed-backups.log.1.gz"),
-          path.join(__dirname, "compressed-backups.log.2.gz")
-        ],
-        remove,
-        done
-      );
+    after(function() {
+      return Promise.all([
+        remove("compressed-backups.log"),
+        remove("compressed-backups.log.1.gz"),
+        remove("compressed-backups.log.2.gz")
+      ]);
     });
   });
 
   describe("with options.keepFileExt = true", function() {
-    before(function(done) {
-      var stream = new RollingFileStream(
+    before(async function() {
+      const stream = new RollingFileStream(
         path.join(__dirname, "extKept-backups.log"),
         30, //30 bytes max size
         2, //two backup files to keep
         { keepFileExt: true }
       );
-      async.forEachSeries(
-        [
-          "This is the first log message.",
-          "This is the second log message.",
-          "This is the third log message.",
-          "This is the fourth log message."
-        ],
-        function(i, cb) {
-          stream.write(i + "\n", "utf8", cb);
-        },
-        function() {
-          stream.end(done);
-        }
-      );
+      const messages = [
+        "This is the first log message.",
+        "This is the second log message.",
+        "This is the third log message.",
+        "This is the fourth log message."
+      ];
+      await writeInSequence(stream, messages);
     });
 
-    it("should produce three files, with the file-extension kept", function(done) {
-      fs.readdir(__dirname, function(err, files) {
-        var testFiles = files
-          .filter(function(f) {
-            return f.indexOf("extKept-backups") > -1;
-          })
-          .sort();
+    it("should produce three files, with the file-extension kept", async function() {
+      const files = await fs.readdir(__dirname);
+      const testFiles = files
+        .filter(f => f.indexOf("extKept-backups") > -1)
+        .sort();
 
-        testFiles.length.should.eql(3);
-        testFiles.should.eql([
-          "extKept-backups.1.log",
-          "extKept-backups.2.log",
-          "extKept-backups.log"
-        ]);
+      testFiles.length.should.eql(3);
+      testFiles.should.eql([
+        "extKept-backups.1.log",
+        "extKept-backups.2.log",
+        "extKept-backups.log"
+      ]);
 
-        fs.readFile(path.join(__dirname, testFiles[0]), "utf8", function(
-          err,
-          contents
-        ) {
-          contents.should.eql("This is the third log message.\n");
+      let contents = await fs.readFile(
+        path.join(__dirname, testFiles[0]),
+        "utf8"
+      );
+      contents.should.eql("This is the third log message.\n");
 
-          fs.readFile(path.join(__dirname, testFiles[1]), "utf8", function(
-            err,
-            contents
-          ) {
-            contents
-              .toString("utf8")
-              .should.eql("This is the second log message.\n");
-            fs.readFile(path.join(__dirname, testFiles[2]), "utf8", function(
-              err,
-              contents
-            ) {
-              contents
-                .toString("utf8")
-                .should.eql("This is the fourth log message.\n");
-              done(err);
-            });
-          });
-        });
-      });
+      contents = await fs.readFile(path.join(__dirname, testFiles[1]), "utf8");
+      contents.toString("utf8").should.eql("This is the second log message.\n");
+      contents = await fs.readFile(path.join(__dirname, testFiles[2]), "utf8");
+      contents.toString("utf8").should.eql("This is the fourth log message.\n");
     });
 
-    after(function(done) {
-      async.forEach(
-        [
-          path.join(__dirname, "extKept-backups.log"),
-          path.join(__dirname, "extKept-backups.1.log"),
-          path.join(__dirname, "extKept-backups.2.log")
-        ],
-        remove,
-        done
-      );
+    after(function() {
+      return Promise.all([
+        remove("extKept-backups.log"),
+        remove("extKept-backups.1.log"),
+        remove("extKept-backups.2.log")
+      ]);
     });
   });
 
   describe("with options.compress = true and keepFileExt = true", function() {
-    before(function(done) {
-      var stream = new RollingFileStream(
+    before(async function() {
+      const stream = new RollingFileStream(
         path.join(__dirname, "compressed-backups.log"),
         30, //30 bytes max size
         2, //two backup files to keep
         { compress: true, keepFileExt: true }
       );
-      async.forEachSeries(
-        [
-          "This is the first log message.",
-          "This is the second log message.",
-          "This is the third log message.",
-          "This is the fourth log message."
-        ],
-        function(i, cb) {
-          stream.write(i + "\n", "utf8", cb);
-        },
-        function() {
-          stream.end(done);
-        }
-      );
+      const messages = [
+        "This is the first log message.",
+        "This is the second log message.",
+        "This is the third log message.",
+        "This is the fourth log message."
+      ];
+      await writeInSequence(stream, messages);
     });
 
-    it("should produce three files, with the backups compressed", function(done) {
-      fs.readdir(__dirname, function(err, files) {
-        var testFiles = files
-          .filter(function(f) {
-            return f.indexOf("compressed-backups") > -1;
-          })
-          .sort();
+    it("should produce three files, with the backups compressed", async function() {
+      const files = await fs.readdir(__dirname);
+      const testFiles = files
+        .filter(f => f.indexOf("compressed-backups") > -1)
+        .sort();
 
-        testFiles.length.should.eql(3);
-        testFiles.should.eql([
-          "compressed-backups.1.log.gz",
-          "compressed-backups.2.log.gz",
-          "compressed-backups.log"
-        ]);
+      testFiles.length.should.eql(3);
+      testFiles.should.eql([
+        "compressed-backups.1.log.gz",
+        "compressed-backups.2.log.gz",
+        "compressed-backups.log"
+      ]);
 
-        fs.readFile(path.join(__dirname, testFiles[2]), "utf8", function(
-          err,
-          contents
-        ) {
-          contents.should.eql("This is the fourth log message.\n");
+      let contents = await fs.readFile(
+        path.join(__dirname, testFiles[2]),
+        "utf8"
+      );
+      contents.should.eql("This is the fourth log message.\n");
 
-          zlib.gunzip(
-            fs.readFileSync(path.join(__dirname, testFiles[1])),
-            function(err, contents) {
-              contents
-                .toString("utf8")
-                .should.eql("This is the second log message.\n");
-              zlib.gunzip(
-                fs.readFileSync(path.join(__dirname, testFiles[0])),
-                function(err, contents) {
-                  contents
-                    .toString("utf8")
-                    .should.eql("This is the third log message.\n");
-                  done(err);
-                }
-              );
-            }
-          );
-        });
-      });
+      let gzipped = await fs.readFile(path.join(__dirname, testFiles[1]));
+      contents = await gunzip(gzipped);
+      contents.toString("utf8").should.eql("This is the second log message.\n");
+      gzipped = await fs.readFile(path.join(__dirname, testFiles[0]));
+      contents = await gunzip(gzipped);
+      contents.toString("utf8").should.eql("This is the third log message.\n");
     });
 
-    after(function(done) {
-      async.forEach(
-        [
-          path.join(__dirname, "compressed-backups.log"),
-          path.join(__dirname, "compressed-backups.1.log.gz"),
-          path.join(__dirname, "compressed-backups.2.log.gz")
-        ],
-        remove,
-        done
-      );
+    after(function() {
+      return Promise.all([
+        remove("compressed-backups.log"),
+        remove("compressed-backups.1.log.gz"),
+        remove("compressed-backups.2.log.gz")
+      ]);
     });
   });
 
   describe("when many files already exist", function() {
-    before(function(done) {
-      async.forEach(
-        [
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.11"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.20"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.-1"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.1.1"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.1")
-        ],
-        remove,
-        function(err) {
-          if (err) done(err);
+    before(async function() {
+      await Promise.all([
+        remove("test-rolling-stream-with-existing-files.11"),
+        remove("test-rolling-stream-with-existing-files.20"),
+        remove("test-rolling-stream-with-existing-files.-1"),
+        remove("test-rolling-stream-with-existing-files.1.1"),
+        remove("test-rolling-stream-with-existing-files.1")
+      ]);
+      await Promise.all([
+        create("test-rolling-stream-with-existing-files.11"),
+        create("test-rolling-stream-with-existing-files.20"),
+        create("test-rolling-stream-with-existing-files.-1"),
+        create("test-rolling-stream-with-existing-files.1.1"),
+        create("test-rolling-stream-with-existing-files.1")
+      ]);
 
-          async.forEach(
-            [
-              path.join(
-                __dirname,
-                "/test-rolling-stream-with-existing-files.11"
-              ),
-              path.join(
-                __dirname,
-                "/test-rolling-stream-with-existing-files.20"
-              ),
-              path.join(
-                __dirname,
-                "/test-rolling-stream-with-existing-files.-1"
-              ),
-              path.join(
-                __dirname,
-                "/test-rolling-stream-with-existing-files.1.1"
-              ),
-              path.join(__dirname, "/test-rolling-stream-with-existing-files.1")
-            ],
-            create,
-            function(err) {
-              if (err) done(err);
+      const stream = new RollingFileStream(
+        path.join(__dirname, "test-rolling-stream-with-existing-files"),
+        18,
+        5
+      );
 
-              var stream = new RollingFileStream(
-                path.join(
-                  __dirname,
-                  "/test-rolling-stream-with-existing-files"
-                ),
-                18,
-                5
-              );
-
-              async.forEachSeries(
-                [0, 1, 2, 3, 4, 5, 6],
-                function(i, cb) {
-                  stream.write(i + ".cheese\n", "utf8", cb);
-                },
-                function() {
-                  stream.end(done);
-                }
-              );
-            }
-          );
-        }
+      await writeInSequence(
+        stream,
+        [0, 1, 2, 3, 4, 5, 6].map(i => i + ".cheese")
       );
     });
 
-    after(function(done) {
-      async.forEach(
+    after(function() {
+      return Promise.all(
         [
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.-1"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.1.1"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.0"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.1"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.2"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.3"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.4"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.5"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.6"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.11"),
-          path.join(__dirname, "/test-rolling-stream-with-existing-files.20")
-        ],
-        remove,
-        done
+          "test-rolling-stream-with-existing-files.-1",
+          "test-rolling-stream-with-existing-files",
+          "test-rolling-stream-with-existing-files.1.1",
+          "test-rolling-stream-with-existing-files.0",
+          "test-rolling-stream-with-existing-files.1",
+          "test-rolling-stream-with-existing-files.2",
+          "test-rolling-stream-with-existing-files.3",
+          "test-rolling-stream-with-existing-files.4",
+          "test-rolling-stream-with-existing-files.5",
+          "test-rolling-stream-with-existing-files.6",
+          "test-rolling-stream-with-existing-files.11",
+          "test-rolling-stream-with-existing-files.20"
+        ].map(remove)
       );
     });
 
-    it("should roll the files, removing the highest indices", function(done) {
-      fs.readdir(__dirname, function(err, files) {
-        files.should.containEql("test-rolling-stream-with-existing-files");
-        files.should.containEql("test-rolling-stream-with-existing-files.1");
-        files.should.containEql("test-rolling-stream-with-existing-files.2");
-        files.should.containEql("test-rolling-stream-with-existing-files.3");
-        files.should.containEql("test-rolling-stream-with-existing-files.4");
-        done(err);
-      });
+    it("should roll the files, removing the highest indices", async function() {
+      const files = await fs.readdir(__dirname);
+      files.should.containEql("test-rolling-stream-with-existing-files");
+      files.should.containEql("test-rolling-stream-with-existing-files.1");
+      files.should.containEql("test-rolling-stream-with-existing-files.2");
+      files.should.containEql("test-rolling-stream-with-existing-files.3");
+      files.should.containEql("test-rolling-stream-with-existing-files.4");
     });
   });
 
@@ -560,18 +419,20 @@ describe("RollingFileStream", function() {
       fs.rmdirSync("subdir");
     });
 
-    it("handles directory deletion gracefully", function(done) {
-      stream.theStream.on("error", done);
+    it("handles directory deletion gracefully", async function() {
+      stream.theStream.on("error", e => {
+        throw e;
+      });
 
-      remove(path.join("subdir", "test-rolling-file-stream"), function() {
-        fs.rmdir("subdir", function() {
-          stream.write("rollover", "utf8", function() {
-            fs.readFileSync(
-              path.join("subdir", "test-rolling-file-stream"),
-              "utf8"
-            ).should.eql("rollover");
-            done();
-          });
+      await fs.unlink(path.join("subdir", "test-rolling-file-stream"));
+      await fs.rmdir("subdir");
+      await new Promise(resolve => {
+        stream.write("rollover", "utf8", () => {
+          fs.readFileSync(
+            path.join("subdir", "test-rolling-file-stream"),
+            "utf8"
+          ).should.eql("rollover");
+          resolve();
         });
       });
     });
