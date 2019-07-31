@@ -10,7 +10,6 @@ const fs = require("fs-extra"),
   zlib = require("zlib"),
   proxyquire = require("proxyquire").noPreserveCache(),
   util = require("util"),
-  async = require("async"),
   streams = require("stream");
 
 let fakeNow = new Date(2012, 8, 12, 10, 37, 11);
@@ -23,6 +22,7 @@ const DateRollingFileStream = proxyquire("../lib/DateRollingFileStream", {
 });
 
 const gunzip = util.promisify(zlib.gunzip);
+const gzip = util.promisify(zlib.gzip);
 const remove = filename => fs.unlink(filename).catch(() => {});
 
 describe("DateRollingFileStream", function() {
@@ -453,52 +453,28 @@ describe("DateRollingFileStream", function() {
   });
 
   describe("with daysToKeep option", function() {
-    var stream;
+    let stream;
     var daysToKeep = 4;
     var numOriginalLogs = 10;
 
-    before(function(done) {
-      var day = 0;
-      var streams = [];
-      async.whilst(
-        function() {
-          return day < numOriginalLogs;
-        },
-        function(nextCallback) {
-          fakeNow = new Date(2012, 8, 20 - day, 0, 10, 12);
-          var currentStream = new DateRollingFileStream(
-            path.join(__dirname, "daysToKeep.log"),
-            ".yyyy-MM-dd",
-            {
-              alwaysIncludePattern: true,
-              daysToKeep: daysToKeep
-            }
+    before(async function() {
+      for (let i = numOriginalLogs; i >= 0; i -= 1) {
+        fakeNow = new Date(2012, 8, 20 - i, 0, 10, 12);
+        stream = new DateRollingFileStream(
+          path.join(__dirname, "daysToKeep.log"),
+          ".yyyy-MM-dd",
+          {
+            alwaysIncludePattern: true,
+            daysToKeep: daysToKeep
+          }
+        );
+        await new Promise(resolve => {
+          stream.write(util.format("Message on day %d\n", i), "utf8", () =>
+            resolve()
           );
-          async.waterfall(
-            [
-              function(callback) {
-                currentStream.write(
-                  util.format("Message on day %d\n", day),
-                  "utf8",
-                  callback
-                );
-              },
-              function(callback) {
-                fs.utimes(currentStream.filename, fakeNow, fakeNow, callback);
-              }
-            ],
-            function(err) {
-              day++;
-              streams.push(currentStream);
-              nextCallback(err);
-            }
-          );
-        },
-        function(err) {
-          stream = streams[0];
-          done(err);
-        }
-      );
+        });
+        await fs.utimes(stream.filename, fakeNow, fakeNow);
+      }
     });
 
     describe("when the day changes", function() {
@@ -526,69 +502,34 @@ describe("DateRollingFileStream", function() {
   });
 
   describe("with daysToKeep and compress options", function() {
-    var stream;
-    var daysToKeep = 4;
-    var numOriginalLogs = 10;
+    let stream;
+    const daysToKeep = 4;
+    const numOriginalLogs = 10;
 
-    before(function(done) {
-      var day = 0;
-      var streams = [];
-      async.whilst(
-        function() {
-          return day < numOriginalLogs;
-        },
-        function(nextCallback) {
-          fakeNow = new Date(2012, 8, 20 - day, 0, 10, 12);
-          var currentStream = new DateRollingFileStream(
-            path.join(__dirname, "compressedDaysToKeep.log"),
-            ".yyyy-MM-dd",
-            {
-              alwaysIncludePattern: true,
-              compress: true,
-              daysToKeep: daysToKeep
-            }
+    before(async function() {
+      for (let i = numOriginalLogs; i >= 0; i -= 1) {
+        fakeNow = new Date(2012, 8, 20 - i, 0, 10, 12);
+        stream = new DateRollingFileStream(
+          path.join(__dirname, "compressedDaysToKeep.log"),
+          ".yyyy-MM-dd",
+          {
+            alwaysIncludePattern: true,
+            compress: true,
+            daysToKeep: daysToKeep
+          }
+        );
+        await new Promise(resolve => {
+          stream.write(util.format("Message on day %d\n", i), "utf8", () =>
+            resolve()
           );
-          async.waterfall(
-            [
-              function(callback) {
-                currentStream.write(
-                  util.format("Message on day %d\n", day),
-                  "utf8",
-                  callback
-                );
-              },
-              function(callback) {
-                var filename = currentStream.filename;
-                var gzip = zlib.createGzip();
-                var inp = fs.createReadStream(filename);
-                var out = fs.createWriteStream(filename + ".gz");
-                inp.pipe(gzip).pipe(out);
+        });
 
-                out.on("finish", function() {
-                  fs.unlink(filename, callback);
-                });
-              },
-              function(callback) {
-                fs.utimes(
-                  currentStream.filename + ".gz",
-                  fakeNow,
-                  fakeNow,
-                  callback
-                );
-              }
-            ],
-            function(err) {
-              day++;
-              streams.push(currentStream);
-              nextCallback(err);
-            }
-          );
-        },
-        () => {
-          stream = streams[0];
-          done();
-        }
-      );
+        const contents = await fs.readFile(stream.filename, "utf8");
+        const gzipped = await gzip(contents);
+        await fs.writeFile(stream.filename + ".gz", gzipped);
+        await fs.unlink(stream.filename);
+        await fs.utimes(stream.filename + ".gz", fakeNow, fakeNow);
+      }
     });
 
     describe("when the day changes", function() {
