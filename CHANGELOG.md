@@ -1,5 +1,9 @@
 # Streamroller Changelog
 
+## 2.1.0
+
+- [Improve Windows support (closing streams)](https://github.com/log4js-node/streamroller/pull/52)
+
 ## 2.0.0
 
 - [Remove support for node v6](https://github.com/log4js-node/streamroller/pull/44)
