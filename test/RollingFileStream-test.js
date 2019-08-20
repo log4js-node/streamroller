@@ -1,5 +1,3 @@
-"use strict";
-
 require("should");
 
 const fs = require("fs-extra"),
@@ -35,6 +33,10 @@ const writeInSequence = async (stream, messages) => {
   });
 };
 
+const close = async (stream) => new Promise(
+  (resolve, reject) => stream.end(e => e ? reject(e) : resolve())
+);
+
 describe("RollingFileStream", function() {
   describe("arguments", function() {
     let stream;
@@ -49,6 +51,7 @@ describe("RollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove("test-rolling-file-stream");
     });
 
@@ -68,8 +71,9 @@ describe("RollingFileStream", function() {
   });
 
   describe("with stream arguments", function() {
+    let stream;
     it("should pass them to the underlying stream", function() {
-      var stream = new RollingFileStream(
+      stream = new RollingFileStream(
         path.join(__dirname, "test-rolling-file-stream"),
         1024,
         5,
@@ -79,26 +83,30 @@ describe("RollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove("test-rolling-file-stream");
     });
   });
 
   describe("without size", function() {
+    let stream;
     it("should default to max int size", function() {
-      var stream = new RollingFileStream(
+      stream = new RollingFileStream(
         path.join(__dirname, "test-rolling-file-stream")
       );
       stream.size.should.eql(Number.MAX_SAFE_INTEGER);
     });
 
     after(async function() {
+      await close(stream);
       await remove("test-rolling-file-stream");
     });
   });
 
   describe("without number of backups", function() {
+    let stream;
     it("should default to 1 backup", function() {
-      var stream = new RollingFileStream(
+      stream = new RollingFileStream(
         path.join(__dirname, "test-rolling-file-stream"),
         1024
       );
@@ -106,6 +114,7 @@ describe("RollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove("test-rolling-file-stream");
     });
   });
@@ -403,6 +412,9 @@ describe("RollingFileStream", function() {
     });
   });
 
+  // in windows, you can't delete a directory if there is an open file handle
+  if (process.platform !== "win32") {
+
   describe("when the directory gets deleted", function() {
     var stream;
     before(function(done) {
@@ -414,9 +426,9 @@ describe("RollingFileStream", function() {
       stream.write("initial", "utf8", done);
     });
 
-    after(function() {
-      fs.unlinkSync(path.join("subdir", "test-rolling-file-stream"));
-      fs.rmdirSync("subdir");
+    after(async () => {
+      await fs.unlink(path.join("subdir", "test-rolling-file-stream"));
+      await fs.rmdir("subdir");
     });
 
     it("handles directory deletion gracefully", async function() {
@@ -426,15 +438,14 @@ describe("RollingFileStream", function() {
 
       await fs.unlink(path.join("subdir", "test-rolling-file-stream"));
       await fs.rmdir("subdir");
-      await new Promise(resolve => {
-        stream.write("rollover", "utf8", () => {
-          fs.readFileSync(
-            path.join("subdir", "test-rolling-file-stream"),
-            "utf8"
-          ).should.eql("rollover");
-          resolve();
-        });
-      });
+      await new Promise(resolve => stream.write("rollover", "utf8", resolve));
+      await close(stream);
+      (await fs.readFile(
+        path.join("subdir", "test-rolling-file-stream"),
+        "utf8"
+      )).should.eql("rollover");
     });
   });
+}
+
 });

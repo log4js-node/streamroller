@@ -1,8 +1,3 @@
-/**
- * This file will be removed.
- */
-"use strict";
-
 require("should");
 
 const fs = require("fs-extra"),
@@ -24,6 +19,9 @@ const DateRollingFileStream = proxyquire("../lib/DateRollingFileStream", {
 const gunzip = util.promisify(zlib.gunzip);
 const gzip = util.promisify(zlib.gzip);
 const remove = filename => fs.unlink(filename).catch(() => {});
+const close = async (stream) => new Promise(
+  (resolve, reject) => stream.end(e => e ? reject(e) : resolve())
+);
 
 describe("DateRollingFileStream", function() {
   describe("arguments", function() {
@@ -37,6 +35,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "test-date-rolling-file-stream-1"));
     });
 
@@ -64,6 +63,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "test-date-rolling-file-stream-2"));
     });
 
@@ -84,6 +84,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "test-date-rolling-file-stream-3"));
     });
 
@@ -103,6 +104,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "test-date-rolling-file-stream-4"));
     });
 
@@ -128,6 +130,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "test-date-rolling-file-stream-5"));
     });
 
@@ -209,6 +212,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(
         path.join(
           __dirname,
@@ -315,6 +319,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "digits.log"));
       await remove(path.join(__dirname, "digits.log.20120912"));
     });
@@ -360,6 +365,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "compressed.log"));
       await remove(path.join(__dirname, "compressed.log.2012-09-12.gz"));
     });
@@ -401,6 +407,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "keepFileExt.log"));
       await remove(path.join(__dirname, "keepFileExt.2012-09-12.log"));
     });
@@ -445,6 +452,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       await remove(path.join(__dirname, "compressedAndKeepExt.log"));
       await remove(
         path.join(__dirname, "compressedAndKeepExt.2012-09-12.log.gz")
@@ -458,23 +466,21 @@ describe("DateRollingFileStream", function() {
     var numOriginalLogs = 10;
 
     before(async function() {
-      for (let i = numOriginalLogs; i >= 0; i -= 1) {
-        fakeNow = new Date(2012, 8, 20 - i, 0, 10, 12);
-        stream = new DateRollingFileStream(
-          path.join(__dirname, "daysToKeep.log"),
-          ".yyyy-MM-dd",
-          {
-            alwaysIncludePattern: true,
-            daysToKeep: daysToKeep
-          }
+      for (let i = 0; i < numOriginalLogs; i += 1) {
+        await fs.writeFile(
+          path.join(__dirname, `daysToKeep.log.2012-09-${20-i}`), 
+          `Message on day ${i}\n`, 
+          { encoding: "utf-8" }
         );
-        await new Promise(resolve => {
-          stream.write(util.format("Message on day %d\n", i), "utf8", () =>
-            resolve()
-          );
-        });
-        await fs.utimes(stream.filename, fakeNow, fakeNow);
       }
+      stream = new DateRollingFileStream(
+        path.join(__dirname, "daysToKeep.log"),
+        ".yyyy-MM-dd",
+        {
+          alwaysIncludePattern: true,
+          daysToKeep: daysToKeep
+        }
+      );
     });
 
     describe("when the day changes", function() {
@@ -493,6 +499,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       const files = await fs.readdir(__dirname);
       const logFiles = files
         .filter(file => file.indexOf("daysToKeep.log") > -1)
@@ -509,27 +516,21 @@ describe("DateRollingFileStream", function() {
     before(async function() {
       for (let i = numOriginalLogs; i >= 0; i -= 1) {
         fakeNow = new Date(2012, 8, 20 - i, 0, 10, 12);
-        stream = new DateRollingFileStream(
-          path.join(__dirname, "compressedDaysToKeep.log"),
-          ".yyyy-MM-dd",
-          {
-            alwaysIncludePattern: true,
-            compress: true,
-            daysToKeep: daysToKeep
-          }
+        const contents = await gzip(`Message on day ${i}\n`);
+        await fs.writeFile(
+          path.join(__dirname, `compressedDaysToKeep.log.2012-09-${20-i}.gz`),
+          contents
         );
-        await new Promise(resolve => {
-          stream.write(util.format("Message on day %d\n", i), "utf8", () =>
-            resolve()
-          );
-        });
-
-        const contents = await fs.readFile(stream.filename, "utf8");
-        const gzipped = await gzip(contents);
-        await fs.writeFile(stream.filename + ".gz", gzipped);
-        await fs.unlink(stream.filename);
-        await fs.utimes(stream.filename + ".gz", fakeNow, fakeNow);
       }
+      stream = new DateRollingFileStream(
+        path.join(__dirname, "compressedDaysToKeep.log"),
+        ".yyyy-MM-dd",
+        {
+          alwaysIncludePattern: true,
+          compress: true,
+          daysToKeep: daysToKeep
+        }
+      );
     });
 
     describe("when the day changes", function() {
@@ -548,6 +549,7 @@ describe("DateRollingFileStream", function() {
     });
 
     after(async function() {
+      await close(stream);
       const files = await fs.readdir(__dirname);
       const logFiles = files
         .filter(file => file.indexOf("compressedDaysToKeep.log") > -1)
