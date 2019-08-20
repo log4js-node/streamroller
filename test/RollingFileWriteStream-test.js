@@ -93,8 +93,7 @@ describe("RollingFileWriteStream", () => {
     });
 
     after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+      s.end(() => fs.removeSync(fileObj.dir));
     });
 
     it("should take a filename and options, return Writable", () => {
@@ -136,8 +135,10 @@ describe("RollingFileWriteStream", () => {
     });
 
     after(done => {
-      fs.removeSync(fileObj.dir);
-      done();
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();  
+      });
     });
 
     it("should rotate using filename with no extension", () => {
@@ -332,8 +333,10 @@ describe("RollingFileWriteStream", () => {
     });
 
     after(done => {
-      fs.removeSync(fileObj.dir);
-      done();
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();  
+      })
     });
 
     it("should rotate files within the day, and when the day changes", () => {
@@ -490,9 +493,11 @@ describe("RollingFileWriteStream", () => {
       }
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should rotate with at most 3 backup files not including the hot one", () => {
@@ -560,9 +565,11 @@ describe("RollingFileWriteStream", () => {
       }
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should rotate with at most 3 backup files not including the hot one", () => {
@@ -677,9 +684,11 @@ describe("RollingFileWriteStream", () => {
       }
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should rotate with gunzip", () => {
@@ -731,9 +740,10 @@ describe("RollingFileWriteStream", () => {
     });
 
     after(done => {
-      s.end();
-      fs.removeSync(fileObj.dir);
-      done();
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();  
+      });
     });
 
     it("should rotate with the same extension", () => {
@@ -783,9 +793,10 @@ describe("RollingFileWriteStream", () => {
     });
 
     after(done => {
-      s.end();
-      fs.removeSync(fileObj.dir);
-      done();
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();  
+      });
     });
 
     it("should rotate with the same extension", () => {
@@ -838,9 +849,10 @@ describe("RollingFileWriteStream", () => {
     });
 
     after(done => {
-      s.end();
-      fs.removeSync(fileObj.dir);
-      done();
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();  
+      });
     });
 
     it("should rotate with the same extension and keep date in the filename", () => {
@@ -897,9 +909,10 @@ describe("RollingFileWriteStream", () => {
     });
 
     after(done => {
-      s.end();
-      fs.removeSync(fileObj.dir);
-      done();
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();  
+      });
     });
 
     it("should rotate every day", () => {
@@ -1089,9 +1102,11 @@ describe("RollingFileWriteStream", () => {
       s.write("now", "utf8", done);
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should use write in the old file if not reach the maxSize limit", () => {
@@ -1120,9 +1135,11 @@ describe("RollingFileWriteStream", () => {
       s.write("three\n", "utf8", done); // this should be in a new file.
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should respect the existing file size", () => {
@@ -1157,9 +1174,11 @@ describe("RollingFileWriteStream", () => {
       s.write("three\n", "utf8", done); // this should be in a new file.
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should respect the existing file size", () => {
@@ -1197,9 +1216,11 @@ describe("RollingFileWriteStream", () => {
       s.write("three\n", "utf8", done); // base.3 -> base.4, base.2 -> base.3, base.1 -> base.2, base -> base.1
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should rotate the old file indices", () => {
@@ -1247,9 +1268,11 @@ describe("RollingFileWriteStream", () => {
       s.write("It is now Sept 13, 2012.\n", "utf8", done); // this should be in a new file.
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should respect the existing file date", () => {
@@ -1279,9 +1302,11 @@ describe("RollingFileWriteStream", () => {
       s.write("there should only be this\n", "utf8", done);
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should ignore the existing file size", () => {
@@ -1309,9 +1334,11 @@ describe("RollingFileWriteStream", () => {
       s.write("test", "utf8", done);
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync(fileObj.dir);
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
     });
 
     it("should create the dir", () => {
@@ -1333,9 +1360,11 @@ describe("RollingFileWriteStream", () => {
       s.write("this should not cause any problems", "utf8", done);
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync("test.log");
+    after(done => {
+      s.end(() => {
+        fs.removeSync("test.log");
+        done();
+      });
     });
 
     it("should use process.cwd() as the dir", () => {
@@ -1372,9 +1401,11 @@ describe("RollingFileWriteStream", () => {
       s.write("this should not cause any problems", "utf8", done);
     });
 
-    after(() => {
-      s.end();
-      fs.removeSync("test-events.log");
+    after(done => {
+      s.end(() => {
+        fs.removeSync("test-events.log");
+        done();
+      });
     });
 
     it("should emit the error event of the underlying stream", done => {

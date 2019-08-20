@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "codecheck": "eslint 'lib/*.js'",
+    "codecheck": "eslint \"lib/*.js\" \"test/*.js\"",
     "prepublishOnly": "npm test",
     "pretest": "npm run codecheck",
     "clean": "rm -rf node_modules/",
