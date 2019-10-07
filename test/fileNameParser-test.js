@@ -100,4 +100,27 @@ describe("fileNameParser", () => {
       });
     });
   });
+
+  describe("with a two-digit date pattern", () => {
+    const parser = require("../lib/fileNameParser")({
+      file: {
+        dir: "/path/to/file",
+        base: "thing.log",
+        ext: ".log",
+        name: "thing"
+      },
+      pattern: "mm"
+    });
+    it("should take a filename and return the date", () => {
+      const expectedTimestamp = new Date(0,0);
+      expectedTimestamp.setMinutes(34);
+      parser("thing.log.34").should.eql({
+        filename: "thing.log.34",
+        date: "34",
+        isCompressed: false,
+        index: 0,
+        timestamp: expectedTimestamp.getTime()
+      });
+    });
+  })
 });
