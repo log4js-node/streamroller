@@ -1,5 +1,9 @@
 # Streamroller Changelog
 
+## 2.2.1
+
+- Fix for num to keep not working when date pattern is all digits
+
 ## 2.2.0
 
 - [Fallback to copy and truncate when file is busy](https://github.com/log4js-node/streamroller/pull/53)
