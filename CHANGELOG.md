@@ -1,8 +1,12 @@
 # Streamroller Changelog
 
+## 2.2.2
+
+- [Fix for overwriting current file when using date rotation](https://github.com/log4js-node/streamroller/pull/54)
+
 ## 2.2.1
 
-- Fix for num to keep not working when date pattern is all digits
+- Fix for num to keep not working when date pattern is all digits (forgot to do a PR for this one)
 
 ## 2.2.0
 
