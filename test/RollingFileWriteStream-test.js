@@ -16,7 +16,7 @@ const mockFs = require("fs-extra");
 const oldStatSync = mockFs.statSync;
 mockFs.statSync = fd => {
   const result = oldStatSync(fd);
-  result.birthtime = fakedFsDate;
+  result.mtime = fakedFsDate;
   return result;
 };
 
@@ -137,7 +137,7 @@ describe("RollingFileWriteStream", () => {
     after(done => {
       s.end(() => {
         fs.removeSync(fileObj.dir);
-        done();  
+        done();
       });
     });
 
@@ -335,7 +335,7 @@ describe("RollingFileWriteStream", () => {
     after(done => {
       s.end(() => {
         fs.removeSync(fileObj.dir);
-        done();  
+        done();
       })
     });
 
@@ -742,7 +742,7 @@ describe("RollingFileWriteStream", () => {
     after(done => {
       s.end(() => {
         fs.removeSync(fileObj.dir);
-        done();  
+        done();
       });
     });
 
@@ -795,7 +795,7 @@ describe("RollingFileWriteStream", () => {
     after(done => {
       s.end(() => {
         fs.removeSync(fileObj.dir);
-        done();  
+        done();
       });
     });
 
@@ -851,7 +851,7 @@ describe("RollingFileWriteStream", () => {
     after(done => {
       s.end(() => {
         fs.removeSync(fileObj.dir);
-        done();  
+        done();
       });
     });
 
@@ -911,7 +911,7 @@ describe("RollingFileWriteStream", () => {
     after(done => {
       s.end(() => {
         fs.removeSync(fileObj.dir);
-        done();  
+        done();
       });
     });
 
