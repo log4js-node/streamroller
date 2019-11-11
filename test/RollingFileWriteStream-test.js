@@ -1416,4 +1416,26 @@ describe("RollingFileWriteStream", () => {
       s.currentFileStream.emit("error", new Error("oh no"));
     });
   });
+
+  describe("when deleting old files and there is an error", () => {
+    before(done => {
+      fs.ensureDir('/tmp/delete-test/logfile.log.2', done);
+    });
+
+    it("should not let errors bubble up", done => {
+      const s = new RollingFileWriteStream("/tmp/delete-test/logfile.log", {
+        maxSize: 10,
+        numToKeep: 1
+      });
+
+      s.write("length is 10", "utf8", () => {
+        // if there's an error during deletion, then done never gets called
+        s.write("length is 10", "utf8", done);
+      });
+    });
+
+    after(done => {
+      fs.remove('/tmp/delete-test', done);
+    })
+  });
 });
