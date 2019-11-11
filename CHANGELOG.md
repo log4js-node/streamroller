@@ -1,5 +1,9 @@
 # Streamroller Changelog
 
+## 2.2.3
+
+- [Fix for unhandled promise rejection during cleanup](https://github.com/log4js-node/streamroller/pull/56)
+
 ## 2.2.2
 
 - [Fix for overwriting current file when using date rotation](https://github.com/log4js-node/streamroller/pull/54)
