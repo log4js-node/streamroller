@@ -42,6 +42,9 @@ describe("fileNameParser", () => {
       should(parser("thefile.log.biscuits")).not.be.ok();
       should(parser("thefile.log.2019")).not.be.ok();
       should(parser("thefile.log.3.2")).not.be.ok();
+      should(parser("thefile.log.04-18")).not.be.ok();
+      should(parser("anotherfile.log.2020-04-18")).not.be.ok();
+      should(parser("2020-05-18")).not.be.ok();
     });
     it("should take a filename and return the date", () => {
       parser("thefile.log.2019-07-17").should.eql({
@@ -112,7 +115,7 @@ describe("fileNameParser", () => {
       pattern: "mm"
     });
     it("should take a filename and return the date", () => {
-      const expectedTimestamp = new Date(0,0);
+      const expectedTimestamp = new Date(0, 0);
       expectedTimestamp.setMinutes(34);
       parser("thing.log.34").should.eql({
         filename: "thing.log.34",
@@ -123,4 +126,55 @@ describe("fileNameParser", () => {
       });
     });
   })
+
+  describe("with a four-digit date pattern", () => {
+    const parser = require("../lib/fileNameParser")({
+      file: {
+        dir: "/path/to/file",
+        base: "stuff.log",
+        ext: ".log",
+        name: "stuff"
+      },
+      pattern: "mm-ss"
+    });
+    it("should return null for files that do not match", () => {
+      should(parser("stuff.log.2020-04-18")).not.be.ok();
+      should(parser("09-18")).not.be.ok();
+    });
+    it("should take a filename and return the date", () => {
+      const expectedTimestamp = new Date(0, 0);
+      expectedTimestamp.setMinutes(34);
+      expectedTimestamp.setSeconds(59);
+      parser("stuff.log.34-59").should.eql({
+        filename: "stuff.log.34-59",
+        date: "34-59",
+        isCompressed: false,
+        index: 0,
+        timestamp: expectedTimestamp.getTime()
+      });
+    });
+    it("should take a filename and return both date and index", () => {
+      const expectedTimestamp_1 = new Date(0, 0);
+      expectedTimestamp_1.setMinutes(7);
+      expectedTimestamp_1.setSeconds(17);
+      parser("stuff.log.07-17.2").should.eql({
+        filename: "stuff.log.07-17.2",
+        index: 2,
+        date: "07-17",
+        timestamp: expectedTimestamp_1.getTime(),
+        isCompressed: false
+      });
+      const expectedTimestamp_2 = new Date(0, 0);
+      expectedTimestamp_2.setMinutes(17);
+      expectedTimestamp_2.setSeconds(30);
+      parser("stuff.log.17-30.3.gz").should.eql({
+        filename: "stuff.log.17-30.3.gz",
+        index: 3,
+        date: "17-30",
+        timestamp: expectedTimestamp_2.getTime(),
+        isCompressed: true
+      });
+    });
+  })
+
 });
