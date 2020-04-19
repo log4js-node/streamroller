@@ -1,5 +1,9 @@
 # Streamroller Changelog
 
+## 2.2.4
+
+- [Fix for incorrect filename matching](https://github.com/log4js-node/streamroller/pull/61) - thanks [@rnd-debug](https://github.com/rnd-debug)
+
 ## 2.2.3
 
 - [Fix for unhandled promise rejection during cleanup](https://github.com/log4js-node/streamroller/pull/56)
