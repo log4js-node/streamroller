@@ -11,7 +11,7 @@
     "prepublishOnly": "npm test",
     "pretest": "npm run codecheck",
     "clean": "rm -rf node_modules/",
-    "test": "nyc --check-coverage --lines 100 --branches 100 --functions 100 mocha",
+    "test": "nyc --check-coverage mocha",
     "html-report": "nyc report --reporter=html"
   },
   "repository": {
@@ -68,5 +68,11 @@
     "hooks": {
       "commit-msg": "commitlint -e $HUSKY_GIT_PARAMS"
     }
+  },
+  "nyc": {
+    "include": [ "lib/**" ],
+    "branches": 100,
+    "lines": 100,
+    "functions": 100
   }
 }
