@@ -1419,11 +1419,11 @@ describe("RollingFileWriteStream", () => {
 
   describe("when deleting old files and there is an error", () => {
     before(done => {
-      fs.ensureDir('/tmp/delete-test/logfile.log.2', done);
+      fs.ensureDir(path.join(__dirname, "tmp-delete-test/logfile.log.2"), done);
     });
 
     it("should not let errors bubble up", done => {
-      const s = new RollingFileWriteStream("/tmp/delete-test/logfile.log", {
+      const s = new RollingFileWriteStream(path.join(__dirname, "tmp-delete-test/logfile.log"), {
         maxSize: 10,
         numToKeep: 1
       });
@@ -1435,7 +1435,7 @@ describe("RollingFileWriteStream", () => {
     });
 
     after(done => {
-      fs.remove('/tmp/delete-test', done);
-    })
+      fs.remove(path.join(__dirname, "tmp-delete-test"), done);
+    });
   });
 });

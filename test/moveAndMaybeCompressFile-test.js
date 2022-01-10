@@ -5,7 +5,7 @@ const path = require('path');
 const zlib = require('zlib');
 const proxyquire = require('proxyquire').noPreserveCache();
 const moveAndMaybeCompressFile = require('../lib/moveAndMaybeCompressFile');
-const TEST_DIR = path.normalize(`/tmp/moveAndMaybeCompressFile_${Math.floor(Math.random()*10000)}`);
+const TEST_DIR = path.join(__dirname, `moveAndMaybeCompressFile_${Math.floor(Math.random()*10000)}`);
 
 describe('moveAndMaybeCompressFile', () => {
   beforeEach(async () => {
