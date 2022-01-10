@@ -5,7 +5,7 @@ const path = require('path');
 const zlib = require('zlib');
 const proxyquire = require('proxyquire').noPreserveCache();
 const moveAndMaybeCompressFile = require('../lib/moveAndMaybeCompressFile');
-const TEST_DIR = path.normalize(`/tmp/moveAndMaybeCompressFile_${Math.floor(Math.random()*10000)}`);
+const TEST_DIR = path.join(__dirname, `moveAndMaybeCompressFile_${Math.floor(Math.random()*10000)}`);
 
 describe('moveAndMaybeCompressFile', () => {
   beforeEach(async () => {
@@ -118,16 +118,16 @@ describe('moveAndMaybeCompressFile', () => {
 
   });
 
-  it('should compress the source file at the new destination with 0o775 rights', async () => {
+  it('should compress the source file at the new destination with 0o744 rights', async () => {
     const source = path.join(TEST_DIR, 'test.log');
     const destination = path.join(TEST_DIR, 'moved-test.log.gz');
     await fs.outputFile(source, 'This is the test file.');
-    const moveAndCompressOptions = {compress: true, mode:0o775}
+    const moveAndCompressOptions = {compress: true, mode:0o744}
     await moveAndMaybeCompressFile(source, destination, moveAndCompressOptions);
 
     const destinationStats = await fs.stat(destination);
-    const destMode = (destinationStats.mode & 0o775).toString(8);
-    destMode.should.equal('775');
+    const destMode = (destinationStats.mode & 0o777).toString(8);
+    destMode.should.equalOneOf('744', '666'); // windows does not use unix file modes
 
     const zippedContents = await fs.readFile(destination);
     const contents = await new Promise(resolve => {
@@ -149,8 +149,8 @@ describe('moveAndMaybeCompressFile', () => {
     await moveAndMaybeCompressFile(source, destination, moveAndCompressOptions);
 
     const destinationStats = await fs.stat(destination);
-    const destMode = (destinationStats.mode & 0o400).toString(8);
-    destMode.should.equal('400');
+    const destMode = (destinationStats.mode & 0o777).toString(8);
+    destMode.should.equalOneOf('400', '444'); // windows does not use unix file modes
 
     const zippedContents = await fs.readFile(destination);
     const contents = await new Promise(resolve => {
