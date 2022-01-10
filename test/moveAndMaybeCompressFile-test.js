@@ -127,7 +127,7 @@ describe('moveAndMaybeCompressFile', () => {
 
     const destinationStats = await fs.stat(destination);
     const destMode = (destinationStats.mode & 0o777).toString(8);
-    destMode.should.equal('744');
+    destMode.should.equalOneOf('744', '666'); // windows does not use unix file modes
 
     const zippedContents = await fs.readFile(destination);
     const contents = await new Promise(resolve => {
@@ -150,7 +150,7 @@ describe('moveAndMaybeCompressFile', () => {
 
     const destinationStats = await fs.stat(destination);
     const destMode = (destinationStats.mode & 0o777).toString(8);
-    destMode.should.equal('400');
+    destMode.should.equalOneOf('400', '444'); // windows does not use unix file modes
 
     const zippedContents = await fs.readFile(destination);
     const contents = await new Promise(resolve => {
