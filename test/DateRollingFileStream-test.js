@@ -460,47 +460,120 @@ describe("DateRollingFileStream", function() {
     });
   });
 
-  describe("with invalid number of daysToKeep", () => {
-    it("should complain about negative daysToKeep", () => {
-      const daysToKeep = -1;
-      (() => {
-        new DateRollingFileStream(
-          path.join(__dirname, "daysToKeep.log"),
-          { daysToKeep: daysToKeep }
-        );
-      }).should.throw(`options.daysToKeep (${daysToKeep}) should be >= 0`);
+  describe("using deprecated daysToKeep", () => {
+    const onWarning = process.rawListeners("warning").shift();
+    let wrapper;
+    let stream;
+
+    before(done => {
+      const muteSelfDeprecation = (listener) => {
+        return (warning) => {
+          if (warning.name === "DeprecationWarning" && warning.code === "StreamRoller0001") {
+            return;
+          } else {
+            listener(warning);
+          }
+        };
+      };
+      wrapper = muteSelfDeprecation(onWarning);
+      process.prependListener("warning", wrapper);
+      process.off("warning", onWarning);
+      done();
     });
 
-    it("should complain about daysToKeep >= Number.MAX_SAFE_INTEGER", () => {
-      const daysToKeep = Number.MAX_SAFE_INTEGER;
-      (() => {
-        new DateRollingFileStream(
-          path.join(__dirname, "daysToKeep.log"),
-          { daysToKeep: daysToKeep }
+    after(async () => {
+      process.prependListener("warning", onWarning);
+      process.off("warning", wrapper);
+      await close(stream);
+      await remove(path.join(__dirname, "daysToKeep.log"));
+    });
+
+    it("should have deprecated warning for daysToKeep", () => {
+      process.on("warning", (warning) => {
+        warning.name.should.eql("DeprecationWarning");
+        warning.code.should.eql("StreamRoller0001");
+      });
+
+      stream = new DateRollingFileStream(
+        path.join(__dirname, "daysToKeep.log"),
+        { daysToKeep: 4 }
+      );
+    });
+
+    describe("with options.daysToKeep but not options.numBackups", () => {
+      it("should be routed from options.daysToKeep to options.numBackups", () => {
+        stream.options.numBackups.should.eql(stream.options.daysToKeep);
+      });
+
+      it("should be generated into stream.options.numToKeep from options.numBackups", () => {
+        stream.options.numToKeep.should.eql(stream.options.numBackups + 1);
+      });
+    });
+
+    describe("with both options.daysToKeep and options.numBackups", function() {
+      let stream;
+      it("should take options.numBackups to supercede options.daysToKeep", function() {
+        stream = new DateRollingFileStream(
+          path.join(__dirname, "numBackups.log"),
+          {
+            daysToKeep: 3,
+            numBackups: 9
+          }
         );
-      }).should.throw(`options.daysToKeep (${daysToKeep}) should be < Number.MAX_SAFE_INTEGER`);
+        stream.options.daysToKeep.should.not.eql(3);
+        stream.options.daysToKeep.should.eql(9);
+        stream.options.numBackups.should.eql(9);
+        stream.options.numToKeep.should.eql(10);
+      });
+
+      after(async function() {
+        await close(stream);
+        await remove("numBackups.log");
+      });
     });
   });
 
-  describe("with daysToKeep option", function() {
+  describe("with invalid number of numBackups", () => {
+    it("should complain about negative numBackups", () => {
+      const numBackups = -1;
+      (() => {
+        new DateRollingFileStream(
+          path.join(__dirname, "numBackups.log"),
+          { numBackups: numBackups }
+        );
+      }).should.throw(`options.numBackups (${numBackups}) should be >= 0`);
+    });
+
+    it("should complain about numBackups >= Number.MAX_SAFE_INTEGER", () => {
+      const numBackups = Number.MAX_SAFE_INTEGER;
+      (() => {
+        new DateRollingFileStream(
+          path.join(__dirname, "numBackups.log"),
+          { numBackups: numBackups }
+        );
+      }).should.throw(`options.numBackups (${numBackups}) should be < Number.MAX_SAFE_INTEGER`);
+    });
+  });
+
+  describe("with numBackups option", function() {
     let stream;
-    var daysToKeep = 4;
+    var numBackups = 4;
     var numOriginalLogs = 10;
 
     before(async function() {
       for (let i = 0; i < numOriginalLogs; i += 1) {
         await fs.writeFile(
-          path.join(__dirname, `daysToKeep.log.2012-09-${20-i}`), 
+          path.join(__dirname, `numBackups.log.2012-09-${20-i}`), 
           `Message on day ${i}\n`, 
           { encoding: "utf-8" }
         );
       }
       stream = new DateRollingFileStream(
-        path.join(__dirname, "daysToKeep.log"),
+        path.join(__dirname, "numBackups.log"),
         "yyyy-MM-dd",
         {
           alwaysIncludePattern: true,
-          daysToKeep: daysToKeep
+          numBackups: numBackups
         }
       );
     });
@@ -511,12 +584,12 @@ describe("DateRollingFileStream", function() {
         stream.write("Second message\n", "utf8", done);
       });
 
-      it("should be daysToKeep + 1 files left from numOriginalLogs", async function() {
+      it("should be numBackups + 1 files left from numOriginalLogs", async function() {
         const files = await fs.readdir(__dirname);
         var logFiles = files.filter(
-          file => file.indexOf("daysToKeep.log") > -1
+          file => file.indexOf("numBackups.log") > -1
         );
-        logFiles.should.have.length(daysToKeep + 1);
+        logFiles.should.have.length(numBackups + 1);
       });
     });
 
@@ -524,15 +597,15 @@ describe("DateRollingFileStream", function() {
       await close(stream);
       const files = await fs.readdir(__dirname);
       const logFiles = files
-        .filter(file => file.indexOf("daysToKeep.log") > -1)
+        .filter(file => file.indexOf("numBackups.log") > -1)
         .map(f => remove(path.join(__dirname, f)));
       await Promise.all(logFiles);
     });
   });
 
-  describe("with daysToKeep and compress options", function() {
+  describe("with numBackups and compress options", function() {
     let stream;
-    const daysToKeep = 4;
+    const numBackups = 4;
     const numOriginalLogs = 10;
 
     before(async function() {
@@ -540,17 +613,17 @@ describe("DateRollingFileStream", function() {
         fakeNow = new Date(2012, 8, 20 - i, 0, 10, 12);
         const contents = await gzip(`Message on day ${i}\n`);
         await fs.writeFile(
-          path.join(__dirname, `compressedDaysToKeep.log.2012-09-${20-i}.gz`),
+          path.join(__dirname, `compressedNumBackups.log.2012-09-${20-i}.gz`),
           contents
         );
       }
       stream = new DateRollingFileStream(
-        path.join(__dirname, "compressedDaysToKeep.log"),
+        path.join(__dirname, "compressedNumBackups.log"),
         "yyyy-MM-dd",
         {
           alwaysIncludePattern: true,
           compress: true,
-          daysToKeep: daysToKeep
+          numBackups: numBackups
         }
       );
     });
@@ -564,9 +637,9 @@ describe("DateRollingFileStream", function() {
       it("should be 5 files left from original 11", async function() {
         const files = await fs.readdir(__dirname);
         var logFiles = files.filter(
-          file => file.indexOf("compressedDaysToKeep.log") > -1
+          file => file.indexOf("compressedNumBackups.log") > -1
         );
-        logFiles.should.have.length(daysToKeep + 1);
+        logFiles.should.have.length(numBackups + 1);
       });
     });
 
@@ -574,7 +647,7 @@ describe("DateRollingFileStream", function() {
       await close(stream);
       const files = await fs.readdir(__dirname);
       const logFiles = files
-        .filter(file => file.indexOf("compressedDaysToKeep.log") > -1)
+        .filter(file => file.indexOf("compressedNumBackups.log") > -1)
         .map(f => remove(path.join(__dirname, f)));
       await Promise.all(logFiles);
     });
