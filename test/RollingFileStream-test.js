@@ -422,6 +422,214 @@ describe("RollingFileStream", function() {
     });
   });
 
+  describe("with options.fileNameSep = \"_\"", function() {
+    before(async function() {
+      const stream = new RollingFileStream(
+        path.join(__dirname, "fileNameSep-backups.log"),
+        30, //30 bytes max size
+        2, //two backup files to keep
+        { fileNameSep: "_" }
+      );
+      const messages = [
+        "This is the first log message.",
+        "This is the second log message.",
+        "This is the third log message.",
+        "This is the fourth log message."
+      ];
+      await writeInSequence(stream, messages);
+    });
+
+    it("should produce three files, with the fileNameSep", async function() {
+      const files = await fs.readdir(__dirname);
+      const testFiles = files
+        .filter(f => f.indexOf("fileNameSep-backups") > -1)
+        .sort();
+
+      testFiles.length.should.eql(3);
+      testFiles.should.eql([
+        "fileNameSep-backups.log_1",
+        "fileNameSep-backups.log_2",
+        "fileNameSep-backups.log"
+      ].sort());
+
+      let contents = await fs.readFile(
+        path.join(__dirname, testFiles[0]),
+        "utf8"
+      );
+      contents.should.eql("This is the fourth log message.\n");
+
+      contents = await fs.readFile(path.join(__dirname, testFiles[1]), "utf8");
+      contents.toString("utf8").should.eql("This is the third log message.\n");
+      contents = await fs.readFile(path.join(__dirname, testFiles[2]), "utf8");
+      contents.toString("utf8").should.eql("This is the second log message.\n");
+    });
+
+    after(function() {
+      return Promise.all([
+        remove("fileNameSep-backups.log"),
+        remove("fileNameSep-backups.log_1"),
+        remove("fileNameSep-backups.log_2")
+      ]);
+    });
+  });
+
+  describe("with options.fileNameSep = \"_\" and keepFileExt = true", function() {
+    before(async function() {
+      const stream = new RollingFileStream(
+        path.join(__dirname, "fileNameSep-extKept-backups.log"),
+        30, //30 bytes max size
+        2, //two backup files to keep
+        { fileNameSep: "_", keepFileExt: true }
+      );
+      const messages = [
+        "This is the first log message.",
+        "This is the second log message.",
+        "This is the third log message.",
+        "This is the fourth log message."
+      ];
+      await writeInSequence(stream, messages);
+    });
+
+    it("should produce three files, with the file-extension kept", async function() {
+      const files = await fs.readdir(__dirname);
+      const testFiles = files
+        .filter(f => f.indexOf("fileNameSep-extKept-backups") > -1)
+        .sort();
+
+      testFiles.length.should.eql(3);
+      testFiles.should.eql([
+        "fileNameSep-extKept-backups_1.log",
+        "fileNameSep-extKept-backups_2.log",
+        "fileNameSep-extKept-backups.log"
+      ].sort());
+
+      let contents = await fs.readFile(
+        path.join(__dirname, testFiles[0]),
+        "utf8"
+      );
+      contents.should.eql("This is the fourth log message.\n");
+
+      contents = await fs.readFile(path.join(__dirname, testFiles[1]), "utf8");
+      contents.toString("utf8").should.eql("This is the third log message.\n");
+      contents = await fs.readFile(path.join(__dirname, testFiles[2]), "utf8");
+      contents.toString("utf8").should.eql("This is the second log message.\n");
+    });
+
+    after(function() {
+      return Promise.all([
+        remove("fileNameSep-extKept-backups.log"),
+        remove("fileNameSep-extKept-backups_1.log"),
+        remove("fileNameSep-extKept-backups_2.log")
+      ]);
+    });
+  });
+
+  describe("with options.fileNameSep = \"_\" and options.compress = true", function() {
+    before(async function() {
+      const stream = new RollingFileStream(
+        path.join(__dirname, "compressed-backups.log"),
+        30, //30 bytes max size
+        2, //two backup files to keep
+        { fileNameSep: "_", compress: true }
+      );
+      const messages = [
+        "This is the first log message.",
+        "This is the second log message.",
+        "This is the third log message.",
+        "This is the fourth log message."
+      ];
+      await writeInSequence(stream, messages);
+    });
+
+    it("should produce three files, with the backups compressed", async function() {
+      const files = await fs.readdir(__dirname);
+      const testFiles = files
+        .filter(f => f.indexOf("compressed-backups") > -1)
+        .sort();
+
+      testFiles.length.should.eql(3);
+      testFiles.should.eql([
+        "compressed-backups.log_1.gz",
+        "compressed-backups.log_2.gz",
+        "compressed-backups.log"
+      ].sort());
+
+      let contents = await fs.readFile(
+        path.join(__dirname, testFiles[0]),
+        "utf8"
+      );
+      contents.should.eql("This is the fourth log message.\n");
+
+      let gzipped = await fs.readFile(path.join(__dirname, testFiles[1]));
+      contents = await gunzip(gzipped);
+      contents.toString("utf8").should.eql("This is the third log message.\n");
+      gzipped = await fs.readFile(path.join(__dirname, testFiles[2]));
+      contents = await gunzip(gzipped);
+      contents.toString("utf8").should.eql("This is the second log message.\n");
+    });
+
+    after(function() {
+      return Promise.all([
+        remove("compressed-backups.log"),
+        remove("compressed-backups.log_1.gz"),
+        remove("compressed-backups.log_2.gz")
+      ]);
+    });
+  });
+
+  describe("with options.fileNameSep = \"_\", options.compress = true and keepFileExt = true", function() {
+    before(async function() {
+      const stream = new RollingFileStream(
+        path.join(__dirname, "compressed-backups.log"),
+        30, //30 bytes max size
+        2, //two backup files to keep
+        { fileNameSep: "_", compress: true, keepFileExt: true }
+      );
+      const messages = [
+        "This is the first log message.",
+        "This is the second log message.",
+        "This is the third log message.",
+        "This is the fourth log message."
+      ];
+      await writeInSequence(stream, messages);
+    });
+
+    it("should produce three files, with the backups compressed", async function() {
+      const files = await fs.readdir(__dirname);
+      const testFiles = files
+        .filter(f => f.indexOf("compressed-backups") > -1)
+        .sort();
+
+      testFiles.length.should.eql(3);
+      testFiles.should.eql([
+        "compressed-backups_1.log.gz",
+        "compressed-backups_2.log.gz",
+        "compressed-backups.log"
+      ].sort());
+
+      let contents = await fs.readFile(
+        path.join(__dirname, testFiles[0]),
+        "utf8"
+      );
+      contents.should.eql("This is the fourth log message.\n");
+
+      let gzipped = await fs.readFile(path.join(__dirname, testFiles[1]));
+      contents = await gunzip(gzipped);
+      contents.toString("utf8").should.eql("This is the third log message.\n");
+      gzipped = await fs.readFile(path.join(__dirname, testFiles[2]));
+      contents = await gunzip(gzipped);
+      contents.toString("utf8").should.eql("This is the second log message.\n");
+    });
+
+    after(function() {
+      return Promise.all([
+        remove("compressed-backups.log"),
+        remove("compressed-backups_1.log.gz"),
+        remove("compressed-backups_2.log.gz")
+      ]);
+    });
+  });
+
   describe("when many files already exist", function() {
     before(async function() {
       await Promise.all([

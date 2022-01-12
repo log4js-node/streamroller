@@ -460,6 +460,184 @@ describe("DateRollingFileStream", function() {
     });
   });
 
+  describe("with fileNameSep option", function() {
+    var stream;
+
+    before(function(done) {
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
+      stream = new DateRollingFileStream(
+        path.join(__dirname, "fileNameSep.log"),
+        "yyyy-MM-dd",
+        { fileNameSep: "_" }
+      );
+      stream.write("First message\n", "utf8", done);
+    });
+
+    describe("when the day changes", function() {
+      before(function(done) {
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write("Second message\n", "utf8", done);
+      });
+
+      it("should be two files", async function() {
+        const files = await fs.readdir(__dirname);
+        var logFiles = files.filter(file => file.indexOf("fileNameSep") > -1);
+        logFiles.should.have.length(2);
+
+        (await fs.readFile(
+          path.join(__dirname, "fileNameSep.log_2012-09-12"),
+          "utf8"
+        )).should.eql("First message\n");
+        (await fs.readFile(
+          path.join(__dirname, "fileNameSep.log"),
+          "utf8"
+        )).should.eql("Second message\n");
+      });
+    });
+
+    after(async function() {
+      await close(stream);
+      await remove(path.join(__dirname, "fileNameSep.log"));
+      await remove(path.join(__dirname, "fileNameSep.log_2012-09-12"));
+    });
+  });
+
+  describe("with fileNameSep option and keepFileExt option", function() {
+    var stream;
+
+    before(function(done) {
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
+      stream = new DateRollingFileStream(
+        path.join(__dirname, "fileNameSepAndKeepExt.log"),
+        "yyyy-MM-dd",
+        { fileNameSep: "_", keepFileExt: true }
+      );
+      stream.write("First message\n", "utf8", done);
+    });
+
+    describe("when the day changes", function() {
+      before(function(done) {
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write("Second message\n", "utf8", done);
+      });
+
+      it("should be two files", async function() {
+        const files = await fs.readdir(__dirname);
+        var logFiles = files.filter(file => file.indexOf("fileNameSepAndKeepExt") > -1);
+        logFiles.should.have.length(2);
+
+        (await fs.readFile(
+          path.join(__dirname, "fileNameSepAndKeepExt_2012-09-12.log"),
+          "utf8"
+        )).should.eql("First message\n");
+        (await fs.readFile(
+          path.join(__dirname, "fileNameSepAndKeepExt.log"),
+          "utf8"
+        )).should.eql("Second message\n");
+      });
+    });
+
+    after(async function() {
+      await close(stream);
+      await remove(path.join(__dirname, "fileNameSepAndKeepExt.log"));
+      await remove(path.join(__dirname, "fileNameSepAndKeepExt_2012-09-12.log"));
+    });
+  });
+
+  describe("with fileNameSep option and compress option", function() {
+    var stream;
+
+    before(function(done) {
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
+      stream = new DateRollingFileStream(
+        path.join(__dirname, "fileNameSepAndCompressed.log"),
+        "yyyy-MM-dd",
+        { fileNameSep: "_", compress: true }
+      );
+      stream.write("First message\n", "utf8", done);
+    });
+
+    describe("when the day changes", function() {
+      before(function(done) {
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write("Second message\n", "utf8", done);
+      });
+
+      it("should be two files, one compressed", async function() {
+        const files = await fs.readdir(__dirname);
+        var logFiles = files.filter(
+          file => file.indexOf("fileNameSepAndCompressed") > -1
+        );
+        logFiles.should.have.length(2);
+
+        const gzipped = await fs.readFile(
+          path.join(__dirname, "fileNameSepAndCompressed.log_2012-09-12.gz")
+        );
+        const contents = await gunzip(gzipped);
+        contents.toString("utf8").should.eql("First message\n");
+        (await fs.readFile(
+          path.join(__dirname, "fileNameSepAndCompressed.log"),
+          "utf8"
+        )).should.eql("Second message\n");
+      });
+    });
+
+    after(async function() {
+      await close(stream);
+      await remove(path.join(__dirname, "fileNameSepAndCompressed.log"));
+      await remove(
+        path.join(__dirname, "fileNameSepAndCompressed.log_2012-09-12.gz")
+      );
+    });
+  });
+
+  describe("with fileNameSep option, compress option and keepFileExt option", function() {
+    var stream;
+
+    before(function(done) {
+      fakeNow = new Date(2012, 8, 12, 0, 10, 12);
+      stream = new DateRollingFileStream(
+        path.join(__dirname, "fileNameSepCompressedAndKeepExt.log"),
+        "yyyy-MM-dd",
+        { fileNameSep: "_", compress: true, keepFileExt: true }
+      );
+      stream.write("First message\n", "utf8", done);
+    });
+
+    describe("when the day changes", function() {
+      before(function(done) {
+        fakeNow = new Date(2012, 8, 13, 0, 10, 12);
+        stream.write("Second message\n", "utf8", done);
+      });
+
+      it("should be two files, one compressed", async function() {
+        const files = await fs.readdir(__dirname);
+        var logFiles = files.filter(
+          file => file.indexOf("fileNameSepCompressedAndKeepExt") > -1
+        );
+        logFiles.should.have.length(2);
+
+        const gzipped = await fs.readFile(
+          path.join(__dirname, "fileNameSepCompressedAndKeepExt_2012-09-12.log.gz")
+        );
+        const contents = await gunzip(gzipped);
+        contents.toString("utf8").should.eql("First message\n");
+        (await fs.readFile(
+          path.join(__dirname, "fileNameSepCompressedAndKeepExt.log"),
+          "utf8"
+        )).should.eql("Second message\n");
+      });
+    });
+
+    after(async function() {
+      await close(stream);
+      await remove(path.join(__dirname, "fileNameSepCompressedAndKeepExt.log"));
+      await remove(
+        path.join(__dirname, "fileNameSepCompressedAndKeepExt_2012-09-12.log.gz")
+      );
+    });
+  });
+
   describe("using deprecated daysToKeep", () => {
     const onWarning = process.rawListeners("warning").shift();
     let wrapper;
