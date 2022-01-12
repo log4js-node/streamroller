@@ -892,10 +892,10 @@ describe("RollingFileWriteStream", () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
+        pattern: "yyyy-MM-dd",
         compress: true,
         keepFileExt: true,
-        alwaysIncludePattern: true,
-        pattern: "yyyy-MM-dd"
+        alwaysIncludePattern: true
       });
       const flows = Array.from(Array(38).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
@@ -1081,6 +1081,491 @@ describe("RollingFileWriteStream", () => {
             path.format(
               Object.assign({}, fileObj, {
                 base: fileObj.name + ".2012-09-12.1.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("01234");
+    });
+  });
+
+  describe("with fileNameSep", () => {
+    const fileObj = generateTestFile("fileNameSep.log");
+    let s;
+
+    before(async () => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      s = new RollingFileWriteStream(fileObj.path, {
+        pattern: "yyyy-MM-dd",
+        maxSize: 5,
+        fileNameSep: "_"
+      });
+      const flows = Array.from(Array(8).keys()).map(i => () => {
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
+      });
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
+    });
+
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
+    });
+
+    it("should rotate with the same fileNameSep", () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [
+        fileObj.base,
+        fileObj.name + ".log_2012-09-12_1"
+      ];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+
+      fs.readFileSync(path.format(fileObj))
+        .toString()
+        .should.equal("567");
+      fs.readFileSync(
+        path.format({
+          dir: fileObj.dir,
+          base: fileObj.name + fileObj.ext + "_2012-09-12_1"
+        })
+      )
+        .toString()
+        .should.equal("01234");
+    });
+  });
+
+  describe("with fileNameSep and keepFileExt", () => {
+    const fileObj = generateTestFile("keepFileExt.log");
+    let s;
+
+    before(async () => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      s = new RollingFileWriteStream(fileObj.path, {
+        pattern: "yyyy-MM-dd",
+        maxSize: 5,
+        fileNameSep: "_",
+        keepFileExt: true
+      });
+      const flows = Array.from(Array(8).keys()).map(i => () => {
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
+      });
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
+    });
+
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
+    });
+
+    it("should rotate with the same fileNameSep and extension", () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [
+        fileObj.base,
+        fileObj.name + "_2012-09-12_1.log"
+      ];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+
+      fs.readFileSync(path.format(fileObj))
+        .toString()
+        .should.equal("567");
+      fs.readFileSync(
+        path.format({
+          dir: fileObj.dir,
+          base: fileObj.name + "_2012-09-12_1" + fileObj.ext
+        })
+      )
+        .toString()
+        .should.equal("01234");
+    });
+  });
+
+  describe("with fileNameSep and compress true", () => {
+    const fileObj = generateTestFile();
+    let s;
+
+    before(async () => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      s = new RollingFileWriteStream(fileObj.path, {
+        maxSize: 5,
+        pattern: "yyyy-MM-dd",
+        fileNameSep: "_",
+        compress: true
+      });
+      const flows = Array.from(Array(8).keys()).map(i => () => {
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
+      });
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
+    });
+
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
+    });
+
+    it("should rotate with the same fileNameSep and gunzip", () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [
+        fileObj.base,
+        fileObj.base + "_2012-09-12_1.gz"
+      ];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+
+      fs.readFileSync(path.format(fileObj))
+        .toString()
+        .should.equal("567");
+      const content = fs.readFileSync(
+        path.format(
+          Object.assign({}, fileObj, {
+            base: fileObj.base + "_2012-09-12_1.gz"
+          })
+        )
+      );
+      zlib
+        .gunzipSync(content)
+        .toString()
+        .should.equal("01234");
+    });
+  });
+
+  describe("with fileNameSep, keepFileExt and compress", () => {
+    const fileObj = generateTestFile("keepFileExt.log");
+    let s;
+
+    before(async () => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      s = new RollingFileWriteStream(fileObj.path, {
+        maxSize: 5,
+        pattern: "yyyy-MM-dd",
+        fileNameSep: "_",
+        keepFileExt: true,
+        compress: true
+      });
+      const flows = Array.from(Array(8).keys()).map(i => () => {
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
+      });
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
+    });
+
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
+    });
+
+    it("should rotate with the same fileNameSep and extension", () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [
+        fileObj.base,
+        fileObj.name + "_2012-09-12_1.log.gz"
+      ];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+
+      fs.readFileSync(path.format(fileObj))
+        .toString()
+        .should.equal("567");
+      const content = fs.readFileSync(
+        path.format(
+          Object.assign({}, fileObj, {
+            base: fileObj.name + "_2012-09-12_1.log.gz"
+          })
+        )
+      );
+      zlib
+        .gunzipSync(content)
+        .toString()
+        .should.equal("01234");
+    });
+  });
+
+  describe("with fileNameSep, alwaysIncludePattern and keepFileExt", () => {
+    const fileObj = generateTestFile("keepFileExt.log");
+    let s;
+
+    before(async () => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      s = new RollingFileWriteStream(fileObj.path, {
+        maxSize: 5,
+        pattern: "yyyy-MM-dd",
+        fileNameSep: "_",
+        keepFileExt: true,
+        alwaysIncludePattern: true
+      });
+      const flows = Array.from(Array(8).keys()).map(i => () => {
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
+      });
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
+    });
+
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
+    });
+
+    it("should rotate with the same fileNameSep, extension and keep date in the filename", () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [
+        fileObj.name + "_2012-09-12_1.log",
+        fileObj.name + "_2012-09-13.log"
+      ];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+      fs.readFileSync(
+        path.format(
+          Object.assign({}, fileObj, {
+            base: fileObj.name + "_2012-09-13.log"
+          })
+        )
+      )
+        .toString()
+        .should.equal("567");
+      fs.readFileSync(
+        path.format(
+          Object.assign({}, fileObj, {
+            base: fileObj.name + "_2012-09-12_1.log"
+          })
+        )
+      )
+        .toString()
+        .should.equal("01234");
+    });
+  });
+
+  describe("with fileNameSep, 5 maxSize, compress, keepFileExt and alwaysIncludePattern", () => {
+    const fileObj = generateTestFile("keepFileExt.log");
+    let s;
+
+    before(async () => {
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      s = new RollingFileWriteStream(fileObj.path, {
+        maxSize: 5,
+        pattern: "yyyy-MM-dd",
+        fileNameSep: "_",
+        compress: true,
+        keepFileExt: true,
+        alwaysIncludePattern: true
+      });
+      const flows = Array.from(Array(38).keys()).map(i => () => {
+        fakeNow = new Date(2012, 8, 12 + parseInt(i / 5, 10), 10, 37, 11);
+        return new Promise(resolve => {
+          s.write(i.toString(), "utf8", () => resolve());
+        });
+      });
+      for (let i = 0; i < flows.length; i += 1) {
+        await flows[i]();
+      }
+    });
+
+    after(done => {
+      s.end(() => {
+        fs.removeSync(fileObj.dir);
+        done();
+      });
+    });
+
+    it("should rotate every day", () => {
+      const files = fs.readdirSync(fileObj.dir);
+      const expectedFileList = [
+        fileObj.name + "_2012-09-12_1.log.gz", //01234
+        fileObj.name + "_2012-09-13_1.log.gz", //56789
+        fileObj.name + "_2012-09-14_2.log.gz", //101112
+        fileObj.name + "_2012-09-14_1.log.gz", //1314
+        fileObj.name + "_2012-09-15_2.log.gz", //151617
+        fileObj.name + "_2012-09-15_1.log.gz", //1819
+        fileObj.name + "_2012-09-16_2.log.gz", //202122
+        fileObj.name + "_2012-09-16_1.log.gz", //2324
+        fileObj.name + "_2012-09-17_2.log.gz", //252627
+        fileObj.name + "_2012-09-17_1.log.gz", //2829
+        fileObj.name + "_2012-09-18_2.log.gz", //303132
+        fileObj.name + "_2012-09-18_1.log.gz", //3334
+        fileObj.name + "_2012-09-19.log" //353637
+      ];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+      fs.readFileSync(
+        path.format(
+          Object.assign({}, fileObj, {
+            base: fileObj.name + "_2012-09-19.log"
+          })
+        )
+      )
+        .toString()
+        .should.equal("353637");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-18_1.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("3334");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-18_2.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("303132");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-17_1.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("2829");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-17_2.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("252627");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-16_1.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("2324");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-16_2.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("202122");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-15_1.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("1819");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-15_2.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("151617");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-14_1.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("1314");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-14_2.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("101112");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-13_1.log.gz"
+              })
+            )
+          )
+        )
+        .toString()
+        .should.equal("56789");
+      zlib
+        .gunzipSync(
+          fs.readFileSync(
+            path.format(
+              Object.assign({}, fileObj, {
+                base: fileObj.name + "_2012-09-12_1.log.gz"
               })
             )
           )
