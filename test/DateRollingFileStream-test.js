@@ -67,7 +67,7 @@ describe("DateRollingFileStream", function() {
       await remove(path.join(__dirname, "test-date-rolling-file-stream-2"));
     });
 
-    it("should have pattern of .yyyy-MM-dd", function() {
+    it("should have pattern of yyyy-MM-dd", function() {
       stream.options.pattern.should.eql("yyyy-MM-dd");
     });
   });
@@ -150,7 +150,7 @@ describe("DateRollingFileStream", function() {
 
       after(async function() {
         await remove(
-          path.join(__dirname, "test-date-rolling-file-stream-5.2012-09-12")
+          path.join(__dirname, "test-date-rolling-file-stream-5..2012-09-12")
         );
       });
 
@@ -178,7 +178,7 @@ describe("DateRollingFileStream", function() {
       describe("the file with the date", function() {
         it("should contain the first message", async function() {
           const contents = await fs.readFile(
-            path.join(__dirname, "test-date-rolling-file-stream-5.2012-09-12"),
+            path.join(__dirname, "test-date-rolling-file-stream-5..2012-09-12"),
             "utf8"
           );
           contents.should.eql("First message\n");
@@ -200,7 +200,7 @@ describe("DateRollingFileStream", function() {
       );
       stream = new DateRollingFileStream(
         path.join(__dirname, "test-date-rolling-file-stream-pattern"),
-        ".yyyy-MM-dd-hh.log",
+        "yyyy-MM-dd-hh.log",
         { alwaysIncludePattern: true }
       );
 
@@ -292,7 +292,7 @@ describe("DateRollingFileStream", function() {
       fakeNow = new Date(2012, 8, 12, 0, 10, 12);
       stream = new DateRollingFileStream(
         path.join(__dirname, "digits.log"),
-        ".yyyyMMdd"
+        "yyyyMMdd"
       );
       stream.write("First message\n", "utf8", done);
     });
@@ -332,7 +332,7 @@ describe("DateRollingFileStream", function() {
       fakeNow = new Date(2012, 8, 12, 0, 10, 12);
       stream = new DateRollingFileStream(
         path.join(__dirname, "compressed.log"),
-        ".yyyy-MM-dd",
+        "yyyy-MM-dd",
         { compress: true }
       );
       stream.write("First message\n", "utf8", done);
@@ -378,7 +378,7 @@ describe("DateRollingFileStream", function() {
       fakeNow = new Date(2012, 8, 12, 0, 10, 12);
       stream = new DateRollingFileStream(
         path.join(__dirname, "keepFileExt.log"),
-        ".yyyy-MM-dd",
+        "yyyy-MM-dd",
         { keepFileExt: true }
       );
       stream.write("First message\n", "utf8", done);
@@ -420,7 +420,7 @@ describe("DateRollingFileStream", function() {
       fakeNow = new Date(2012, 8, 12, 0, 10, 12);
       stream = new DateRollingFileStream(
         path.join(__dirname, "compressedAndKeepExt.log"),
-        ".yyyy-MM-dd",
+        "yyyy-MM-dd",
         { compress: true, keepFileExt: true }
       );
       stream.write("First message\n", "utf8", done);
@@ -497,7 +497,7 @@ describe("DateRollingFileStream", function() {
       }
       stream = new DateRollingFileStream(
         path.join(__dirname, "daysToKeep.log"),
-        ".yyyy-MM-dd",
+        "yyyy-MM-dd",
         {
           alwaysIncludePattern: true,
           daysToKeep: daysToKeep
@@ -546,7 +546,7 @@ describe("DateRollingFileStream", function() {
       }
       stream = new DateRollingFileStream(
         path.join(__dirname, "compressedDaysToKeep.log"),
-        ".yyyy-MM-dd",
+        "yyyy-MM-dd",
         {
           alwaysIncludePattern: true,
           compress: true,
