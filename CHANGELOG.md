@@ -1,4 +1,37 @@
-# Streamroller Changelog
+# streamroller Changelog
+
+## 3.0.0
+
+- [Fix for mode to apply to compressed file](https://github.com/log4js-node/streamroller/pull/65) - thanks [@rnd-debug](https://github.com/rnd-debug)
+- [Allow for 0 backups (only hot file)](https://github.com/log4js-node/streamroller/pull/74) - thanks [@peteriman](https://github.com/peteriman)
+- [Exposed fileNameSep to be configurable](https://github.com/log4js-node/streamroller/pull/67) - thanks [@laidaxian](https://github.com/laidaxian)
+  - [Fix for fileNameSep affecting globally](https://github.com/log4js-node/streamroller/pull/79) - thanks [@peteriman](https://github.com/peteriman)
+- [Fix for extra separator in filenames](https://github.com/log4js-node/streamroller/pull/75) - thanks [@peteriman](https://github.com/peteriman)
+- [Moved to options.numBackups instead of options.daysToKeep](https://github.com/log4js-node/streamroller/pull/78) - thanks [@peteriman](https://github.com/peteriman)
+- [Improved test case performance for fakeNow](https://github.com/log4js-node/streamroller/pull/76) - thanks [@peteriman](https://github.com/peteriman)
+- <details><summary>Updated dependencies (click for details) - thanks <a href="https://github.com/peteriman">@peteriman</a></summary>
+  
+  - [package.json](https://github.com/log4js-node/streamroller/pull/70)
+    - @commitlint/cli from 8.1.0 to 16.0.2
+    - @commitlint/config-conventional from 8.1.0 to 16.0.0
+    - @type/nodes 17.0.8
+    - eslint from 6.0.1 to 8.6.0
+    - mocha from 6.1.4 to 9.1.3
+    - nyc from 14.1.1 to 15.1.0
+  - [package-lock.json](https://github.com/log4js-node/streamroller/pull/71) 
+    - @babel/compat-data from 7.16.4 to 7.16.8 
+    - @babel/generator from 7.16.7 to 7.16.8
+    - @babel/parser from 7.16.7 to 7.16.8
+    - @babel/travers from 7.16.7 to 7.16.8
+    - @babel/types from 7.16.7 to 7.16.8
+  - [package-lock.json](https://github.com/log4js-node/streamroller/pull/77)
+    - caniuse-lite from 1.0.30001298 to 1.0.30001299
+    - electron-to-chromium from 1.4.39 to 1.4.44
+  - [package.json](https://github.com/nomiddlename/date-format/pull/30)
+    - date-format from 3.0.0 to 4.0.1
+    - husky from 3.0.0 to 7.0.4
+    - fs-extra from 8.1.0 to 10.0.0
+</details>
 
 ## 2.2.4
 
