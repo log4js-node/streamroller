@@ -488,6 +488,7 @@ describe("DateRollingFileStream", function() {
     var numOriginalLogs = 10;
 
     before(async function() {
+      fakeNow = new Date(2012, 8, 13, 0, 10, 12); // pre-req to trigger a date-change later
       for (let i = 0; i < numOriginalLogs; i += 1) {
         await fs.writeFile(
           path.join(__dirname, `daysToKeep.log.2012-09-${20-i}`), 
@@ -507,8 +508,8 @@ describe("DateRollingFileStream", function() {
 
     describe("when the day changes", function() {
       before(function(done) {
-        fakeNow = new Date(2012, 8, 21, 0, 10, 12);
-        stream.write("Second message\n", "utf8", done);
+        fakeNow = new Date(2012, 8, 21, 0, 10, 12); // trigger a date-change
+        stream.write("Test message\n", "utf8", done);
       });
 
       it("should be daysToKeep + 1 files left from numOriginalLogs", async function() {
@@ -536,8 +537,8 @@ describe("DateRollingFileStream", function() {
     const numOriginalLogs = 10;
 
     before(async function() {
+      fakeNow = new Date(2012, 8, 13, 0, 10, 12); // pre-req to trigger a date-change later
       for (let i = numOriginalLogs; i >= 0; i -= 1) {
-        fakeNow = new Date(2012, 8, 20 - i, 0, 10, 12);
         const contents = await gzip(`Message on day ${i}\n`);
         await fs.writeFile(
           path.join(__dirname, `compressedDaysToKeep.log.2012-09-${20-i}.gz`),
@@ -557,7 +558,7 @@ describe("DateRollingFileStream", function() {
 
     describe("when the day changes", function() {
       before(function(done) {
-        fakeNow = new Date(2012, 8, 21, 0, 10, 12);
+        fakeNow = new Date(2012, 8, 21, 0, 10, 12); // trigger a date-change
         stream.write("New file message\n", "utf8", done);
       });
 
