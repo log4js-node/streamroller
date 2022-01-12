@@ -119,6 +119,30 @@ describe("RollingFileStream", function() {
     });
   });
 
+  describe("with invalid number of backups", () => {
+    it("should complain about negative backups", () => {
+      const backups = -1;
+      (() => {
+        new RollingFileStream(
+          path.join(__dirname, "test-rolling-file-stream"),
+          1024,
+          backups
+        );
+      }).should.throw(`backups (${backups}) should be >= 0`);
+    });
+
+    it("should complain about backups >= Number.MAX_SAFE_INTEGER", () => {
+      const backups = Number.MAX_SAFE_INTEGER;
+      (() => {
+        new RollingFileStream(
+          path.join(__dirname, "test-rolling-file-stream"),
+          1024,
+          backups
+        );
+      }).should.throw(`backups (${backups}) should be < Number.MAX_SAFE_INTEGER`);
+    });
+  });
+
   describe("writing less than the file size", function() {
     before(async function() {
       await remove("test-rolling-file-stream-write-less");

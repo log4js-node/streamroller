@@ -460,6 +460,28 @@ describe("DateRollingFileStream", function() {
     });
   });
 
+  describe("with invalid number of daysToKeep", () => {
+    it("should complain about negative daysToKeep", () => {
+      const daysToKeep = -1;
+      (() => {
+        new DateRollingFileStream(
+          path.join(__dirname, "daysToKeep.log"),
+          { daysToKeep: daysToKeep }
+        );
+      }).should.throw(`options.daysToKeep (${daysToKeep}) should be >= 0`);
+    });
+
+    it("should complain about daysToKeep >= Number.MAX_SAFE_INTEGER", () => {
+      const daysToKeep = Number.MAX_SAFE_INTEGER;
+      (() => {
+        new DateRollingFileStream(
+          path.join(__dirname, "daysToKeep.log"),
+          { daysToKeep: daysToKeep }
+        );
+      }).should.throw(`options.daysToKeep (${daysToKeep}) should be < Number.MAX_SAFE_INTEGER`);
+    });
+  });
+
   describe("with daysToKeep option", function() {
     let stream;
     var daysToKeep = 4;
@@ -539,7 +561,7 @@ describe("DateRollingFileStream", function() {
         stream.write("New file message\n", "utf8", done);
       });
 
-      it("should be 4 files left from original 3", async function() {
+      it("should be 5 files left from original 11", async function() {
         const files = await fs.readdir(__dirname);
         var logFiles = files.filter(
           file => file.indexOf("compressedDaysToKeep.log") > -1
