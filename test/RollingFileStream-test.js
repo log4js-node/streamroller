@@ -128,7 +128,7 @@ describe("RollingFileStream", function() {
           1024,
           backups
         );
-      }).should.throw(`backups (${backups}) should be >= 0`);
+      }).should.throw(`options.numBackups (${backups}) should be >= 0`);
     });
 
     it("should complain about backups >= Number.MAX_SAFE_INTEGER", () => {
@@ -139,7 +139,51 @@ describe("RollingFileStream", function() {
           1024,
           backups
         );
-      }).should.throw(`backups (${backups}) should be < Number.MAX_SAFE_INTEGER`);
+      }).should.throw(`options.numBackups (${backups}) should be < Number.MAX_SAFE_INTEGER`);
+    });
+  });
+
+  describe("using backups", () => {
+    describe("with backups but not options.numBackups", () => {
+      let stream;
+      it("should be routed from backups to options.numBackups", function() {
+        stream = new RollingFileStream(
+          path.join(__dirname, "test-rolling-file-stream"),
+          1024,
+          3
+        );
+        stream.options.numBackups.should.eql(stream.backups);
+      });
+
+      it("should be generated into stream.options.numToKeep from options.numBackups", function() {
+        stream.options.numToKeep.should.eql(stream.options.numBackups + 1);
+      });
+
+      after(async function() {
+        await close(stream);
+        await remove("test-rolling-file-stream");
+      });
+    });
+
+    describe("with both backups and options.numBackups", function() {
+      let stream;
+      it("should take options.numBackups to supercede backups", function() {
+        stream = new RollingFileStream(
+          path.join(__dirname, "test-rolling-file-stream"),
+          1024,
+          3,
+          { numBackups: 9 }
+        );
+        stream.backups.should.not.eql(3);
+        stream.backups.should.eql(9);
+        stream.options.numBackups.should.eql(9);
+        stream.options.numToKeep.should.eql(10);
+      });
+
+      after(async function() {
+        await close(stream);
+        await remove("test-rolling-file-stream");
+      });
     });
   });
 
