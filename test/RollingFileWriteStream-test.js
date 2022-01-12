@@ -472,7 +472,7 @@ describe("RollingFileWriteStream", () => {
     });
   });
 
-  describe("with 5 maxSize and 3 files limit", () => {
+  describe("with 5 maxSize and 3 backups limit", () => {
     const fileObj = generateTestFile();
     let s;
 
@@ -480,7 +480,7 @@ describe("RollingFileWriteStream", () => {
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
-        numToKeep: 3
+        numToKeep: 4
       });
       const flows = Array.from(Array(38).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 5), 10, 37, 11);
@@ -543,7 +543,7 @@ describe("RollingFileWriteStream", () => {
     });
   });
 
-  describe("with 5 maxSize and 3 files limit, rotating daily", () => {
+  describe("with 5 maxSize and 3 backups limit, rotating daily", () => {
     const fileObj = generateTestFile();
     let s;
 
@@ -552,7 +552,7 @@ describe("RollingFileWriteStream", () => {
       s = new RollingFileWriteStream(fileObj.path, {
         maxSize: 5,
         pattern: "yyyy-MM-dd",
-        numToKeep: 3
+        numToKeep: 4
       });
       const flows = Array.from(Array(38).keys()).map(i => () => {
         fakeNow = new Date(2012, 8, 12 + parseInt(i / 10), 10, 37, 11);

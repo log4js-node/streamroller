@@ -55,7 +55,7 @@ When filename size >= maxSize then:
   * `compress` \<boolean\> - defaults to `false` - compress the backup files using gzip (files will have `.gz` extension).
   * `keepFileExt` \<boolean\> - defaults to `false` - keep the file original extension. e.g.: `abc.log -> abc.2013-08-30.log`.
   * `alwaysIncludePattern` \<boolean\> - defaults to `false` - extend the initial file with the pattern
-  * `daysToKeep` \<integer\> - defaults to `MAX_SAFE_INTEGER` - the number of old files that matches the pattern to keep (excluding the hot file)
+  * `daysToKeep` \<integer\> - defaults to `1` - the number of old files that matches the pattern to keep (excluding the hot file)
 
 
 This returns a `WritableStream`. When the current time, formatted as `pattern`, changes then the current file will be renamed to `filename.formattedDate` where `formattedDate` is the result of processing the date through the pattern, and a new file will begin to be written. Streamroller uses [date-format](http://github.com/nomiddlename/date-format) to format dates, and the `pattern` should use the date-format format. e.g. with a `pattern` of `".yyyy-MM-dd"`, and assuming today is August 29, 2013 then writing to the stream today will just write to `filename`. At midnight (or more precisely, at the next file write after midnight), `filename` will be renamed to `filename.2013-08-29` and a new `filename` will be created. If `options.alwaysIncludePattern` is true, then the initial file will be `filename.2013-08-29` and no renaming will occur at midnight, but a new file will be written to with the name `filename.2013-08-30`.
