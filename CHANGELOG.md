@@ -4,7 +4,7 @@
 
 - [Not to publish misc files to NPM](https://github.com/log4js-node/streamroller/pull/82) - thanks [@peteriman](https://github.com/peteriman)
 - Updated dependencies - thanks [@peteriman](https://github.com/peteriman)
-  - [date-format from 4.0.1 to 4.0.2](https://github.com/log4js-node/streamroller/pull/84)
+  - [date-format from 4.0.1 to 4.0.2](https://github.com/log4js-node/streamroller/pull/86)
   - [electron-to-chromium from 1.4.44 to 1.4.45](https://github.com/log4js-node/streamroller/pull/81) 
 
 ## 3.0.0
