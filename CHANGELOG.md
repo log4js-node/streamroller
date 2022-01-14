@@ -1,5 +1,11 @@
 # streamroller Changelog
 
+## 3.0.1
+
+- [Not to publish misc files to NPM](https://github.com/log4js-node/streamroller/pull/82) - thanks [@peteriman](https://github.com/peteriman)
+- Updated dependencies - thanks [@peteriman](https://github.com/peteriman)
+  - [electron-to-chromium from 1.4.44 to 1.4.45](https://github.com/log4js-node/streamroller/pull/81) 
+
 ## 3.0.0
 
 - [Fix for mode to apply to compressed file](https://github.com/log4js-node/streamroller/pull/65) - thanks [@rnd-debug](https://github.com/rnd-debug)
