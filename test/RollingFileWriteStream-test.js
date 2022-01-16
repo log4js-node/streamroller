@@ -99,14 +99,14 @@ describe("RollingFileWriteStream", () => {
     it("should take a filename and options, return Writable", () => {
       s.should.be.an.instanceOf(stream.Writable);
       s.currentFileStream.path.should.eql(fileObj.path);
-      s.currentFileStream.mode.should.eql(420);
+      s.currentFileStream.mode.should.eql(0o600);
       s.currentFileStream.flags.should.eql("a");
     });
 
     it("should apply default options", () => {
       s.options.maxSize.should.eql(Number.MAX_SAFE_INTEGER);
       s.options.encoding.should.eql("utf8");
-      s.options.mode.should.eql(420);
+      s.options.mode.should.eql(0o600);
       s.options.flags.should.eql("a");
       s.options.compress.should.eql(false);
       s.options.keepFileExt.should.eql(false);

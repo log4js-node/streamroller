@@ -65,7 +65,7 @@ describe("RollingFileStream", function() {
     });
 
     it("should apply default settings to the underlying stream", function() {
-      stream.theStream.mode.should.eql(420);
+      stream.theStream.mode.should.eql(0o600);
       stream.theStream.flags.should.eql("a");
     });
   });

@@ -48,7 +48,7 @@ describe("DateRollingFileStream", function() {
     });
 
     it("with default settings for the underlying stream", function() {
-      stream.currentFileStream.mode.should.eql(420);
+      stream.currentFileStream.mode.should.eql(0o600);
       stream.currentFileStream.flags.should.eql("a");
     });
   });
