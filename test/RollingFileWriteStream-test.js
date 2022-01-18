@@ -1905,6 +1905,7 @@ describe("RollingFileWriteStream", () => {
   describe("when deleting old files and there is an error", () => {
     let s;
     before(done => {
+      // using ensureDir for test coverage for fs.unlink(f).catch(e) of deleteFiles() in lib/RollingFileWriteStream.js 
       fs.ensureDir(path.join(__dirname, "tmp-delete-test/logfile.log.2"), done);
     });
 
