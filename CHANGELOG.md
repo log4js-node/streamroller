@@ -1,5 +1,17 @@
 # streamroller Changelog
 
+## 3.0.2
+
+- [Changed default file modes from 0o644 to 0o600 for better security](https://github.com/log4js-node/streamroller/pull/87) - thanks [@peteriman](https://github.com/peteriman)
+- [Housekeeping for comments and .gitignore](https://github.com/log4js-node/streamroller/pull/89) - thanks [@peteriman](https://github.com/peteriman)
+- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/88) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump caniuse-lite from 1.0.30001299 to 1.0.30001300
+  - chore(deps-dev): bump electron-to-chromium from 1.4.45 to 1.4.47
+  - chore(deps-dev): bump @types/node from 17.0.8 to 17.0.9
+  - chore(deps-dev): bump eslint from 8.6.0 to 8.7.0
+  - chore(deps-dev): bump mocha from 9.1.3 to 9.1.4
+  - chore(deps): bump date-format from 4.0.2 to 4.0.3
+
 ## 3.0.1
 
 - [Not to publish misc files to NPM](https://github.com/log4js-node/streamroller/pull/82) - thanks [@peteriman](https://github.com/peteriman)
