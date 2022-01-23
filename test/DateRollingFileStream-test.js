@@ -646,7 +646,7 @@ describe("DateRollingFileStream", function() {
     before(done => {
       const muteSelfDeprecation = (listener) => {
         return (warning) => {
-          if (warning.name === "DeprecationWarning" && warning.code === "StreamRoller0001") {
+          if (warning.name === "DeprecationWarning" && warning.code === "streamroller-DEP0001") {
             return;
           } else {
             listener(warning);
@@ -669,7 +669,7 @@ describe("DateRollingFileStream", function() {
     it("should have deprecated warning for daysToKeep", () => {
       process.on("warning", (warning) => {
         warning.name.should.eql("DeprecationWarning");
-        warning.code.should.eql("StreamRoller0001");
+        warning.code.should.eql("streamroller-DEP0001");
       });
 
       stream = new DateRollingFileStream(
