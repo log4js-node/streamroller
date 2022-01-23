@@ -4,7 +4,8 @@
   "description": "file streams that roll over when size limits, or dates are reached",
   "main": "lib/index.js",
   "files": [
-    "lib"
+    "lib",
+    "CHANGELOG.md"
   ],
   "directories": {
     "test": "test"
