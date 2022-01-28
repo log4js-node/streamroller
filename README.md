@@ -24,10 +24,10 @@ The streams behave the same as standard node.js streams, except that when certai
 * `numBackups` \<integer\> - defaults to `1` - the number of old files to keep (excluding the hot file)
 * `options` \<Object\>
   * `encoding` \<string\> - defaults to `'utf8'`
-  * `mode` \<integer\> - defaults to `0o600`
-  * `flags` \<string\> - defaults to `'a'` (see [fs.open](https://nodejs.org/dist/latest-v8.x/docs/api/fs.html#fs_fs_open_path_flags_mode_callback) for more details)
-  * `compress` \<boolean\> - defaults to `false` - compress the backup files using gzip (files will have `.gz` extension).
-  * `keepFileExt` \<boolean\> - defaults to `false` - keep the file original extension. e.g.: `abc.log -> abc.1.log`.
+  * `mode` \<integer\> - defaults to `0o600` (see [node.js file modes](https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_file_modes))
+  * `flags` \<string\> - defaults to `'a'` (see [node.js file flags](https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_file_system_flags))
+  * `compress` \<boolean\> - defaults to `false` - compress the backup files using gzip (backup files will have `.gz` extension)
+  * `keepFileExt` \<boolean\> - defaults to `false` - preserve the file extension when rotating log files (`file.log` becomes `file.1.log` instead of `file.log.1`).
   * `fileNameSep` \<string\> - defaults to `'.'` - the filename separator when rolling. e.g.: abc.log`.`1 or abc`.`1.log (keepFileExt)
 
 This returns a `WritableStream`. When the current file being written to (given by `filename`) gets up to or larger than `maxSize`, then the current file will be renamed to `filename.1` and a new file will start being written to. Up to `numBackups` of old files are maintained, so if `numBackups` is 3 then there will be 4 files:
@@ -51,10 +51,10 @@ When filename size >= maxSize then:
 * `pattern` \<string\> - defaults to `yyyy-MM-dd` - the date pattern to trigger rolling (see below)
 * `options` \<Object\>
   * `encoding` \<string\> - defaults to `'utf8'`
-  * `mode` \<integer\> - defaults to `0o600`
-  * `flags` \<string\> - defaults to `'a'` (see [fs.open](https://nodejs.org/dist/latest-v8.x/docs/api/fs.html#fs_fs_open_path_flags_mode_callback) for more details)
-  * `compress` \<boolean\> - defaults to `false` - compress the backup files using gzip (files will have `.gz` extension).
-  * `keepFileExt` \<boolean\> - defaults to `false` - keep the file original extension. e.g.: `abc.log -> abc.2013-08-30.log`.
+  * `mode` \<integer\> - defaults to `0o600` (see [node.js file modes](https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_file_modes))
+  * `flags` \<string\> - defaults to `'a'` (see [node.js file flags](https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_file_system_flags))
+  * `compress` \<boolean\> - defaults to `false` - compress the backup files using gzip (backup files will have `.gz` extension)
+  * `keepFileExt` \<boolean\> - defaults to `false` - preserve the file extension when rotating log files (`file.log` becomes `file.2017-05-30.log` instead of `file.log.2017-05-30`).
   * `fileNameSep` \<string\> - defaults to `'.'` - the filename separator when rolling. e.g.: abc.log`.`2013-08-30 or abc`.`2013-08-30.log (keepFileExt)
   * `alwaysIncludePattern` \<boolean\> - defaults to `false` - extend the initial file with the pattern
   * <strike>`daysToKeep`</strike> `numBackups` \<integer\> - defaults to `1` - the number of old files that matches the pattern to keep (excluding the hot file)
