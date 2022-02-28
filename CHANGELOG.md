@@ -46,7 +46,7 @@
   - [package-lock.json](https://github.com/log4js-node/streamroller/pull/77)
     - caniuse-lite from 1.0.30001298 to 1.0.30001299
     - electron-to-chromium from 1.4.39 to 1.4.44
-  - [package.json](https://github.com/nomiddlename/date-format/pull/30)
+  - [package.json](https://github.com/log4js-node/streamroller/pull/80)
     - date-format from 3.0.0 to 4.0.1
     - husky from 3.0.0 to 7.0.4
     - fs-extra from 8.1.0 to 10.0.0
