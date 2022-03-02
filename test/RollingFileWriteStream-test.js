@@ -1838,6 +1838,147 @@ describe("RollingFileWriteStream", () => {
     });
   });
 
+  describe("when multi-dir does not exist (recursive, nodejs >= 10.12.0)", () => {
+    const testFile = "tmp_/tmpA/tmpB/tmpC/ignored.log";
+    let s;
+
+    before(done => {
+      fs.removeSync("tmp_/tmpA");
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      s = new RollingFileWriteStream(testFile);
+      s.write("test", "utf8", done);
+    });
+
+    after(done => {
+      s.end(() => {
+        fs.removeSync("tmp_/tmpA");
+        done();
+      });
+    });
+
+    it("should create the dir", () => {
+      const files = fs.readdirSync(path.dirname(testFile));
+      const expectedFileList = ["ignored.log"];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+
+      fs.readFileSync(testFile)
+        .toString()
+        .should.equal("test");
+    });
+  });
+
+  describe("when multi-dir does not exist (non-recursive, nodejs < 10.12.0)", () => {
+    const testFile = "tmp_/tmpA/tmpB/tmpC/ignored.log";
+    let s;
+
+    before(done => {
+      fs.removeSync("tmp_/tmpA");
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      const RollingFileWriteStream = proxyquire("../lib/RollingFileWriteStream", {
+        "./now": mockNow,
+        "fs-extra": {
+          mkdirSync(dirPath, options) {
+            return fs.mkdirSync(dirPath, { ...options, ...{ recursive: false } });
+          } 
+        }
+      });
+      s = new RollingFileWriteStream(testFile);
+      s.write("test", "utf8", done);
+    });
+
+    after(done => {
+      s.end(() => {
+        fs.removeSync("tmp_/tmpA");
+        done();
+      });
+    });
+
+    it("should create the dir", () => {
+      const files = fs.readdirSync(path.dirname(testFile));
+      const expectedFileList = ["ignored.log"];
+      files.should.containDeep(expectedFileList);
+      files.length.should.equal(expectedFileList.length);
+
+      fs.readFileSync(testFile)
+        .toString()
+        .should.equal("test");
+    });
+  });
+
+  describe("when multi-dir does not exist (error handling)", () => {
+    const testFile = "tmp_/tmpA/tmpB/tmpC/ignored.log";
+    let s;
+
+    before(done => {
+      fs.removeSync("tmp_/tmpA");
+      fakeNow = new Date(2012, 8, 12, 10, 37, 11);
+      done();
+    });
+
+    after(done => {
+      try {
+        s.end(() => {
+          fs.removeSync("tmp_/tmpA");
+          done();
+        });
+      } catch (e) {
+        done();
+      }
+    });
+
+    it("should throw EPERM error", () => {
+      const errorEPERM = new Error("EPERM");
+      errorEPERM.code = "EPERM";
+      (() => {
+        const RollingFileWriteStream = proxyquire("../lib/RollingFileWriteStream", {
+          "./now": mockNow,
+          "fs-extra": {
+            mkdirSync() {
+              throw errorEPERM;
+            } 
+          }
+        });
+        s = new RollingFileWriteStream(testFile);
+      }).should.throw(errorEPERM);
+    });
+
+    const errorEROFS = new Error("EROFS");
+    errorEROFS.code = "EROFS";
+
+    it("should throw EROFS error", () => {
+      (() => {
+        const RollingFileWriteStream = proxyquire("../lib/RollingFileWriteStream", {
+          "./now": mockNow,
+          "fs-extra": {
+            mkdirSync() {
+              throw errorEROFS;
+            },
+            statSync() {
+              return { isDirectory() { return false; } };
+            }
+          }
+        });
+        s = new RollingFileWriteStream(testFile);
+      }).should.throw(errorEROFS);
+    });
+
+    it("should not throw EROFS error", () => {
+      (() => {
+        fs.mkdirSync("tmp_/tmpA/tmpB/tmpC", { recursive: true });
+        const RollingFileWriteStream = proxyquire("../lib/RollingFileWriteStream", {
+          "./now": mockNow,
+          "fs-extra": {
+            mkdirSync() {
+              throw errorEROFS;
+            }
+          }
+        });
+        s = new RollingFileWriteStream(testFile);
+      }).should.not.throw(errorEROFS);
+    });
+  });
+
   describe("when given just a base filename with no dir", () => {
     let s;
     before(done => {
