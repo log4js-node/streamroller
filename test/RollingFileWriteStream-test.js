@@ -1839,11 +1839,11 @@ describe("RollingFileWriteStream", () => {
   });
 
   describe("when multi-dir does not exist (recursive, nodejs >= 10.12.0)", () => {
-    const testFile = "tmp_/tmpA/tmpB/tmpC/ignored.log";
+    const testFile = path.join(__dirname, "tmp_/tmpA/tmpB/tmpC/ignored.log");
     let s;
 
     before(done => {
-      fs.removeSync("tmp_/tmpA");
+      fs.removeSync(path.join(__dirname, "tmp_/tmpA"));
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       s = new RollingFileWriteStream(testFile);
       s.write("test", "utf8", done);
@@ -1851,7 +1851,7 @@ describe("RollingFileWriteStream", () => {
 
     after(done => {
       s.end(() => {
-        fs.removeSync("tmp_/tmpA");
+        fs.removeSync(path.join(__dirname, "tmp_/tmpA"));
         done();
       });
     });
@@ -1869,11 +1869,11 @@ describe("RollingFileWriteStream", () => {
   });
 
   describe("when multi-dir does not exist (non-recursive, nodejs < 10.12.0)", () => {
-    const testFile = "tmp_/tmpA/tmpB/tmpC/ignored.log";
+    const testFile = path.join(__dirname, "tmp_/tmpA/tmpB/tmpC/ignored.log");
     let s;
 
     before(done => {
-      fs.removeSync("tmp_/tmpA");
+      fs.removeSync(path.join(__dirname, "tmp_/tmpA"));
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       const RollingFileWriteStream = proxyquire("../lib/RollingFileWriteStream", {
         "./now": mockNow,
@@ -1889,7 +1889,7 @@ describe("RollingFileWriteStream", () => {
 
     after(done => {
       s.end(() => {
-        fs.removeSync("tmp_/tmpA");
+        fs.removeSync(path.join(__dirname, "tmp_/tmpA"));
         done();
       });
     });
@@ -1907,11 +1907,11 @@ describe("RollingFileWriteStream", () => {
   });
 
   describe("when multi-dir does not exist (error handling)", () => {
-    const testFile = "tmp_/tmpA/tmpB/tmpC/ignored.log";
+    const testFile = path.join(__dirname, "tmp_/tmpA/tmpB/tmpC/ignored.log");
     let s;
 
     before(done => {
-      fs.removeSync("tmp_/tmpA");
+      fs.removeSync(path.join(__dirname, "tmp_/tmpA"));
       fakeNow = new Date(2012, 8, 12, 10, 37, 11);
       done();
     });
@@ -1919,7 +1919,7 @@ describe("RollingFileWriteStream", () => {
     after(done => {
       try {
         s.end(() => {
-          fs.removeSync("tmp_/tmpA");
+          fs.removeSync(path.join(__dirname, "tmp_/tmpA"));
           done();
         });
       } catch (e) {
@@ -1965,7 +1965,7 @@ describe("RollingFileWriteStream", () => {
 
     it("should not throw EROFS error", () => {
       (() => {
-        fs.mkdirSync("tmp_/tmpA/tmpB/tmpC", { recursive: true });
+        fs.mkdirSync(path.join(__dirname, "tmp_/tmpA/tmpB/tmpC"), { recursive: true });
         const RollingFileWriteStream = proxyquire("../lib/RollingFileWriteStream", {
           "./now": mockNow,
           "fs-extra": {
