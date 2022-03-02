@@ -10,7 +10,7 @@
 - [test: 100% test coverage](https://github.com/log4js-node/streamroller/pull/94) - thanks [@peteriman](https://github.com/peteriman)
 - [Updated dependencies](https://github.com/log4js-node/streamroller/pull/97) - thanks [@peteriman](https://github.com/peteriman)
   - chore(deps-dev): bump @commitlint/cli from 16.1.0 to 16.2.1
-  - chore(deps-dev): bump @commitlint/config-conventional from 16.0.0 to … 
+  - chore(deps-dev): bump @commitlint/config-conventional from 16.0.0 to 16.2.1
   - chore(deps-dev): bump @types/node from 17.0.16 to 17.0.21
   - chore(deps-dev): bump eslint from 8.8.0 to 8.10.0
   - chore(deps-dev): bump mocha from 9.2.0 to 9.2.1
