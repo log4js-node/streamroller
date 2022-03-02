@@ -1,5 +1,28 @@
 # streamroller Changelog
 
+## 3.0.3
+
+- [Provide backward compatibility for RollingFileWriteStream to recursively create directory](https://github.com/log4js-node/streamroller/pull/96) - thanks [@peteriman](https://github.com/peteriman)
+- [100% test coverage](https://github.com/log4js-node/streamroller/pull/94) - thanks [@peteriman](https://github.com/peteriman)
+- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/97) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump @commitlint/cli from 16.1.0 to 16.2.1
+  - chore(deps-dev): bump @commitlint/config-conventional from 16.0.0 to … 
+  - chore(deps-dev): bump @types/node from 17.0.16 to 17.0.21
+  - chore(deps-dev): bump eslint from 8.8.0 to 8.10.0
+  - chore(deps-dev): bump mocha from 9.2.0 to 9.2.1
+  - chore(deps): bump date-format from 4.0.3 to 4.0.4
+  - chore(deps): bump fs-extra from 10.0.0 to 10.0.1
+- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/95) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump @commitlint/cli from 16.0.2 to 16.1.0
+  - chore(deps-dev): bump @types/node from 17.0.9 to 17.0.16
+  - chore(deps-dev): bump eslint from 8.7.0 to 8.8.0
+  - chore(deps-dev): bump proxyquire from 2.1.1 to 2.1.3
+  - chore(deps): bump debug from 4.1.1 to 4.3.3
+- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/92) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps): updated package-lock.json 
+- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/91) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump mocha from 9.1.4 to 9.2.0
+
 ## 3.0.2
 
 - [Changed default file modes from 0o644 to 0o600 for better security](https://github.com/log4js-node/streamroller/pull/87) - thanks [@peteriman](https://github.com/peteriman)
