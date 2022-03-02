@@ -1,9 +1,13 @@
 # streamroller Changelog
 
+## 3.0.4
+
+- [test: remove test file/folder remnants](https://github.com/log4js-node/streamroller/pull/99) - thanks [@peteriman](https://github.com/peteriman)
+
 ## 3.0.3
 
-- [Provide backward compatibility for RollingFileWriteStream to recursively create directory](https://github.com/log4js-node/streamroller/pull/96) - thanks [@peteriman](https://github.com/peteriman)
-- [100% test coverage](https://github.com/log4js-node/streamroller/pull/94) - thanks [@peteriman](https://github.com/peteriman)
+- [compat: backward compatibility for RollingFileWriteStream to recursively create directory](https://github.com/log4js-node/streamroller/pull/96) - thanks [@peteriman](https://github.com/peteriman)
+- [test: 100% test coverage](https://github.com/log4js-node/streamroller/pull/94) - thanks [@peteriman](https://github.com/peteriman)
 - [Updated dependencies](https://github.com/log4js-node/streamroller/pull/97) - thanks [@peteriman](https://github.com/peteriman)
   - chore(deps-dev): bump @commitlint/cli from 16.1.0 to 16.2.1
   - chore(deps-dev): bump @commitlint/config-conventional from 16.0.0 to … 
