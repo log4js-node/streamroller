@@ -55,7 +55,7 @@ describe("RollingFileWriteStream", () => {
   describe("with no arguments", () => {
     it("should throw an error", () => {
       (() => new RollingFileWriteStream()).should.throw(
-        /(the )?"?path"? (argument )?must be (a|of type) string\. received (type )?undefined/i
+        /Invalid filename:/i
       );
     });
   });
