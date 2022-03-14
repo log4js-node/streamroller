@@ -3,7 +3,7 @@
 ## 3.0.5
 
 - [chore(validation): added filename validation](https://github.com/log4js-node/streamroller/pull/101) - thanks [@peteriman](https://github.com/peteriman)
-- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/102) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/109) - thanks [@peteriman](https://github.com/peteriman)
   - eslint from 8.10.0 to 8.11.0
   - mocha from 9.2.1 to 9.2.2
   - date-format from 4.0.4 to 4.0.5
