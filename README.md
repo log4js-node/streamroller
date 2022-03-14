@@ -60,6 +60,12 @@ When filename size >= maxSize then:
   * `fileNameSep` \<string\> - defaults to `'.'` - the filename separator when rolling. e.g.: abc.log`.`2013-08-30 or abc`.`2013-08-30.log (keepFileExt)
   * `alwaysIncludePattern` \<boolean\> - defaults to `false` - extend the initial file with the pattern
   * <strike>`daysToKeep`</strike> `numBackups` \<integer\> - defaults to `1` - the number of old files that matches the pattern to keep (excluding the hot file)
+  * `maxSize` \<integer\> - defaults to `MAX_SAFE_INTEGER` - the size in bytes to trigger a rollover
 
-
-This returns a `WritableStream`. When the current time, formatted as `pattern`, changes then the current file will be renamed to `filename.formattedDate` where `formattedDate` is the result of processing the date through the pattern, and a new file will begin to be written. Streamroller uses [date-format](http://github.com/nomiddlename/date-format) to format dates, and the `pattern` should use the date-format format. e.g. with a `pattern` of `"yyyy-MM-dd"`, and assuming today is August 29, 2013 then writing to the stream today will just write to `filename`. At midnight (or more precisely, at the next file write after midnight), `filename` will be renamed to `filename.2013-08-29` and a new `filename` will be created. If `options.alwaysIncludePattern` is true, then the initial file will be `filename.2013-08-29` and no renaming will occur at midnight, but a new file will be written to with the name `filename.2013-08-30`.
+This returns a `WritableStream`. When the current time, formatted as `pattern`, changes then the current file will be renamed to `filename.formattedDate` where `formattedDate` is the result of processing the date through the pattern, and a new file will begin to be written. Streamroller uses [date-format](http://github.com/nomiddlename/date-format) to format dates, and the `pattern` should use the date-format format. e.g. with a `pattern` of `"yyyy-MM-dd"`, and assuming today is August 29, 2013 then writing to the stream today will just write to `filename`. At midnight (or more precisely, at the next file write after midnight), `filename` will be renamed to `filename.2013-08-29` and a new `filename` will be created. If `options.alwaysIncludePattern` is true, then the initial file will be `filename.2013-08-29` and no renaming will occur at midnight, but a new file will be written to with the name `filename.2013-08-30`. If `maxSize` is populated, when the current file being written to (given by `filename`) gets up to or larger than `maxSize`, then the current file will be renamed to `filename.pattern.1` and a new file will start being written to. Up to `numBackups` of old files are maintained, so if `numBackups` is 3 then there will be 4 files:
+<pre>
+     filename
+     filename.20220131.1
+     filename.20220131.2
+     filename.20220131.3
+</pre>
