@@ -1,5 +1,17 @@
 # streamroller Changelog
 
+## 3.0.5
+
+- [chore(validation): added filename validation](https://github.com/log4js-node/streamroller/pull/101) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/102) - thanks [@peteriman](https://github.com/peteriman)
+  - eslint from 8.10.0 to 8.11.0
+  - mocha from 9.2.1 to 9.2.2
+  - date-format from 4.0.4 to 4.0.5
+  - package-lock.json
+- [chore(docs): updated README.md with badges](https://github.com/log4js-node/streamroller/pull/105) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(docs): updated README.md for DateRollingFileStream](https://github.com/log4js-node/streamroller/pull/106) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(docs): added docs for istanbul ignore](https://github.com/log4js-node/streamroller/pull/107) - thanks [@peteriman](https://github.com/peteriman)
+
 ## 3.0.4
 
 - [test: remove test file/folder remnants](https://github.com/log4js-node/streamroller/pull/99) - thanks [@peteriman](https://github.com/peteriman)
