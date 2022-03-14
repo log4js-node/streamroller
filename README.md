@@ -1,5 +1,7 @@
-streamroller
+streamroller [![CodeQL](https://github.com/log4js-node/streamroller/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/log4js-node/streamroller/actions/workflows/codeql-analysis.yml) [![Node.js CI](https://github.com/log4js-node/streamroller/actions/workflows/node.js.yml/badge.svg)](https://github.com/log4js-node/streamroller/actions/workflows/node.js.yml)
 ============
+
+[![NPM](https://nodei.co/npm/streamroller.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/streamroller/)
 
 node.js file streams that roll over when they reach a maximum size, or a date/time.
 
