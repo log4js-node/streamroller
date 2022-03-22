@@ -1,5 +1,14 @@
 # streamroller Changelog
 
+## 3.0.6
+
+- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/110) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(dep): bump debug from 4.3.3 to 4.3.4
+  - chore(dep): bump date-format from 4.0.5 to 4.0.6
+  - chore(dev): bump @types/node from 17.0.21 to 17.0.22
+  - chore(dev): bump @commitlint/cli from 16.2.1 to 16.2.3
+  - package-lock.json
+
 ## 3.0.5
 
 - [chore(validation): added filename validation](https://github.com/log4js-node/streamroller/pull/101) - thanks [@peteriman](https://github.com/peteriman)
