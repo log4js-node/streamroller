@@ -1,5 +1,19 @@
 # streamroller Changelog
 
+## 3.0.7
+
+- [chore(dep): temporary fix for fs-extra issue (to be reverted when fs-extra patches it)](https://github.com/log4js-node/streamroller/pull/116) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/117) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(dep): bump date-format from 4.0.6 to 4.0.7
+  - chore(dep): updated package-lock.json
+- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/113) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(dev): bump @types/node from 17.0.23 to 17.0.24
+  - updated package-lock.json
+- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/112) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(dev): bump @types/node from 17.0.22 to 17.0.23
+  - chore(dev): bump eslint from 8.11.0 to 8.13.0
+  - updated package-lock.json
+
 ## 3.0.6
 
 - [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/110) - thanks [@peteriman](https://github.com/peteriman)
@@ -76,8 +90,7 @@
 - [Fix for extra separator in filenames](https://github.com/log4js-node/streamroller/pull/75) - thanks [@peteriman](https://github.com/peteriman)
 - [Moved to options.numBackups instead of options.daysToKeep](https://github.com/log4js-node/streamroller/pull/78) - thanks [@peteriman](https://github.com/peteriman)
 - [Improved test case performance for fakeNow](https://github.com/log4js-node/streamroller/pull/76) - thanks [@peteriman](https://github.com/peteriman)
-- <details><summary>Updated dependencies (click for details) - thanks <a href="https://github.com/peteriman">@peteriman</a></summary>
-  
+- Updated dependencies - thanks <a href="https://github.com/peteriman">@peteriman</a></summary>
   - [package.json](https://github.com/log4js-node/streamroller/pull/70)
     - @commitlint/cli from 8.1.0 to 16.0.2
     - @commitlint/config-conventional from 8.1.0 to 16.0.0
@@ -98,7 +111,6 @@
     - date-format from 3.0.0 to 4.0.1
     - husky from 3.0.0 to 7.0.4
     - fs-extra from 8.1.0 to 10.0.0
-</details>
 
 ## 2.2.4
 
