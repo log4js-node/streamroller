@@ -27,14 +27,13 @@ describe('moveAndMaybeCompressFile', () => {
 
     const exists = await fs.pathExists(source);
     exists.should.be.false();
-
   });
 
   it('should compress the source file at the new destination', async () => {
     const source = path.join(TEST_DIR, 'test.log');
     const destination = path.join(TEST_DIR, 'moved-test.log.gz');
     await fs.outputFile(source, 'This is the test file.');
-    const moveAndCompressOptions = {compress: true}
+    const moveAndCompressOptions = {compress: true};
     await moveAndMaybeCompressFile(source, destination, moveAndCompressOptions);
 
     const zippedContents = await fs.readFile(destination);
@@ -85,8 +84,7 @@ describe('moveAndMaybeCompressFile', () => {
     contents.should.equal('This is the test file.');
 
     // won't delete the source, but it will be empty
-    (await fs.readFile(source, 'utf8')).should.be.empty()
-
+    (await fs.readFile(source, 'utf8')).should.be.empty();
   });
 
   it('should truncate file if remove fails when compressed (windows)', async () => {
@@ -114,15 +112,14 @@ describe('moveAndMaybeCompressFile', () => {
     contents.should.equal('This is the test file.');
 
     // won't delete the source, but it will be empty
-    (await fs.readFile(source, 'utf8')).should.be.empty()
-
+    (await fs.readFile(source, 'utf8')).should.be.empty();
   });
 
   it('should compress the source file at the new destination with 0o744 rights', async () => {
     const source = path.join(TEST_DIR, 'test.log');
     const destination = path.join(TEST_DIR, 'moved-test.log.gz');
     await fs.outputFile(source, 'This is the test file.');
-    const moveAndCompressOptions = {compress: true, mode:0o744}
+    const moveAndCompressOptions = {compress: true, mode:0o744};
     await moveAndMaybeCompressFile(source, destination, moveAndCompressOptions);
 
     const destinationStats = await fs.stat(destination);
@@ -145,7 +142,7 @@ describe('moveAndMaybeCompressFile', () => {
     const source = path.join(TEST_DIR, 'test.log');
     const destination = path.join(TEST_DIR, 'moved-test.log.gz');
     await fs.outputFile(source, 'This is the test file.');
-    const moveAndCompressOptions = {compress: true, mode:0o400}
+    const moveAndCompressOptions = {compress: true, mode:0o400};
     await moveAndMaybeCompressFile(source, destination, moveAndCompressOptions);
 
     const destinationStats = await fs.stat(destination);
