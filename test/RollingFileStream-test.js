@@ -691,37 +691,37 @@ describe("RollingFileStream", function() {
   // in windows, you can't delete a directory if there is an open file handle
   if (process.platform !== "win32") {
 
-    describe("when the directory gets deleted", function() {
-      var stream;
-      before(function(done) {
-        stream = new RollingFileStream(
-          path.join("subdir", "test-rolling-file-stream"),
-          5,
-          5
-        );
-        stream.write("initial", "utf8", done);
-      });
-
-      after(async () => {
-        await fs.unlink(path.join("subdir", "test-rolling-file-stream"));
-        await fs.rmdir("subdir");
-      });
-
-      it("handles directory deletion gracefully", async function() {
-        stream.theStream.on("error", e => {
-          throw e;
-        });
-
-        await fs.unlink(path.join("subdir", "test-rolling-file-stream"));
-        await fs.rmdir("subdir");
-        await new Promise(resolve => stream.write("rollover", "utf8", resolve));
-        await close(stream);
-        (await fs.readFile(
-          path.join("subdir", "test-rolling-file-stream"),
-          "utf8"
-        )).should.eql("rollover");
-      });
+  describe("when the directory gets deleted", function() {
+    var stream;
+    before(function(done) {
+      stream = new RollingFileStream(
+        path.join("subdir", "test-rolling-file-stream"),
+        5,
+        5
+      );
+      stream.write("initial", "utf8", done);
     });
-  }
+
+    after(async () => {
+      await fs.unlink(path.join("subdir", "test-rolling-file-stream"));
+      await fs.rmdir("subdir");
+    });
+
+    it("handles directory deletion gracefully", async function() {
+      stream.theStream.on("error", e => {
+        throw e;
+      });
+
+      await fs.unlink(path.join("subdir", "test-rolling-file-stream"));
+      await fs.rmdir("subdir");
+      await new Promise(resolve => stream.write("rollover", "utf8", resolve));
+      await close(stream);
+      (await fs.readFile(
+        path.join("subdir", "test-rolling-file-stream"),
+        "utf8"
+      )).should.eql("rollover");
+    });
+  });
+}
 
 });
