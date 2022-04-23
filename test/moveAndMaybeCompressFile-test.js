@@ -65,6 +65,50 @@ describe('moveAndMaybeCompressFile', () => {
     (await fs.pathExists(destination)).should.be.false();
   });
 
+  it('should do nothing if compress is concurrently in progress by another process', async () => {
+    const source = path.join(TEST_DIR, 'test.log');
+    const destination = path.join(TEST_DIR, 'moved-test.log.gz');
+    await fs.outputFile(source, 'This is the test file.');
+    // simulate another process has already started writing the destination file
+    await fs.outputFile(destination, 'This is the compressed file.');
+    const options = {compress: true};
+    await moveAndMaybeCompressFile(source, destination, options);
+
+    (await fs.readFile(source, 'utf8')).should.equal('This is the test file.');
+    (await fs.readFile(destination, 'utf8')).should.equal('This is the compressed file.');
+  });
+
+  it('should remove destination file if readstream error', async () => {
+    const moveWithMock = proxyquire('../lib/moveAndMaybeCompressFile', {
+      "fs-extra": {
+        pathExists: () => Promise.resolve(true)
+      }
+    });
+
+    const source = path.join(TEST_DIR, 'test.log');
+    const destination = path.join(TEST_DIR, 'moved-test.log.gz');
+    const options = {compress: true};
+    await moveWithMock(source, destination, options);
+
+    (await fs.pathExists(destination)).should.be.false();
+  });
+
+  it('should have an empty destination file if readstream error and remove fails', async () => {
+    const moveWithMock = proxyquire('../lib/moveAndMaybeCompressFile', {
+      "fs-extra": {
+        pathExists: () => Promise.resolve(true),
+        unlink: () => Promise.reject({ code: 'EBUSY', message: 'all gone wrong'}),
+      }
+    });
+
+    const source = path.join(TEST_DIR, 'test.log');
+    const destination = path.join(TEST_DIR, 'moved-test.log.gz');
+    const options = {compress: true};
+    await moveWithMock(source, destination, options);
+
+    (await fs.readFile(destination, 'utf8')).should.equal('');
+  });
+
   it('should use copy+truncate if source file is locked (windows)', async () => {
     const moveWithMock = proxyquire('../lib/moveAndMaybeCompressFile', {
       "fs-extra": {
@@ -113,6 +157,34 @@ describe('moveAndMaybeCompressFile', () => {
 
     // won't delete the source, but it will be empty
     (await fs.readFile(source, 'utf8')).should.be.empty();
+  });
+
+  it('should not affect source file if remove and truncate fails when compressed (windows)', async () => {
+    const moveWithMock = proxyquire('../lib/moveAndMaybeCompressFile', {
+      "fs-extra": {
+        exists: () => Promise.resolve(true),
+        unlink: () => Promise.reject({ code: 'EBUSY', message: 'all gone wrong'}),
+        createReadStream: fs.createReadStream.bind(fs),
+        truncate: () => Promise.reject({ code: 'EBUSY', message: 'all gone wrong'}),
+      }
+    });
+
+    const source = path.join(TEST_DIR, 'test.log');
+    const destination = path.join(TEST_DIR, 'moved-test.log.gz');
+    await fs.outputFile(source, 'This is the test file.');
+    const options = {compress: true};
+    await moveWithMock(source, destination, options);
+
+    const zippedContents = await fs.readFile(destination);
+    const contents = await new Promise(resolve => {
+      zlib.gunzip(zippedContents, (e, data) => {
+        resolve(data.toString());
+      });
+    });
+    contents.should.equal('This is the test file.');
+
+    // won't delete or truncate the source
+    (await fs.readFile(source, 'utf8')).should.equal('This is the test file.');
   });
 
   it('should compress the source file at the new destination with 0o744 rights', async () => {
