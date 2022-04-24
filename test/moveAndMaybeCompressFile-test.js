@@ -70,43 +70,59 @@ describe('moveAndMaybeCompressFile', () => {
     const destination = path.join(TEST_DIR, 'moved-test.log.gz');
     await fs.outputFile(source, 'This is the test file.');
     // simulate another process has already started writing the destination file
-    await fs.outputFile(destination, 'This is the compressed file.');
+    await fs.outputFile(destination, 'Compressed file.');
     const options = {compress: true};
     await moveAndMaybeCompressFile(source, destination, options);
 
-    (await fs.readFile(source, 'utf8')).should.equal('This is the test file.');
-    (await fs.readFile(destination, 'utf8')).should.equal('This is the compressed file.');
+    (await fs.readFile(source, 'utf8')).should.equal('This is the test file.', 'source file should remain intact');
+    (await fs.readFile(destination, 'utf8')).should.equal('Compressed file.', 'destination file should remain');
   });
 
   it('should remove destination file if readstream error', async () => {
     const moveWithMock = proxyquire('../lib/moveAndMaybeCompressFile', {
       "fs-extra": {
-        pathExists: () => Promise.resolve(true)
+        createReadStream: (...args) => { 
+          if (args[0]) {
+            // replace test.log with a non-existent file to simulate readstream error
+            args[0] = args[0].replace(new RegExp('test.log' + '$'), 'non-exist.log');
+          }
+          return fs.createReadStream(...args)
+        }
       }
     });
 
     const source = path.join(TEST_DIR, 'test.log');
     const destination = path.join(TEST_DIR, 'moved-test.log.gz');
+    await fs.outputFile(source, 'This is the test file.');
     const options = {compress: true};
     await moveWithMock(source, destination, options);
 
-    (await fs.pathExists(destination)).should.be.false();
+    (await fs.readFile(source, 'utf8')).should.equal('This is the test file.', 'source file should remain intact');
+    (await fs.pathExists(destination)).should.be.false('destination file should be removed');
   });
 
-  it('should have an empty destination file if readstream error and remove fails', async () => {
+  it('should have destination file if readstream error and remove fails', async () => {
     const moveWithMock = proxyquire('../lib/moveAndMaybeCompressFile', {
       "fs-extra": {
-        pathExists: () => Promise.resolve(true),
+        createReadStream: (...args) => { 
+          if (args[0]) {
+            // replace test.log with a non-existent file to simulate readstream error
+            args[0] = args[0].replace(new RegExp('test.log' + '$'), 'non-exist.log');
+          }
+          return fs.createReadStream(...args)
+        },
         unlink: () => Promise.reject({ code: 'EBUSY', message: 'all gone wrong'}),
       }
     });
 
     const source = path.join(TEST_DIR, 'test.log');
     const destination = path.join(TEST_DIR, 'moved-test.log.gz');
+    await fs.outputFile(source, 'This is the test file.');
     const options = {compress: true};
     await moveWithMock(source, destination, options);
 
-    (await fs.readFile(destination, 'utf8')).should.equal('');
+    (await fs.readFile(source, 'utf8')).should.equal('This is the test file.', 'source file should remain intact');
+    (await fs.readFile(destination, 'utf8')).should.equal('', 'destination file should remain');
   });
 
   it('should use copy+truncate if source file is locked (windows)', async () => {
@@ -184,7 +200,7 @@ describe('moveAndMaybeCompressFile', () => {
     contents.should.equal('This is the test file.');
 
     // won't delete or truncate the source
-    (await fs.readFile(source, 'utf8')).should.equal('This is the test file.');
+    (await fs.readFile(source, 'utf8')).should.equal('This is the test file.', 'source file should remain intact');
   });
 
   it('should compress the source file at the new destination with 0o744 rights', async () => {
