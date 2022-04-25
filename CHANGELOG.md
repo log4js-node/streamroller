@@ -1,5 +1,21 @@
 # streamroller Changelog
 
+## 3.0.8
+
+- [chore(fix): concurrency issues when forked processes trying to roll same file](https://github.com/log4js-node/streamroller/pull/124) - thanks [@peteriman](https://github.com/peteriman)
+  - [chore(refactor): use writeStream.destroy() instead](https://github.com/log4js-node/streamroller/pull/125)
+  - [chore(refactor): use isCreated variable instead of e.code='EEXIST'](https://github.com/log4js-node/streamroller/pull/126)
+- [chore(lint): added .eslintrc and fixed linting issues](https://github.com/log4js-node/streamroller/pull/123) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/127) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(dev): bump @types/node from 17.0.24 to 17.0.26
+  - chore(dev): bump eslint from 8.13.0 to 8.14.0
+  - chore(dep): bump date-format from 4.0.7 to 4.0.9
+  - updated package-lock.json
+- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/119) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(dep): bump fs-extra from 10.0.1 to 10.1.0
+  - updated package-lock.json
+  - Revert "[chore(dep): temporary fix for fs-extra issue (to be reverted when fs-extra patches it)](https://github.com/log4js-node/streamroller/pull/116)"
+
 ## 3.0.7
 
 - [chore(dep): temporary fix for fs-extra issue (to be reverted when fs-extra patches it)](https://github.com/log4js-node/streamroller/pull/116) - thanks [@peteriman](https://github.com/peteriman)
