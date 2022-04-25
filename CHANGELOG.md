@@ -37,7 +37,7 @@
   - chore(dep): bump date-format from 4.0.5 to 4.0.6
   - chore(dev): bump @types/node from 17.0.21 to 17.0.22
   - chore(dev): bump @commitlint/cli from 16.2.1 to 16.2.3
-  - package-lock.json
+  - updated package-lock.json
 
 ## 3.0.5
 
@@ -46,7 +46,7 @@
   - chore(dev): eslint from 8.10.0 to 8.11.0
   - chore(dev): mocha from 9.2.1 to 9.2.2
   - chore(dep): date-format from 4.0.4 to 4.0.5
-  - package-lock.json
+  - updated package-lock.json
 - [chore(docs): updated README.md with badges](https://github.com/log4js-node/streamroller/pull/105) - thanks [@peteriman](https://github.com/peteriman)
 - [chore(docs): updated README.md for DateRollingFileStream](https://github.com/log4js-node/streamroller/pull/106) - thanks [@peteriman](https://github.com/peteriman)
 - [chore(docs): added docs for istanbul ignore](https://github.com/log4js-node/streamroller/pull/107) - thanks [@peteriman](https://github.com/peteriman)
@@ -74,7 +74,7 @@
   - chore(deps-dev): bump proxyquire from 2.1.1 to 2.1.3
   - chore(deps): bump debug from 4.1.1 to 4.3.3
 - [Updated dependencies](https://github.com/log4js-node/streamroller/pull/92) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(deps): updated package-lock.json 
+  - updated package-lock.json 
 - [Updated dependencies](https://github.com/log4js-node/streamroller/pull/91) - thanks [@peteriman](https://github.com/peteriman)
   - chore(deps-dev): bump mocha from 9.1.4 to 9.2.0
 
@@ -94,8 +94,8 @@
 
 - [Not to publish misc files to NPM](https://github.com/log4js-node/streamroller/pull/82) - thanks [@peteriman](https://github.com/peteriman)
 - Updated dependencies - thanks [@peteriman](https://github.com/peteriman)
-  - [date-format from 4.0.1 to 4.0.2](https://github.com/log4js-node/streamroller/pull/86)
-  - [electron-to-chromium from 1.4.44 to 1.4.45](https://github.com/log4js-node/streamroller/pull/81) 
+  - [bump date-format from 4.0.1 to 4.0.2](https://github.com/log4js-node/streamroller/pull/86)
+  - [bump electron-to-chromium from 1.4.44 to 1.4.45](https://github.com/log4js-node/streamroller/pull/81) 
 
 ## 3.0.0
 
@@ -108,25 +108,25 @@
 - [Improved test case performance for fakeNow](https://github.com/log4js-node/streamroller/pull/76) - thanks [@peteriman](https://github.com/peteriman)
 - Updated dependencies - thanks <a href="https://github.com/peteriman">@peteriman</a></summary>
   - [package.json](https://github.com/log4js-node/streamroller/pull/70)
-    - @commitlint/cli from 8.1.0 to 16.0.2
-    - @commitlint/config-conventional from 8.1.0 to 16.0.0
-    - @type/nodes 17.0.8
-    - eslint from 6.0.1 to 8.6.0
-    - mocha from 6.1.4 to 9.1.3
-    - nyc from 14.1.1 to 15.1.0
-  - [package-lock.json](https://github.com/log4js-node/streamroller/pull/71) 
-    - @babel/compat-data from 7.16.4 to 7.16.8 
-    - @babel/generator from 7.16.7 to 7.16.8
-    - @babel/parser from 7.16.7 to 7.16.8
-    - @babel/travers from 7.16.7 to 7.16.8
-    - @babel/types from 7.16.7 to 7.16.8
-  - [package-lock.json](https://github.com/log4js-node/streamroller/pull/77)
-    - caniuse-lite from 1.0.30001298 to 1.0.30001299
-    - electron-to-chromium from 1.4.39 to 1.4.44
+    - bump @commitlint/cli from 8.1.0 to 16.0.2
+    - bump @commitlint/config-conventional from 8.1.0 to 16.0.0
+    - bump @type/nodes 17.0.8
+    - bump eslint from 6.0.1 to 8.6.0
+    - bump mocha from 6.1.4 to 9.1.3
+    - bump nyc from 14.1.1 to 15.1.0
+  - [updated package-lock.json](https://github.com/log4js-node/streamroller/pull/71) 
+    - bump @babel/compat-data from 7.16.4 to 7.16.8 
+    - bump @babel/generator from 7.16.7 to 7.16.8
+    - bump @babel/parser from 7.16.7 to 7.16.8
+    - bump @babel/travers from 7.16.7 to 7.16.8
+    - bump @babel/types from 7.16.7 to 7.16.8
+  - [updated package-lock.json](https://github.com/log4js-node/streamroller/pull/77)
+    - bump caniuse-lite from 1.0.30001298 to 1.0.30001299
+    - bump electron-to-chromium from 1.4.39 to 1.4.44
   - [package.json](https://github.com/log4js-node/streamroller/pull/80)
-    - date-format from 3.0.0 to 4.0.1
-    - husky from 3.0.0 to 7.0.4
-    - fs-extra from 8.1.0 to 10.0.0
+    - bump date-format from 3.0.0 to 4.0.1
+    - bump husky from 3.0.0 to 7.0.4
+    - bump fs-extra from 8.1.0 to 10.0.0
 
 ## 2.2.4
 
