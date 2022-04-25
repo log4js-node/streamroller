@@ -86,7 +86,7 @@ describe('moveAndMaybeCompressFile', () => {
             // replace test.log with a non-existent file to simulate readstream error
             args[0] = args[0].replace(new RegExp('test.log' + '$'), 'non-exist.log');
           }
-          return fs.createReadStream(...args)
+          return fs.createReadStream(...args);
         }
       }
     });
@@ -109,7 +109,7 @@ describe('moveAndMaybeCompressFile', () => {
             // replace test.log with a non-existent file to simulate readstream error
             args[0] = args[0].replace(new RegExp('test.log' + '$'), 'non-exist.log');
           }
-          return fs.createReadStream(...args)
+          return fs.createReadStream(...args);
         },
         unlink: () => Promise.reject({ code: 'EBUSY', message: 'all gone wrong'}),
       }
