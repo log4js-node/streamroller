@@ -1,4 +1,4 @@
-const should = require("should");
+require("should");
 
 const fs = require("fs-extra"),
   path = require("path"),
@@ -90,27 +90,11 @@ describe("RollingFileStream", function() {
 
   describe("without size", function() {
     let stream;
-    it("should default to undefined", function() {
+    it("should default to max int size", function() {
       stream = new RollingFileStream(
         path.join(__dirname, "test-rolling-file-stream")
       );
-      should(stream.size).not.be.ok();
-    });
-
-    after(async function() {
-      await close(stream);
-      await remove("test-rolling-file-stream");
-    });
-  });
-
-  describe("with size 0", function() {
-    let stream;
-    it("should become undefined", function() {
-      stream = new RollingFileStream(
-        path.join(__dirname, "test-rolling-file-stream"),
-        0
-      );
-      should(stream.size).not.be.ok();
+      stream.size.should.eql(Number.MAX_SAFE_INTEGER);
     });
 
     after(async function() {
