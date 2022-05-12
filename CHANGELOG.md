@@ -1,55 +1,68 @@
 # streamroller Changelog
 
+## 3.0.9
+
+- [fix: maxSize=0 means no rolling](https://github.com/log4js-node/streamroller/pull/131) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/132) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump @commitlint/cli from 16.2.3 to 16.2.4
+  - chore(deps-dev): bump @commitlint/config-conventional from 16.2.1 to 16.2.4
+  - chore(deps-dev): bump @types/node from 17.0.26 to 17.0.32
+  - chore(deps-dev): bump eslint from 8.14.0 to 8.15.0
+  - chore(deps-dev): bump husky from 7.0.4 to 8.0.1
+  - chore(deps-dev): bump mocha from 9.2.2 to 10.0.0
+  - chore(deps): bump date-format from 4.0.9 to 4.0.10
+  - chore(deps): updated package-lock.json
+
 ## 3.0.8
 
-- [chore(fix): concurrency issues when forked processes trying to roll same file](https://github.com/log4js-node/streamroller/pull/124) - thanks [@peteriman](https://github.com/peteriman)
-  - [chore(refactor): use writeStream.destroy() instead](https://github.com/log4js-node/streamroller/pull/125)
-  - [chore(refactor): use isCreated variable instead of e.code='EEXIST'](https://github.com/log4js-node/streamroller/pull/126)
+- [fix: concurrency issues when forked processes trying to roll same file](https://github.com/log4js-node/streamroller/pull/124) - thanks [@peteriman](https://github.com/peteriman)
+  - [refactor: use writeStream.destroy() instead](https://github.com/log4js-node/streamroller/pull/125)
+  - [refactor: use isCreated variable instead of e.code='EEXIST'](https://github.com/log4js-node/streamroller/pull/126)
 - [chore(lint): added .eslintrc and fixed linting issues](https://github.com/log4js-node/streamroller/pull/123) - thanks [@peteriman](https://github.com/peteriman)
-- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/127) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(dev): bump @types/node from 17.0.24 to 17.0.26
-  - chore(dev): bump eslint from 8.13.0 to 8.14.0
-  - chore(dep): bump date-format from 4.0.7 to 4.0.9
-  - updated package-lock.json
-- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/119) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(dep): bump fs-extra from 10.0.1 to 10.1.0
-  - updated package-lock.json
-  - Revert "[chore(dep): temporary fix for fs-extra issue (to be reverted when fs-extra patches it)](https://github.com/log4js-node/streamroller/pull/116)"
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/127) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump @types/node from 17.0.24 to 17.0.26
+  - chore(deps-dev): bump eslint from 8.13.0 to 8.14.0
+  - chore(deps): bump date-format from 4.0.7 to 4.0.9
+  - chore(deps): updated package-lock.json
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/119) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps): bump fs-extra from 10.0.1 to 10.1.0
+  - chore(deps): updated package-lock.json
+  - revert: "[chore(dep): temporary fix for fs-extra issue (to be reverted when fs-extra patches it)](https://github.com/log4js-node/streamroller/pull/116)"
 
 ## 3.0.7
 
-- [chore(dep): temporary fix for fs-extra issue (to be reverted when fs-extra patches it)](https://github.com/log4js-node/streamroller/pull/116) - thanks [@peteriman](https://github.com/peteriman)
-- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/117) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(dep): bump date-format from 4.0.6 to 4.0.7
-  - chore(dep): updated package-lock.json
-- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/113) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(dev): bump @types/node from 17.0.23 to 17.0.24
-  - updated package-lock.json
-- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/112) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(dev): bump @types/node from 17.0.22 to 17.0.23
-  - chore(dev): bump eslint from 8.11.0 to 8.13.0
-  - updated package-lock.json
+- [chore(deps): temporary fix for fs-extra issue (to be reverted when fs-extra patches it)](https://github.com/log4js-node/streamroller/pull/116) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/117) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps): bump date-format from 4.0.6 to 4.0.7
+  - chore(deps): updated package-lock.json
+- [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/113) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump @types/node from 17.0.23 to 17.0.24
+  - chore(deps-dev): updated package-lock.json
+- [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/112) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump @types/node from 17.0.22 to 17.0.23
+  - chore(deps-dev): bump eslint from 8.11.0 to 8.13.0
+  - chore(deps-dev): updated package-lock.json
 
 ## 3.0.6
 
-- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/110) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(dep): bump debug from 4.3.3 to 4.3.4
-  - chore(dep): bump date-format from 4.0.5 to 4.0.6
-  - chore(dev): bump @types/node from 17.0.21 to 17.0.22
-  - chore(dev): bump @commitlint/cli from 16.2.1 to 16.2.3
-  - updated package-lock.json
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/110) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps): bump debug from 4.3.3 to 4.3.4
+  - chore(deps): bump date-format from 4.0.5 to 4.0.6
+  - chore(deps-dev): bump @types/node from 17.0.21 to 17.0.22
+  - chore(deps-dev): bump @commitlint/cli from 16.2.1 to 16.2.3
+  - chore(deps): updated package-lock.json
 
 ## 3.0.5
 
-- [chore(validation): added filename validation](https://github.com/log4js-node/streamroller/pull/101) - thanks [@peteriman](https://github.com/peteriman)
-- [chore(dep): updated dependencies](https://github.com/log4js-node/streamroller/pull/109) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(dev): eslint from 8.10.0 to 8.11.0
-  - chore(dev): mocha from 9.2.1 to 9.2.2
-  - chore(dep): date-format from 4.0.4 to 4.0.5
-  - updated package-lock.json
-- [chore(docs): updated README.md with badges](https://github.com/log4js-node/streamroller/pull/105) - thanks [@peteriman](https://github.com/peteriman)
-- [chore(docs): updated README.md for DateRollingFileStream](https://github.com/log4js-node/streamroller/pull/106) - thanks [@peteriman](https://github.com/peteriman)
-- [chore(docs): added docs for istanbul ignore](https://github.com/log4js-node/streamroller/pull/107) - thanks [@peteriman](https://github.com/peteriman)
+- [fix: added filename validation](https://github.com/log4js-node/streamroller/pull/101) - thanks [@peteriman](https://github.com/peteriman)
+- [docs: updated README.md with badges](https://github.com/log4js-node/streamroller/pull/105) - thanks [@peteriman](https://github.com/peteriman)
+- [docs: updated README.md for DateRollingFileStream](https://github.com/log4js-node/streamroller/pull/106) - thanks [@peteriman](https://github.com/peteriman)
+- [docs: added docs for istanbul ignore](https://github.com/log4js-node/streamroller/pull/107) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/109) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): eslint from 8.10.0 to 8.11.0
+  - chore(deps-dev): mocha from 9.2.1 to 9.2.2
+  - chore(deps): date-format from 4.0.4 to 4.0.5
+  - chore(deps): updated package-lock.json
 
 ## 3.0.4
 
@@ -57,9 +70,9 @@
 
 ## 3.0.3
 
-- [compat: backward compatibility for RollingFileWriteStream to recursively create directory](https://github.com/log4js-node/streamroller/pull/96) - thanks [@peteriman](https://github.com/peteriman)
+- [fix: backward compatibility for RollingFileWriteStream to recursively create directory](https://github.com/log4js-node/streamroller/pull/96) - thanks [@peteriman](https://github.com/peteriman)
 - [test: 100% test coverage](https://github.com/log4js-node/streamroller/pull/94) - thanks [@peteriman](https://github.com/peteriman)
-- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/97) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/97) - thanks [@peteriman](https://github.com/peteriman)
   - chore(deps-dev): bump @commitlint/cli from 16.1.0 to 16.2.1
   - chore(deps-dev): bump @commitlint/config-conventional from 16.0.0 to 16.2.1
   - chore(deps-dev): bump @types/node from 17.0.16 to 17.0.21
@@ -67,22 +80,22 @@
   - chore(deps-dev): bump mocha from 9.2.0 to 9.2.1
   - chore(deps): bump date-format from 4.0.3 to 4.0.4
   - chore(deps): bump fs-extra from 10.0.0 to 10.0.1
-- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/95) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/95) - thanks [@peteriman](https://github.com/peteriman)
   - chore(deps-dev): bump @commitlint/cli from 16.0.2 to 16.1.0
   - chore(deps-dev): bump @types/node from 17.0.9 to 17.0.16
   - chore(deps-dev): bump eslint from 8.7.0 to 8.8.0
   - chore(deps-dev): bump proxyquire from 2.1.1 to 2.1.3
   - chore(deps): bump debug from 4.1.1 to 4.3.3
-- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/92) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/92) - thanks [@peteriman](https://github.com/peteriman)
   - updated package-lock.json 
-- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/91) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/91) - thanks [@peteriman](https://github.com/peteriman)
   - chore(deps-dev): bump mocha from 9.1.4 to 9.2.0
 
 ## 3.0.2
 
-- [Changed default file modes from 0o644 to 0o600 for better security](https://github.com/log4js-node/streamroller/pull/87) - thanks [@peteriman](https://github.com/peteriman)
-- [Housekeeping for comments and .gitignore](https://github.com/log4js-node/streamroller/pull/89) - thanks [@peteriman](https://github.com/peteriman)
-- [Updated dependencies](https://github.com/log4js-node/streamroller/pull/88) - thanks [@peteriman](https://github.com/peteriman)
+- [fix: changed default file modes from 0o644 to 0o600 for better security](https://github.com/log4js-node/streamroller/pull/87) - thanks [@peteriman](https://github.com/peteriman)
+- [refactor: housekeeping for comments and .gitignore](https://github.com/log4js-node/streamroller/pull/89) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/88) - thanks [@peteriman](https://github.com/peteriman)
   - chore(deps-dev): bump caniuse-lite from 1.0.30001299 to 1.0.30001300
   - chore(deps-dev): bump electron-to-chromium from 1.4.45 to 1.4.47
   - chore(deps-dev): bump @types/node from 17.0.8 to 17.0.9
@@ -92,41 +105,41 @@
 
 ## 3.0.1
 
-- [Not to publish misc files to NPM](https://github.com/log4js-node/streamroller/pull/82) - thanks [@peteriman](https://github.com/peteriman)
-- Updated dependencies - thanks [@peteriman](https://github.com/peteriman)
-  - [bump date-format from 4.0.1 to 4.0.2](https://github.com/log4js-node/streamroller/pull/86)
-  - [bump electron-to-chromium from 1.4.44 to 1.4.45](https://github.com/log4js-node/streamroller/pull/81) 
+- [build: not to publish misc files to NPM](https://github.com/log4js-node/streamroller/pull/82) - thanks [@peteriman](https://github.com/peteriman)
+- chore(deps): updated dependencies - thanks [@peteriman](https://github.com/peteriman)
+  - [chore(deps): bump date-format from 4.0.1 to 4.0.2](https://github.com/log4js-node/streamroller/pull/86)
+  - [chore(deps-dev): bump electron-to-chromium from 1.4.44 to 1.4.45](https://github.com/log4js-node/streamroller/pull/81) 
 
 ## 3.0.0
 
-- [Fix for mode to apply to compressed file](https://github.com/log4js-node/streamroller/pull/65) - thanks [@rnd-debug](https://github.com/rnd-debug)
-- [Allow for 0 backups (only hot file)](https://github.com/log4js-node/streamroller/pull/74) - thanks [@peteriman](https://github.com/peteriman)
-- [Exposed fileNameSep to be configurable](https://github.com/log4js-node/streamroller/pull/67) - thanks [@laidaxian](https://github.com/laidaxian)
-  - [Fix for fileNameSep affecting globally](https://github.com/log4js-node/streamroller/pull/79) - thanks [@peteriman](https://github.com/peteriman)
-- [Fix for extra separator in filenames](https://github.com/log4js-node/streamroller/pull/75) - thanks [@peteriman](https://github.com/peteriman)
-- [Moved to options.numBackups instead of options.daysToKeep](https://github.com/log4js-node/streamroller/pull/78) - thanks [@peteriman](https://github.com/peteriman)
-- [Improved test case performance for fakeNow](https://github.com/log4js-node/streamroller/pull/76) - thanks [@peteriman](https://github.com/peteriman)
-- Updated dependencies - thanks <a href="https://github.com/peteriman">@peteriman</a></summary>
-  - [package.json](https://github.com/log4js-node/streamroller/pull/70)
-    - bump @commitlint/cli from 8.1.0 to 16.0.2
-    - bump @commitlint/config-conventional from 8.1.0 to 16.0.0
-    - bump @type/nodes 17.0.8
-    - bump eslint from 6.0.1 to 8.6.0
-    - bump mocha from 6.1.4 to 9.1.3
-    - bump nyc from 14.1.1 to 15.1.0
-  - [updated package-lock.json](https://github.com/log4js-node/streamroller/pull/71) 
-    - bump @babel/compat-data from 7.16.4 to 7.16.8 
-    - bump @babel/generator from 7.16.7 to 7.16.8
-    - bump @babel/parser from 7.16.7 to 7.16.8
-    - bump @babel/travers from 7.16.7 to 7.16.8
-    - bump @babel/types from 7.16.7 to 7.16.8
-  - [updated package-lock.json](https://github.com/log4js-node/streamroller/pull/77)
-    - bump caniuse-lite from 1.0.30001298 to 1.0.30001299
-    - bump electron-to-chromium from 1.4.39 to 1.4.44
-  - [package.json](https://github.com/log4js-node/streamroller/pull/80)
-    - bump date-format from 3.0.0 to 4.0.1
-    - bump husky from 3.0.0 to 7.0.4
-    - bump fs-extra from 8.1.0 to 10.0.0
+- [fix: for mode to apply to compressed file](https://github.com/log4js-node/streamroller/pull/65) - thanks [@rnd-debug](https://github.com/rnd-debug)
+- [fix: for extra separator in filenames](https://github.com/log4js-node/streamroller/pull/75) - thanks [@peteriman](https://github.com/peteriman)
+- [feat: allow for 0 backups (only hot file)](https://github.com/log4js-node/streamroller/pull/74) - thanks [@peteriman](https://github.com/peteriman)
+- [feat: exposed fileNameSep to be configurable](https://github.com/log4js-node/streamroller/pull/67) - thanks [@laidaxian](https://github.com/laidaxian)
+  - [fix: for fileNameSep affecting globally](https://github.com/log4js-node/streamroller/pull/79) - thanks [@peteriman](https://github.com/peteriman)
+- [refactor: moved to options.numBackups instead of options.daysToKeep](https://github.com/log4js-node/streamroller/pull/78) - thanks [@peteriman](https://github.com/peteriman)
+- [test: improved test case performance for fakeNow](https://github.com/log4js-node/streamroller/pull/76) - thanks [@peteriman](https://github.com/peteriman)
+- chore(deps-dev): updated dependencies - thanks <a href="https://github.com/peteriman">@peteriman</a></summary>
+  - [chore(deps-dev): updated package.json](https://github.com/log4js-node/streamroller/pull/70)
+    - chore(deps-dev): bump @commitlint/cli from 8.1.0 to 16.0.2
+    - chore(deps-dev): bump @commitlint/config-conventional from 8.1.0 to 16.0.0
+    - chore(deps-dev): bump @type/nodes 17.0.8
+    - chore(deps-dev): bump eslint from 6.0.1 to 8.6.0
+    - chore(deps-dev): bump mocha from 6.1.4 to 9.1.3
+    - chore(deps-dev): bump nyc from 14.1.1 to 15.1.0
+  - [chore(deps-dev): updated package-lock.json](https://github.com/log4js-node/streamroller/pull/71) 
+    - chore(deps-dev): bump @babel/compat-data from 7.16.4 to 7.16.8 
+    - chore(deps-dev): bump @babel/generator from 7.16.7 to 7.16.8
+    - chore(deps-dev): bump @babel/parser from 7.16.7 to 7.16.8
+    - chore(deps-dev): bump @babel/travers from 7.16.7 to 7.16.8
+    - chore(deps-dev): bump @babel/types from 7.16.7 to 7.16.8
+  - [chore(deps-dev): updated package-lock.json](https://github.com/log4js-node/streamroller/pull/77)
+    - chore(deps-dev): bump caniuse-lite from 1.0.30001298 to 1.0.30001299
+    - chore(deps-dev): bump electron-to-chromium from 1.4.39 to 1.4.44
+  - [chore(deps-dev): updated package.json](https://github.com/log4js-node/streamroller/pull/80)
+    - chore(deps): bump date-format from 3.0.0 to 4.0.1
+    - chore(deps-dev): bump husky from 3.0.0 to 7.0.4
+    - chore(deps): bump fs-extra from 8.1.0 to 10.0.0
 
 ## 2.2.4
 
