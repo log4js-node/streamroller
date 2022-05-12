@@ -1,4 +1,4 @@
-const should = require("should");
+require("should");
 
 const path = require("path");
 const zlib = require("zlib");
@@ -69,6 +69,9 @@ describe("RollingFileWriteStream", () => {
       (() => {
         new RollingFileWriteStream("filename", { maxSize: -3 });
       }).should.throw("options.maxSize (-3) should be > 0");
+      (() => {
+        new RollingFileWriteStream("filename", { maxSize: 0 });
+      }).should.throw("options.maxSize (0) should be > 0");
     });
 
     it("should complain about a negative numToKeep", () => {
@@ -101,7 +104,7 @@ describe("RollingFileWriteStream", () => {
     });
 
     it("should apply default options", () => {
-      should(s.options.maxSize).not.be.ok();
+      s.options.maxSize.should.eql(Number.MAX_SAFE_INTEGER);
       s.options.encoding.should.eql("utf8");
       s.options.mode.should.eql(0o600);
       s.options.flags.should.eql("a");
