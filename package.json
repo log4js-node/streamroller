@@ -42,7 +42,7 @@
     "should": "^13.2.3"
   },
   "dependencies": {
-    "date-format": "^4.0.9",
+    "date-format": "^4.0.10",
     "debug": "^4.3.4",
     "fs-extra": "^10.1.0"
   },
