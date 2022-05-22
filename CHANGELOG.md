@@ -1,12 +1,22 @@
 # streamroller Changelog
 
+## 3.1.0
+- [feat: tilde expansion for filename](https://github.com/log4js-node/streamroller/pull/135) - thanks [@peteriman](https://github.com/peteriman)
+- [fix: better file validation](https://github.com/log4js-node/streamroller/pull/134) - thanks [@peteriman](https://github.com/peteriman)
+- [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/140) - thanks [@peteriman](https://github.com/peteriman)
+  - chore(deps-dev): bump @commitlint/cli from 16.3.0 to 17.0.0
+  - chore(deps-dev): bump @commitlint/config-conventional from 16.2.4 to 17.0.0
+  - chore(deps-dev): bump @types/node from 17.0.33 to 17.0.35
+  - chore(deps-dev): bump eslint from 8.15.0 to 8.16.0
+  - chore(deps): updated package-lock.json
+
 ## 3.0.9
 
 - [fix: maxSize=0 means no rolling](https://github.com/log4js-node/streamroller/pull/131) - thanks [@peteriman](https://github.com/peteriman)
 - [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/132) - thanks [@peteriman](https://github.com/peteriman)
-  - chore(deps-dev): bump @commitlint/cli from 16.2.3 to 16.2.4
+  - chore(deps-dev): bump @commitlint/cli from 16.2.3 to 16.3.0
   - chore(deps-dev): bump @commitlint/config-conventional from 16.2.1 to 16.2.4
-  - chore(deps-dev): bump @types/node from 17.0.26 to 17.0.32
+  - chore(deps-dev): bump @types/node from 17.0.26 to 17.0.33
   - chore(deps-dev): bump eslint from 8.14.0 to 8.15.0
   - chore(deps-dev): bump husky from 7.0.4 to 8.0.1
   - chore(deps-dev): bump mocha from 9.2.2 to 10.0.0
@@ -112,11 +122,11 @@
 
 ## 3.0.0
 
-- [fix: for mode to apply to compressed file](https://github.com/log4js-node/streamroller/pull/65) - thanks [@rnd-debug](https://github.com/rnd-debug)
-- [fix: for extra separator in filenames](https://github.com/log4js-node/streamroller/pull/75) - thanks [@peteriman](https://github.com/peteriman)
 - [feat: allow for 0 backups (only hot file)](https://github.com/log4js-node/streamroller/pull/74) - thanks [@peteriman](https://github.com/peteriman)
 - [feat: exposed fileNameSep to be configurable](https://github.com/log4js-node/streamroller/pull/67) - thanks [@laidaxian](https://github.com/laidaxian)
   - [fix: for fileNameSep affecting globally](https://github.com/log4js-node/streamroller/pull/79) - thanks [@peteriman](https://github.com/peteriman)
+- [fix: for mode to apply to compressed file](https://github.com/log4js-node/streamroller/pull/65) - thanks [@rnd-debug](https://github.com/rnd-debug)
+- [fix: for extra separator in filenames](https://github.com/log4js-node/streamroller/pull/75) - thanks [@peteriman](https://github.com/peteriman)
 - [refactor: moved to options.numBackups instead of options.daysToKeep](https://github.com/log4js-node/streamroller/pull/78) - thanks [@peteriman](https://github.com/peteriman)
 - [test: improved test case performance for fakeNow](https://github.com/log4js-node/streamroller/pull/76) - thanks [@peteriman](https://github.com/peteriman)
 - chore(deps-dev): updated dependencies - thanks <a href="https://github.com/peteriman">@peteriman</a></summary>
