@@ -60,6 +60,14 @@ describe("RollingFileWriteStream", () => {
     });
   });
 
+  describe("with directory as filename", () => {
+    it("should throw an error", () => {
+      (() => new RollingFileWriteStream("." + path.sep)).should.throw(
+        /Filename is a directory:/i
+      );
+    });
+  });
+
   describe("with invalid options", () => {
     after(done => {
       fs.remove("filename", done);
