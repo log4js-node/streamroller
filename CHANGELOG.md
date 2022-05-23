@@ -1,5 +1,8 @@
 # streamroller Changelog
 
+## 3.1.1
+- [fix: fs.appendFileSync should use flag instead of flags](https://github.com/log4js-node/streamroller/pull/141) - thanks [@peteriman](https://github.com/peteriman)
+
 ## 3.1.0
 - [feat: tilde expansion for filename](https://github.com/log4js-node/streamroller/pull/135) - thanks [@peteriman](https://github.com/peteriman)
 - [fix: better file validation](https://github.com/log4js-node/streamroller/pull/134) - thanks [@peteriman](https://github.com/peteriman)
