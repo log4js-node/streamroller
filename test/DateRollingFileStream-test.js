@@ -639,7 +639,7 @@ describe("DateRollingFileStream", function() {
   });
 
   describe("using deprecated daysToKeep", () => {
-    const onWarning = process.rawListeners("warning").shift();
+    const onWarning = process.listeners("warning").shift();
     let wrapper;
     let stream;
 
@@ -655,13 +655,13 @@ describe("DateRollingFileStream", function() {
       };
       wrapper = muteSelfDeprecation(onWarning);
       process.prependListener("warning", wrapper);
-      process.off("warning", onWarning);
+      process.removeListener("warning", onWarning);
       done();
     });
 
     after(async () => {
       process.prependListener("warning", onWarning);
-      process.off("warning", wrapper);
+      process.removeListener("warning", wrapper);
       await close(stream);
       await remove(path.join(__dirname, "daysToKeep.log"));
     });
