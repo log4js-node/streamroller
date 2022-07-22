@@ -1,5 +1,23 @@
 # streamroller Changelog
 
+## 3.1.2
+- [ci: added tests for Node.js 8.x, 10.x, 18.x](https://github.com/log4js-node/streamroller/pull/148) - thanks [@lamweili](https://github.com/lamweili)
+- [refactor: support older Node.js versions](https://github.com/log4js-node/streamroller/pull/147) - thanks [@lamweili](https://github.com/lamweili)
+- [docs: renamed peteriman to lamweili](https://github.com/log4js-node/streamroller/pull/144) - thanks [@lamweili](https://github.com/lamweili)
+- [chore(deps): bump date-format from 4.0.11 to 4.0.13](https://github.com/log4js-node/streamroller/pull/150) - thanks [@lamweili](https://github.com/lamweili)
+- [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/146) - thanks [@lamweili](https://github.com/lamweili)
+  - chore(deps-dev): bump @commitlint/cli from 17.0.1 to 17.0.3
+  - chore(deps-dev): bump @commitlint/config-conventional from 17.0.2 to 17.0.3
+  - chore(deps-dev): bump @types/node from 17.0.38 to 18.0.6
+  - chore(deps-dev): bump eslint from 8.16.0 to 8.20.0
+  - chore(deps-dev): updated package-lock.json
+- [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/143) - thanks [@lamweili](https://github.com/lamweili)
+  - chore(deps-dev): bump @commitlint/cli from 17.0.0 to 17.0.1
+  - chore(deps-dev): bump @commitlint/config-conventional 17.0.0 to 17.0.2
+  - chore(deps-dev): bump @types/node from 17.0.35 to 17.0.38
+  - chore(deps): bump date-format 4.0.10 to 4.0.11
+  - chore(deps): updated package-lock.json
+
 ## 3.1.1
 - [fix: fs.appendFileSync should use flag instead of flags](https://github.com/log4js-node/streamroller/pull/141) - thanks [@lamweili](https://github.com/lamweili)
 
