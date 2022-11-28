@@ -26,13 +26,13 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
         include:
           - node-version: 8.x
-            npm-i: eslint@6.x mocha@7.x
+            npm-i: "eslint@6.x mocha@7.x"
 
           - node-version: 10.x
-            npm-i: eslint@7.x mocha@8.x
+            npm-i: "eslint@7.x mocha@8.x"
 
           - node-version: 12.x
-            npm-i: mocha@9.x
+            npm-i: "mocha@9.x"
 
     steps:
     - uses: actions/checkout@v3
