@@ -32,7 +32,7 @@
   "gitHead": "ece35d7d86c87c04ff09e8604accae81cf36a0ce",
   "devDependencies": {
     "@commitlint/cli": "^17.3.0",
-    "@commitlint/config-conventional": "^17.1.0",
+    "@commitlint/config-conventional": "^17.3.0",
     "@types/node": "^18.7.23",
     "eslint": "^8.24.0",
     "husky": "^8.0.1",
