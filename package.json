@@ -34,7 +34,7 @@
     "@commitlint/cli": "^17.3.0",
     "@commitlint/config-conventional": "^17.3.0",
     "@types/node": "^18.11.9",
-    "eslint": "^8.24.0",
+    "eslint": "^8.28.0",
     "husky": "^8.0.1",
     "mocha": "^10.0.0",
     "nyc": "^15.1.0",
