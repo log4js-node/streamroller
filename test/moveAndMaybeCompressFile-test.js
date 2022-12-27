@@ -147,6 +147,22 @@ describe('moveAndMaybeCompressFile', () => {
     (await fs.readFile(source, 'utf8')).should.be.empty();
   });
 
+  it('should not throw unhandled promise rejection when doing copy+truncate', async () => {
+    const moveWithMock = proxyquire('../lib/moveAndMaybeCompressFile', {
+      "fs-extra": {
+        exists: () => Promise.resolve(true),
+        move: () => Promise.reject({ code: 'EBUSY', message: 'all gone wrong'}),
+        copy: () => Promise.reject({ code: 'ENOENT', message: 'file deleted halfway'}),
+        truncate: (fs.truncate.bind(fs))
+      }
+    });
+
+    const source = path.join(TEST_DIR, 'test.log');
+    const destination = path.join(TEST_DIR, 'moved-test.log');
+    await fs.outputFile(source, 'This is the test file.');
+    await moveWithMock(source, destination).should.not.be.rejected();
+  });
+
   it('should truncate file if remove fails when compressed (windows)', async () => {
     const moveWithMock = proxyquire('../lib/moveAndMaybeCompressFile', {
       "fs-extra": {
