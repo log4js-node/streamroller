@@ -1,7 +1,30 @@
 # streamroller Changelog
 
+## 3.1.4
+
+- [fix: addressed unhandled promise rejection when a file gets deleted in midst of rolling](https://github.com/log4js-node/streamroller/pull/160) - thanks [@lamweili](https://github.com/lamweili)
+- [docs: updated repository url](https://github.com/log4js-node/streamroller/pull/158) - thanks [@lamweili](https://github.com/lamweili)
+- [ci: replaced deprecated github set-output](https://github.com/log4js-node/streamroller/pull/159) - thanks [@lamweili](https://github.com/lamweili)
+- [ci: added quotes](https://github.com/log4js-node/streamroller/pull/157) - thanks [@lamweili](https://github.com/lamweili)
+- [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/161) - thanks [@lamweili](https://github.com/lamweili)
+  - chore(deps-dev): bump @types/node from 18.11.9 to 18.11.18
+  - chore(deps-dev): bump eslint from 8.28.0 to 8.30.0
+  - chore(deps-dev): bump mocha from 10.1.0 to 10.2.0
+  - chore(deps-dev): updated package-lock.json
+- [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/156) - thanks [@lamweili](https://github.com/lamweili)
+  - chore(deps-dev): bump @commitlint/cli from 17.1.2 to 17.3.0
+  - chore(deps-dev): bump @commitlint/config-conventional from 17.1.0 to … 
+  - chore(deps-dev): bump @types/node from 18.7.23 to 18.11.9
+  - chore(deps-dev): bump eslint from 8.24.0 to 8.28.0
+  - chore(deps-dev): bump husky from 8.0.1 to 8.0.2
+  - chore(deps-dev): bump mocha from 10.0.0 to 10.1.0
+  - chore(deps-dev): updated package-lock.json
+
 ## 3.1.3
 
+- [ci: manually downgrade dev dependencies for older versions](https://github.com/log4js-node/streamroller/pull/153) - thanks [@lamweili](https://github.com/lamweili)
+- [ci: removed scheduled job from codeql and separated npm audit](https://github.com/log4js-node/streamroller/pull/152) - thanks [@lamweili](https://github.com/lamweili)
+- [ci: updated codeql from v1 to v2](https://github.com/log4js-node/streamroller/pull/151) - thanks [@lamweili](https://github.com/lamweili)
 - [chore(deps): updated dependencies](https://github.com/log4js-node/streamroller/pull/154) - thanks [@lamweili](https://github.com/lamweili)
   - chore(deps-dev): bump @commitlint/cli from 17.0.3 to 17.1.2
   - chore(deps-dev): bump @commitlint/config-conventional from 17.0.3 to 17.1.0
@@ -10,14 +33,12 @@
   - chore(deps-dev): bump mocha from 7.2.0 to 10.0.0
   - chore(deps): bump date-format from 4.0.13 to 4.0.14
   - chore(deps): updated package-lock.json
-- [ci: manually downgrade dev dependencies for older versions](https://github.com/log4js-node/streamroller/pull/153) - thanks [@lamweili](https://github.com/lamweili)
-- [ci: removed scheduled job from codeql and separated npm audit](https://github.com/log4js-node/streamroller/pull/152) - thanks [@lamweili](https://github.com/lamweili)
-- [ci: updated codeql from v1 to v2](https://github.com/log4js-node/streamroller/pull/151) - thanks [@lamweili](https://github.com/lamweili)
 
 ## 3.1.2
-- [ci: added tests for Node.js 8.x, 10.x, 18.x](https://github.com/log4js-node/streamroller/pull/148) - thanks [@lamweili](https://github.com/lamweili)
+
 - [refactor: support older Node.js versions](https://github.com/log4js-node/streamroller/pull/147) - thanks [@lamweili](https://github.com/lamweili)
 - [docs: renamed peteriman to lamweili](https://github.com/log4js-node/streamroller/pull/144) - thanks [@lamweili](https://github.com/lamweili)
+- [ci: added tests for Node.js 8.x, 10.x, 18.x](https://github.com/log4js-node/streamroller/pull/148) - thanks [@lamweili](https://github.com/lamweili)
 - [chore(deps): bump date-format from 4.0.11 to 4.0.13](https://github.com/log4js-node/streamroller/pull/150) - thanks [@lamweili](https://github.com/lamweili)
 - [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/146) - thanks [@lamweili](https://github.com/lamweili)
   - chore(deps-dev): bump @commitlint/cli from 17.0.1 to 17.0.3
