@@ -13,7 +13,7 @@
   - chore(deps-dev): updated package-lock.json
 - [chore(deps-dev): updated dependencies](https://github.com/log4js-node/streamroller/pull/156) - thanks [@lamweili](https://github.com/lamweili)
   - chore(deps-dev): bump @commitlint/cli from 17.1.2 to 17.3.0
-  - chore(deps-dev): bump @commitlint/config-conventional from 17.1.0 to … 
+  - chore(deps-dev): bump @commitlint/config-conventional from 17.1.0 to 17.3.0
   - chore(deps-dev): bump @types/node from 18.7.23 to 18.11.9
   - chore(deps-dev): bump eslint from 8.24.0 to 8.28.0
   - chore(deps-dev): bump husky from 8.0.1 to 8.0.2
