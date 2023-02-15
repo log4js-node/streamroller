@@ -118,6 +118,32 @@ describe("RollingFileWriteStream", () => {
     });
   });
 
+  describe("with tilde expansion in filename", () => {   
+    let s;
+    const fileName = "tmpTilde.log";
+    const expandedPath = path.join(__dirname, fileName);
+
+    before(() => {
+      const RollingFileWriteStream = proxyquire("../lib/RollingFileWriteStream", {
+        "os": {
+          homedir() {
+            return __dirname;
+          } 
+        }
+      });
+      s = new RollingFileWriteStream(path.join("~", fileName));
+    });
+
+    after(() => {
+      s.end(() => fs.removeSync(expandedPath));
+    });
+
+    it("should expand tilde to create in home directory", () => {
+      s.currentFileStream.path.should.eql(expandedPath);
+      fs.existsSync(expandedPath).should.be.true();
+    });
+  });
+
   describe("with 5 maxSize, rotating daily", () => {
     const fileObj = generateTestFile("noExtension");
     let s;
@@ -341,7 +367,7 @@ describe("RollingFileWriteStream", () => {
       s.end(() => {
         fs.removeSync(fileObj.dir);
         done();
-      })
+      });
     });
 
     it("should rotate files within the day, and when the day changes", () => {
