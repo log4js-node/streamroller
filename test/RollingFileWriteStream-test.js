@@ -1646,9 +1646,10 @@ describe("RollingFileWriteStream", () => {
       fs.ensureFileSync(fileObj.path);
       fs.writeFileSync(fileObj.path, "This is exactly 30 bytes long\n");
       s = new RollingFileWriteStream(fileObj.path, { maxSize: 35 });
-      s.write("one\n", "utf8"); //34
-      s.write("two\n", "utf8"); //38 - file should be rotated next time
-      s.write("three\n", "utf8", done); // this should be in a new file.
+      s.write("one\n", "utf8", function () { //34
+        s.write("two\n", "utf8"); //38 - file should be rotated next time
+        s.write("three\n", "utf8", done); // this should be in a new file.
+      });
     });
 
     after(done => {
@@ -1685,9 +1686,10 @@ describe("RollingFileWriteStream", () => {
         maxSize: 35,
         flags: "a+"
       });
-      s.write("one\n", "utf8"); //34
-      s.write("two\n", "utf8"); //38 - file should be rotated next time
-      s.write("three\n", "utf8", done); // this should be in a new file.
+      s.write("one\n", "utf8", function () { //34
+        s.write("two\n", "utf8"); //38 - file should be rotated next time
+        s.write("three\n", "utf8", done); // this should be in a new file.
+      });
     });
 
     after(done => {
@@ -1727,9 +1729,10 @@ describe("RollingFileWriteStream", () => {
         maxSize: 30,
         numToKeep: 5
       });
-      s.write("This is exactly 30 bytes long\n", "utf8"); // base.1 -> base.2, base -> base.1
-      s.write("This is exactly 30 bytes long\n", "utf8"); // base.2 -> base.3, base.1 -> base.2, base -> base.1
-      s.write("three\n", "utf8", done); // base.3 -> base.4, base.2 -> base.3, base.1 -> base.2, base -> base.1
+      s.write("This is exactly 30 bytes long\n", "utf8", function () { // base.1 -> base.2, base -> base.1
+        s.write("This is exactly 30 bytes long\n", "utf8"); // base.2 -> base.3, base.1 -> base.2, base -> base.1
+        s.write("three\n", "utf8", done); // base.3 -> base.4, base.2 -> base.3, base.1 -> base.2, base -> base.1
+      });
     });
 
     after(done => {
